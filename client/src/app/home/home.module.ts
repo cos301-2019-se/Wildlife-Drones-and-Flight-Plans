@@ -7,6 +7,7 @@ import { RouterModule } from '@angular/router';
 import { LeafletModule } from '@asymmetrik/ngx-leaflet';
 
 import { HomePage } from './home.page';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   imports: [
@@ -14,6 +15,7 @@ import { HomePage } from './home.page';
     FormsModule,
     IonicModule,
     LeafletModule,
+    HttpClientModule,
     RouterModule.forChild([
       {
         path: '',
