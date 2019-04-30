@@ -12,13 +12,17 @@ export class UserService {
     return 'Hello World!';
   }
 
-  async getAllUsers(): JSON{
-    const connection =  this.databaseService.getConnection();
-    let users = connection.then(() => {
+   getAllUsers(): string{
 
-        let userRepository = connection.getRepository(User);
+   /* const con = this.databaseService.getConnection();
+    return await  con.then((data) => {
+        return data.find({id: 1});
 
-    })
+     
+
+    })   */
+
+       return "hi";
   }
 
 }
