@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DatabaseService } from './db.service';
 import { User } from '../entity/User';
 
+
 @Injectable()
 export class UserService {
 
@@ -14,6 +15,47 @@ export class UserService {
         return await data.getRepository(User).find();
         
      })  
+    }
+
+    login(_email,_pass):boolean {
+        
+        const con =  this.databaseService.getConnection();
+       let tempEmail =   con.then(async (data)=>{
+            console.log(await data.getRepository(User).find({email : _email}))
+             return await data.getRepository(User).find({email : _email})
+          }) 
+
+          if (tempEmail["password"] != _pass) {
+            return false;
+      }
+          else if(tempEmail["password"] == _pass)
+         return true;
+    }
+
+    addUser(_name,_username,_password,_job,_email):boolean {
+
+        const con =  this.databaseService.getConnection();
+        let registerUser = con.then(async (data)=>{
+        let user = new User();
+        user.name = _name;
+        user.userName = _username;
+        user.password = _password;
+        user.jobType = _job;
+        user.email = _email;
+        user.token = "lir47x";
+        user.expires = "01/05/2019"
+        return await data.manager.save(user).then(user => {console.log("Saved a new user with id: " + user.id)});
+        
+         })
+
+        if(registerUser != null)
+        {
+             return true;
+        }
+        else{
+
+        return false;
+        }
     }
 }
 
