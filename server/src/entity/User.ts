@@ -13,11 +13,23 @@ export class User {
     userName: string;
 
     @Column("text")
-    password: string;
+    password: string;    
 
-    @Column({
-        enum: ['Pilot', 'Ranger']
-    })
-    jobType: string;
+     /*@Column({
+        //collation: {"Pilot" : text, "Ranger"};
+        // enum: ['Pilot', 'Ranger']
+     })*/
+    @Column("text")
+    jobType: 'manager' | 'pilot' | 'ranger'; //string;
+
+    @Column("text")
+    email: string;
+
+    @Column("text")
+    token: string;
+
+    @Column("text")
+    expires: string;
+
 
 }
