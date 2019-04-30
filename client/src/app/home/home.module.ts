@@ -8,6 +8,7 @@ import { LeafletModule } from '@asymmetrik/ngx-leaflet';
 
 import { HomePage } from './home.page';
 import { HttpClientModule } from '@angular/common/http';
+import { LeafletDrawModule } from '@asymmetrik/ngx-leaflet-draw';
 
 @NgModule({
   imports: [
@@ -15,6 +16,7 @@ import { HttpClientModule } from '@angular/common/http';
     FormsModule,
     IonicModule,
     LeafletModule,
+    LeafletDrawModule,
     HttpClientModule,
     RouterModule.forChild([
       {

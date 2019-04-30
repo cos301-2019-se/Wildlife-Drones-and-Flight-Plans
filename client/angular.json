@@ -40,6 +40,9 @@
               },
               {
                 "input": "./node_modules/leaflet/dist/leaflet.css"
+              },
+              {
+                "input": "./node_modules/leaflet-draw/dist/leaflet.draw.css"
               }
             ],
             "scripts": [],

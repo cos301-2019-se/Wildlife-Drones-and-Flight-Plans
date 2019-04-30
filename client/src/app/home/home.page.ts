@@ -1,5 +1,6 @@
 import { Component, ViewChild } from '@angular/core';
-import { MapOptions, ControlOptions, tileLayer, geoJSON, Map, point, polyline } from 'leaflet';
+import { Draw, MapOptions, ControlOptions, Control, tileLayer, geoJSON, Map, point, polyline, DrawOptions, icon, FeatureGroup, featureGroup } from 'leaflet';
+import 'leaflet-draw';
 import { LeafletDirective } from '@asymmetrik/ngx-leaflet';
 import { MapService } from '../services/map/map.service';
 import { antPath } from 'leaflet-ant-path';
@@ -14,6 +15,11 @@ export class HomePage {
   private map: Map;
 
   @ViewChild('leaflet') leaflet: LeafletDirective;
+
+  shortestPath;
+  points = [];
+  pointsLayer: FeatureGroup = new FeatureGroup();
+  shortestPathLayer = null;
 
   constructor(
     private mapService: MapService,
@@ -40,18 +46,7 @@ export class HomePage {
 
     const mapData = await this.mapService.getMap();
 
-    this.http.get(`http://localhost:3000/map/random-path?top=-25.8415&bottom=-25.9392&left=28.2560&right=28.3320&startX=28.26&startY=-25.85`)
-    .toPromise()
-      .then((points: any[]) => {
-        points = points.map(point => [point.y, point.x]);
-
-        polyline(points, {
-          color: 'yellow',
-          weight: 2
-        }).addTo(map);
-
-      });
-    geoJSON(mapData.reserve as any, {
+    const reserve = geoJSON(mapData.reserve as any, {
       style: feature => {
         return {
           color: 'red',
@@ -79,5 +74,56 @@ export class HomePage {
         };
       }
     }).addTo(map));
+
+    map.addLayer(this.pointsLayer);
+    const drawControl = new Control.Draw({
+      position: 'bottomleft',
+      edit: {
+        featureGroup: this.pointsLayer
+      },
+      draw: {
+        marker: {
+          icon: icon({
+            iconSize: [25, 41],
+            iconAnchor: [13, 41],
+            iconUrl: 'assets/marker-icon.png',
+            shadowUrl: 'assets/marker-shadow.png'
+          })
+        },
+        polyline: false,
+        rectangle: false,
+        circle: false,
+        polygon: false,
+      }
+    });
+
+    map.on(Draw.Event.CREATED, async e => {
+      const layer = (e as any).layer;
+      console.log(e);
+      console.log(this.pointsLayer);
+
+      this.points.push([layer._latlng.lat, layer._latlng.lng]);
+      this.pointsLayer.addLayer(layer);
+
+      console.log('this points', this.points);
+
+      const shortestPath: any[] = await this.http.post('http://localhost:3000/map/shortest-path', {
+        points: this.points
+      }).toPromise() as any;
+
+      console.log(shortestPath);
+
+      if (this.shortestPathLayer) {
+        this.map.removeLayer(this.shortestPathLayer);
+      }
+      this.shortestPathLayer = polyline(shortestPath, {
+        color: 'yellow',
+        weight: 2
+      });
+
+      this.map.addLayer(this.shortestPathLayer);
+    });
+
+    map.addControl(drawControl);
   }
 }

@@ -10,6 +10,8 @@ import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 
 import { LeafletModule } from '@asymmetrik/ngx-leaflet';
+import { LeafletDrawModule } from '@asymmetrik/ngx-leaflet-draw';
+
 import { MapService } from './services/map/map.service';
 
 import { HttpClientModule } from '@angular/common/http';
@@ -23,6 +25,7 @@ import { HttpClientModule } from '@angular/common/http';
     AppRoutingModule,
     HttpClientModule,
     LeafletModule.forRoot(),
+    LeafletDrawModule.forRoot(),
   ],
   providers: [
     StatusBar,
