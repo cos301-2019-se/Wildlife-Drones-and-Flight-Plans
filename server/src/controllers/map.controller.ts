@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query, Post, Body } from '@nestjs/common';
 
 @Controller('map')
 export class MapController {
@@ -21,6 +21,13 @@ export class MapController {
         const solution = solve(points).map(i => points[i]);
         solution.push({'x': startX, 'y': startY});
         return solution;
+    }
+
+    @Post('shortest-path')
+    shortestPath(@Body('points') points) {
+        return solve(
+            points.map(point => new Point(point[0], point[1]))
+        ).map(i => points[i]).concat([points[0]]);
     }
 }
 
