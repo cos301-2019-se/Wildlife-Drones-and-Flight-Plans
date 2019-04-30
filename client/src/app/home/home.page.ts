@@ -40,13 +40,13 @@ export class HomePage {
 
     const mapData = await this.mapService.getMap();
 
-    this.http.get(`localhost:3000/map/random-path?top=-25.8415&bottom=-25.9392&left=28.2560&right=28.3320&startX=28.26&startY=-25.85`)
+    this.http.get(`http://localhost:3000/map/random-path?top=-25.8415&bottom=-25.9392&left=28.2560&right=28.3320&startX=28.26&startY=-25.85`)
     .toPromise()
       .then((points: any[]) => {
         points = points.map(point => [point.y, point.x]);
 
         polyline(points, {
-          color: 'green',
+          color: 'yellow',
           weight: 2
         }).addTo(map);
 
