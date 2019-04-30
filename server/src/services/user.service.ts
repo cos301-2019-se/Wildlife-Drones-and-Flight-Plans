@@ -1,32 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import { DatabaseService } from './db.service';
+import { User } from '../entity/User';
 
 @Injectable()
 export class UserService {
 
     constructor(private readonly databaseService: DatabaseService) {}
-
-    
-
-  getHello(): string {
-    return 'Hello World!';
-  }
-
-   getAllUsers(): string{
-
-   /* const con = this.databaseService.getConnection();
-    return await  con.then((data) => {
-        return data.find({id: 1});
-
-     
-
-    })   */
-
-       return "hi";
-  }
-
+ 
+     getAllUsers(): any {
+    const con =  this.databaseService.getConnection();
+   return con.then(async (data)=>{
+        console.log(await data.getRepository(User).find())
+        return await data.getRepository(User).find();
+        
+     })  
+    }
 }
-
 
 
 
