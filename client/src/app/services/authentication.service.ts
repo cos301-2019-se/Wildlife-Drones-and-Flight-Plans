@@ -16,13 +16,34 @@ export class AuthenticationService {
     });
   }
 
-  //Checks the token to see if it exists in local storage.If exists change auth state to true
-  checkToken() {
+  //Checks if token exists then comapres token to api to see if valid.
+  //This function will only be used when launching app
+  checkToken(){
+    //Check if token is set if not then kick.
     this.storage.get(TOKEN_KEY).then(res => {
       if (res) {
+        //if token set see if token is valid.
         this.authenticationState.next(true);
       }
+      else
+      {
+        this.authenticationState.next(false);
+      }
     })
+  }
+
+  //check if token exists locally and is set.Then returns set token.
+  //This function is used to retrieve token for api calls
+  async checkTokenLocalSync()
+  {
+      const token = await this.storage.get(TOKEN_KEY);
+      if(token != null){
+        return token;
+      }
+      else
+      {
+        this.authenticationState.next(false);
+      }
   }
  
   //login and create token.Change state to true
