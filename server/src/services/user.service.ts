@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, RequestTimeoutException } from '@nestjs/common';
 import { DatabaseService } from './db.service';
 import { User } from '../entity/User';
-
+import * as bcrypt from 'bcrypt';
+import * as uuidv4 from 'uuid/v4';
 
 @Injectable()
 export class UserService {
@@ -9,27 +10,21 @@ export class UserService {
     constructor(private readonly databaseService: DatabaseService) {}
  
      getAllUsers(): any {
-    const con =  this.databaseService.getConnection();
-   return con.then(async (data)=>{
-        console.log(await data.getRepository(User).find())
-        return await data.getRepository(User).find();
-        
-     })  
+        const con =  this.databaseService.getConnection();
+        return con.then(async (data)=>{
+           console.log(await data.getRepository(User).find())
+           return await data.getRepository(User).find(); 
+        })  
     }
 
-    login(_email,_pass):boolean {
-        
+    login(_email,_pass):any {
         const con =  this.databaseService.getConnection();
-       let tempEmail =   con.then(async (data)=>{
-            console.log(await data.getRepository(User).find({email : _email}))
-             return await data.getRepository(User).find({email : _email})
-          }) 
-
-          if (tempEmail["password"] != _pass) {
-            return false;
-      }
-          else if(tempEmail["password"] == _pass)
-         return true;
+        return con.then(async (data)=>{
+            const ExistingUser = await data.getRepository(User).findOne({email : _email})
+            console.log(" compare result : " +  bcrypt.compareSync(_pass, ExistingUser.password));
+            let temp = bcrypt.compareSync(_pass, ExistingUser.password)
+            return await temp;
+        })
     }
 
     addUser(_name,_username,_password,_job,_email):boolean {
@@ -37,126 +32,31 @@ export class UserService {
         const con =  this.databaseService.getConnection();
         let registerUser = con.then(async (data)=>{
         let user = new User();
-        user.name = _name;
-        user.userName = _username;
-        user.password = _password;
-        user.jobType = _job;
-        user.email = _email;
-        user.token = "lir47x";
-        user.expires = "01/05/2019"
-        return await data.manager.save(user).then(user => {console.log("Saved a new user with id: " + user.id)});
-        
-         })
 
-        if(registerUser != null)
-        {
-             return true;
-        }
-        else{
+        bcrypt.genSalt(5, function(err, salt) {
+                 bcrypt.hash(_password, salt, function(err, hash) {
+                    user.name = _name;
+                    user.userName = _username;
+                    user.password = hash;
+                    user.jobType = _job;
+                    user.email = _email;
+                    user.salt = salt;
+                    user.token = "lir47x";
+                    user.expires = "02/05/2019"
+                    return  data.manager.save(user).then(user => {console.log("Saved a new user with id: " + user.id)});
+                    });
+                });
+            })
 
-        return false;
-        }
+    if(registerUser != null)
+    {
+            return true;
+    }
+    else{
+
+    return false;
+    }
     }
 }
 
 
-
-/*export function getAllUsers()
-{
-   var con = connect() 
-   con.then(async connection => 
-    {    
-        let userRepository = connection.getRepository(User);
-        //console.log("Loading users from the database...");
-        const AllUsers = await userRepository.find();
-        //console.log("Loaded users: ", users);
- 
-        //console.log("Here you can setup and run express/koa/any other framework.");
-        return AllUsers;
- 
-    }).catch(error => console.log(error));
-
-}
-
-export async function getUser(_id)
-{
-   const connection = await connect() 
-   //var user;
-
-   
-        let userRepository = connection.getRepository(User);
-       
-       var user = await userRepository.find({id: _id});
-
-        console.log(user);
-
-       return user;
-
-    //.then( () => {return ["User {id: 2,name: 'Ted Saw',userName: 'TSaw',password: '123ert',jobType: 'Ranger' }"];})
-}
-
-
-export function userExist(_id)
-{
-   var con = connect() 
-   //var user;
-
-   con.then(async connection => 
-    {    
-        let userRepository = connection.getRepository(User);
-       
-       var user = await userRepository.find({id: _id});
-
-        if(user.toString() == ""  )
-            console.log(false);
-            //return false;
-        else
-            console.log(true)
-            //return true;
-
-      // return await user;
-       
- 
-    }).catch(error => console.log(error));
-
-}
-
-export function pass(_email, _pass)
-{
-   var con = connect() 
-   //var user;
-
-   con.then(async connection => 
-    {    
-        let userRepository = connection.getRepository(User);
-       
-       var user = await userRepository.find({email: _email});
-
-       if()
-
-        if(user.toString() == ""  )
-            console.log(false);
-            //return false;
-        else
-            console.log(true)
-            //return true;
-
-      // return await user;
-       
- 
-    }).catch(error => console.log(error));
-
-}
-
-
-console.log("Inserting a new user into the database...");
-    const user = new User();
-    user.name = "Andreas Louw";
-    user.userName = "ALouw";
-    user.password = "1qwesdf";
-    user.jobType = "pilot";
-    user.email = "alouw@gmail.com";
-    user.token = "lir47z";
-    user.expires = "01/05/2019"
-    await connection.manager.save(user).then(user => {console.log("Saved a new user with id: " + user.id)});
-*/

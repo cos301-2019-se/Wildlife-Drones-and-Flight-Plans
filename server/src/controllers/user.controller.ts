@@ -11,12 +11,12 @@ export class UserController {
   }
   @Post('login')
   loginUser(): boolean {
-    return this.userService.login("tedsaw@gmail.com","123ert");
+    return this.userService.login("tedssaw@gmail.com", "Reddbull1" );
   }
 
   @Post('addUser')
   addUser(): boolean {
-    return this.userService.addUser("Jannie","Balsak","koostieties","Ranger", "tedsaw@gmail.com");
+    return this.userService.addUser("Jannie","Balsak","Reddbull","Ranger", "tedssaw@gmail.com");
     //return //something
   }
 

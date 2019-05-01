@@ -13,7 +13,8 @@ export class User {
     userName: string;
 
     @Column("text")
-    password: string;    
+    password: string; 
+
 
      /*@Column({
         //collation: {"Pilot" : text, "Ranger"};
@@ -30,6 +31,11 @@ export class User {
 
     @Column("text")
     expires: string;
+
+       
+    @Column("text")
+    salt: string;    
+
 
 
 }
