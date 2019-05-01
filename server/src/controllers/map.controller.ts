@@ -36,6 +36,8 @@ export class MapController {
 
     @Post('update')
     async update(@Body('top') top, @Body('left') left, @Body('bottom') bottom, @Body('right') right) {
-        return await this.mapUpdaterService.updateMap(left, bottom, right, top);
+        const mapFeatures = await this.mapUpdaterService.updateMap(left, bottom, right, top);
+        console.log(mapFeatures);
+        return mapFeatures;
     }
 }

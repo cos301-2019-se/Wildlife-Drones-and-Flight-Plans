@@ -8,8 +8,10 @@ import * as pointInPolygon from 'point-in-polygon';
 @Injectable()
 export class MapUpdaterService {
 
-  async updateMap(left: number, bottom: number, right: number, top:number) {
+  async updateMap(left: number, bottom: number, right: number, top: number) {
+    console.log(left, bottom, right, top);
     const mapData = await this.downloadMap(left, bottom, right, top);
+    console.log('downloaded map data');
 
     const reserves = mapData.features
       .filter(feature => feature.properties.leisure && feature.properties.leisure === 'nature_reserve');
@@ -38,7 +40,6 @@ export class MapUpdaterService {
       roads: this.findFeaturesInArea(roads, reserve),
     };
 
-    console.log(allFeatures);
     return allFeatures;
   }
 
@@ -49,12 +50,17 @@ export class MapUpdaterService {
   private async downloadMap(left: number, bottom: number, right: number, top:number) {
     const url = `http://api.openstreetmap.org/api/0.6/map?bbox=${left},${bottom},${right},${top}`;
 
+    console.log('downloading map', url);
+
     const res = await axios.get(url, {
       responseType: 'arraybuffer',
     });
 
+    console.log('got axios');
+
     const parser = new xmldom.DOMParser();
     const dom = parser.parseFromString(res.data.toString());
+    console.log('parsed dom');
     return osmToGeoJson(dom);
   }
 
