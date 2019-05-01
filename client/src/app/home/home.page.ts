@@ -79,7 +79,9 @@ export class HomePage {
     const drawControl = new Control.Draw({
       position: 'bottomleft',
       edit: {
-        featureGroup: this.pointsLayer
+        featureGroup: this.pointsLayer,
+        remove: false,
+        edit: false
       },
       draw: {
         marker: {
