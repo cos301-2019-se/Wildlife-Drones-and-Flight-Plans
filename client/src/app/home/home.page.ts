@@ -34,7 +34,7 @@ export class HomePage {
       })
     ],
     zoom: 13,
-    center: [-25.8974, 28.2906]
+    center: this.mapService.getCenter()
   };
 
   async mapReady(map: Map) {
@@ -92,6 +92,7 @@ export class HomePage {
             shadowUrl: 'assets/marker-shadow.png'
           })
         },
+        circlemarker: false,
         polyline: false,
         rectangle: false,
         circle: false,
