@@ -24,14 +24,20 @@ const expectedFivePoints =  [[8, 5], [2, 2], [6, 90], [22, 27], [13, 16], [8, 5]
     describe('Get shortest path between two point(s)',()=>{
         it('Was shortest path',async()=>{
             const res = shortestPath.getShortestPath(Twopoints);
-            expect(res).toEqual(expectedTwoPoints);
+            expect(
+              JSON.stringify(res) == JSON.stringify(expectedTwoPoints) ||
+              JSON.stringify(res) == JSON.stringify(expectedTwoPoints.reverse())
+            ).toBeTruthy();
         });
     });
 
     describe('Get shortest path between five point(s)',()=>{
         it('Was shortest path',async()=>{
             const res = shortestPath.getShortestPath(Fivepoints);
-            expect(res).toEqual(expectedFivePoints);
+            expect(
+              JSON.stringify(res) == JSON.stringify(expectedFivePoints) ||
+              JSON.stringify(res) == JSON.stringify(expectedFivePoints.reverse())
+            ).toBeTruthy();
         });
     });
     //////////////////////END//////////////////////////////////
