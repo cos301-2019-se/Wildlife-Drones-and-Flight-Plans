@@ -31,7 +31,6 @@ export class MapUpdaterService {
         feature.properties.route && feature.properties.route === 'road' ||
         feature.properties.highway
       );
-
     const reserve = reserves[0];
 
     const allFeatures = {
@@ -39,7 +38,6 @@ export class MapUpdaterService {
       dams: this.findFeaturesInArea(dams, reserve),
       roads: this.findFeaturesInArea(roads, reserve),
     };
-
     return allFeatures;
   }
 
@@ -72,12 +70,13 @@ export class MapUpdaterService {
    * @param {*} a 
    * @param {*} b 
    */
-  private isInPolygon(a, b) {
+  public isInPolygon(a, b) {
     a = JSON.parse(JSON.stringify(a));
     b = JSON.parse(JSON.stringify(b));
     // if a is a line
     if (Array.isArray(a[0]) && typeof a[0][0] === 'number') {
       a = [a];
+      
     }
     // if a is a single point
     if (typeof a[0] === 'number') {
@@ -90,7 +89,6 @@ export class MapUpdaterService {
         b[i] = el[0];
       }
     }
-
     return b.some(bPoints => a.some(aPoints => aPoints.some(a => pointInPolygon(a, bPoints))));
   }
 
