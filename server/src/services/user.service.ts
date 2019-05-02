@@ -39,10 +39,9 @@ export class UserService {
                     user.userName = _username;
                     user.password = hash;
                     user.jobType = _job;
-                    user.email = _email;
-                    user.salt = salt;
+                    user.email = _email;        
                     user.token = "lir47x";
-                    user.expires = "02/05/2019"
+                    user.expires = new Date(user.expires.getDate() + 1);
                     return  data.manager.save(user).then(user => {console.log("Saved a new user with id: " + user.id)});
                     });
                 });
