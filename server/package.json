@@ -1,5 +1,4 @@
 {
-
   "name": "server",
   "version": "0.0.1",
   "description": "",
@@ -26,15 +25,15 @@
     "@nestjs/platform-express": "^6.0.0",
     "@types/xmldom": "^0.1.29",
     "axios": "^0.18.0",
+    "bcrypt": "^3.0.6",
     "osmtogeojson": "^3.0.0-beta.3",
     "point-in-polygon": "^1.0.1",
     "reflect-metadata": "^0.1.12",
     "rimraf": "^2.6.2",
     "rxjs": "^6.3.3",
-    "xmldom": "^0.1.27",
-    "bcrypt": "^3.0.6",
-    "sqlite3": "^4.0.3",
-    "typeorm": "0.2.16"
+    "sqlite3": "^4.0.6",
+    "typeorm": "^0.2.17",
+    "xmldom": "^0.1.27"
   },
   "devDependencies": {
     "@nestjs/testing": "^6.0.0",
@@ -67,5 +66,4 @@
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
   }
-
 }
