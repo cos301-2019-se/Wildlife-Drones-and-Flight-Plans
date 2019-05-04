@@ -3,6 +3,8 @@ import { DatabaseService } from './db.service';
 import { User } from '../entity/User';
 import * as bcrypt from 'bcrypt';
 import * as uuidv4 from 'uuid/v4';
+import { defaultCoreCipherList } from 'constants';
+import { STATUS_CODES } from 'http';
 
 @Injectable()
 export class UserService {
@@ -22,8 +24,28 @@ export class UserService {
         return con.then(async (data)=>{
             const ExistingUser = await data.getRepository(User).findOne({email : _email})
             console.log(" compare result : " +  bcrypt.compareSync(_pass, ExistingUser.password));
-            let temp = bcrypt.compareSync(_pass, ExistingUser.password)
-            return await temp;
+            var today = new Date();
+            var d = Date.parse(ExistingUser.expires)
+            var d2 = new Date();
+            var dateT = d2.toDateString();
+            var c = Date.parse(dateT)
+           let valid  = false;
+           if(bcrypt.compareSync(_pass, ExistingUser.password) == true)
+           {
+                if((c - d) < (24*60*60*1000))
+                {
+                    console.log("The tokeen is still valid");
+                        var newDate = new Date();
+                        newDate.setDate(newDate.getDate() + 1);
+                        ExistingUser.expires = newDate.toString();
+                }
+                else if( (c-d) > (24*60*60*1000))
+                {
+                    ExistingUser.token = uuidv4();
+                }
+                return await ExistingUser.token
+             }
+           
         })
     }
 
@@ -40,8 +62,11 @@ export class UserService {
                     user.password = hash;
                     user.jobType = _job;
                     user.email = _email;        
-                    user.token = "lir47x";
-                    user.expires = new Date(user.expires.getDate() + 1);
+                    user.token = uuidv4();
+                    var temp = new Date();
+                    temp.setDate(temp.getDate() + 1);
+                    console.log(temp)
+                    user.expires = temp.toString();
                     return  data.manager.save(user).then(user => {console.log("Saved a new user with id: " + user.id)});
                     });
                 });
@@ -56,6 +81,36 @@ export class UserService {
     return false;
     }
     }
+
+    vToken(_email,_token):any {
+      
+        const con =  this.databaseService.getConnection();
+        return con.then(async (data)=>{
+            const ExistingUser = await data.getRepository(User).findOne({email : _email})
+            //console.log(" compare result : " +  bcrypt.compareSync(_pass, ExistingUser.password));
+            //console.log(ExistingUser);
+            if(ExistingUser.token != _token)
+            {
+                return false;
+            }
+            if(ExistingUser.token == _token)
+            {
+               // console.log("User token in database" + ExistingUser.token);
+               var temp = new Date();
+               temp.setDate(temp.getDate() + 1);
+               console.log(temp)
+               ExistingUser.expires = temp.toString();
+                //console.log("User token sent in " +_token)
+                 return  await true;
+            }
+            else
+            {
+                return await false;
+            }
+           
+        })
+    }
+
 }
 
 

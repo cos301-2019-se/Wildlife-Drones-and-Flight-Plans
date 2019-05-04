@@ -29,8 +29,8 @@ export class User {
     @Column("text")
     token: string;
 
-    @Column("Date")
-    expires: Date;
+    @Column("text")
+    expires: string;
 
 
 
