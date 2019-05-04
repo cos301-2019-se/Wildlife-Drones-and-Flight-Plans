@@ -1,0 +1,20 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>
+      Update Map
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="startDrawing()">
+        Select
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="map"
+    leaflet #leaflet
+    (leafletMapReady)="mapReady($event)"
+    [leafletOptions]="mapOptions"
+  ></div>
+</ion-content>
