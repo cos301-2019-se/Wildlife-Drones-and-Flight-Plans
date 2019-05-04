@@ -20,9 +20,14 @@ export class UserService {
     }
 
     login(_email,_pass):any {
+
+ 
         const con =  this.databaseService.getConnection();
         return con.then(async (data)=>{
+           
             const ExistingUser = await data.getRepository(User).findOne({email : _email})
+        
+
             console.log(" compare result : " +  bcrypt.compareSync(_pass, ExistingUser.password));
             var today = new Date();
             var d = Date.parse(ExistingUser.expires)
@@ -45,8 +50,9 @@ export class UserService {
                 }
                 return await ExistingUser.token
              }
-           
+            
         })
+    
     }
 
     addUser(_name,_username,_password,_job,_email):boolean {
