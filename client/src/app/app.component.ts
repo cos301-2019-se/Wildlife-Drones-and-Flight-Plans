@@ -26,7 +26,7 @@ export class AppComponent {
       this.splashScreen.hide();
       this.authenticationService.authenticationState.subscribe(state => {
         if (state) {
-          this.router.navigate(['home']);
+          this.router.navigate(['update']);
         } else {
           this.router.navigate(['login']);
         }

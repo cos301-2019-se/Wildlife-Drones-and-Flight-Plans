@@ -1,0 +1,15 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>
+      Shortest Path
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="map"
+    leaflet #leaflet
+    (leafletMapReady)="mapReady($event)"
+    [leafletOptions]="mapOptions"
+  ></div>
+</ion-content>
