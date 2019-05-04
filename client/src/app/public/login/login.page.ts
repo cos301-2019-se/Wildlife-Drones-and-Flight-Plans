@@ -9,7 +9,6 @@ export class LoginPage implements OnInit {
   enteredPassword:string;
   enteredEmail:string;
   constructor(private authService:AuthenticationService) { 
-    this.authService.callAPI('test',{"Test":"value"});
   }
 
   ngOnInit() {
