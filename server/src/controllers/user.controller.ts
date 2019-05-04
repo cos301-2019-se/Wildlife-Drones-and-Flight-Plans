@@ -10,14 +10,11 @@ export class UserController {
     return this.userService.getAllUsers();
   }
   @Post('login')
-  loginUser(@Body() _body): boolean {
+  loginUser(@Body() _body): JSON {
     //var email =  
     // console.log();
    // var temp1 =@Body(email);
-
-   console.log(_body.email);
-   console.log(_body.password);
-    return this.userService.login(_body.email,_body.password);
+   return this.userService.login(_body.email,_body.password);
   }
 
   @Post('addUser')
@@ -37,7 +34,7 @@ export class UserController {
 
    //console.log(_body.email);
    //console.log(_body.password);
-    return this.userService.vToken(_body.Email,_body.token);
+    return this.userService.vToken(_body.email,_body.token);
   }
 
 }

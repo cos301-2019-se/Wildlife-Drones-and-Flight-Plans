@@ -26,8 +26,8 @@ export class UserService {
         return con.then(async (data)=>{
            
             const ExistingUser = await data.getRepository(User).findOne({email : _email})
-        
-
+            if(ExistingUser)
+            {
             console.log(" compare result : " +  bcrypt.compareSync(_pass, ExistingUser.password));
             var today = new Date();
             var d = Date.parse(ExistingUser.expires)
@@ -39,7 +39,7 @@ export class UserService {
            {
                 if((c - d) < (24*60*60*1000))
                 {
-                    console.log("The tokeen is still valid");
+                    console.log("The token is still valid");
                         var newDate = new Date();
                         newDate.setDate(newDate.getDate() + 1);
                         ExistingUser.expires = newDate.toString();
@@ -48,9 +48,19 @@ export class UserService {
                 {
                     ExistingUser.token = uuidv4();
                 }
-                return await ExistingUser.token
+                return {"token":ExistingUser.token};
              }
-            
+             else
+             {
+                console.log('Password incorrect');
+                return {"token":""};
+             }
+            }
+            else
+            {
+                console.log('User does not exist');
+                return {"token":""};
+            }
         })
     
     }
@@ -92,12 +102,14 @@ export class UserService {
       
         const con =  this.databaseService.getConnection();
         return con.then(async (data)=>{
-            const ExistingUser = await data.getRepository(User).findOne({email : _email})
+            const ExistingUser = await data.getRepository(User).findOne({email : _email});
+            if(ExistingUser)
+            {
             //console.log(" compare result : " +  bcrypt.compareSync(_pass, ExistingUser.password));
             //console.log(ExistingUser);
             if(ExistingUser.token != _token)
             {
-                return false;
+                return await false;
             }
             if(ExistingUser.token == _token)
             {
@@ -113,6 +125,11 @@ export class UserService {
             {
                 return await false;
             }
+        }
+        else
+        {
+            return await false;
+        }
            
         })
     }
