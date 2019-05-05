@@ -48,7 +48,7 @@ export class UserService {
                 {
                     ExistingUser.token = uuidv4();
                 }
-                return await ExistingUser.token
+                return  {"text":ExistingUser.token}
              }
             
         })
