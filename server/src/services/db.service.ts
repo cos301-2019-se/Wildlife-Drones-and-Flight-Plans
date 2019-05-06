@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { createConnection, Entity, Connection, Repository } from 'typeorm';
 import { User } from '../entity/User';
+import { Animal_locations } from '../entity/Animal_loactions';
+import { Animal_intrest_point} from '../entity/animal_intrest_point';
 
 @Injectable()
 export class DatabaseService {
@@ -21,6 +23,16 @@ export class DatabaseService {
         return;
       }
       this.isInitialising = true;
+
+       /*
+        *for when using postgres
+        *type: "postgres",
+        *host: "localhost",
+        *port: 5432,
+        *username: "postgres",
+        *password: "123ert",
+        *database: "rietvlei_reserve",
+      */
 
       this.connection = await createConnection({
         type: "sqlite",
