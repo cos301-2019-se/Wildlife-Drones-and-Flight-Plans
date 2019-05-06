@@ -1,6 +1,9 @@
 import { Controller, Get, Param, Query, Post, Body } from '@nestjs/common';
-import { ShortestPathService } from 'src/providers/shortest-path.service';
+import { ShortestPathService } from '../providers/shortest-path.service';
 import { MapUpdaterService } from '../providers/map-updater.service';
+
+// jest.setTimeout(-1);
+//jest.useFakeTimers();
 
 @Controller('map')
 export class MapController {
