@@ -56,6 +56,8 @@ export class MapUpdaterService {
       water: allFeatures.dams,
     });
 
+    console.log(grid.features.length);
+
     return allFeatures;
   }
 

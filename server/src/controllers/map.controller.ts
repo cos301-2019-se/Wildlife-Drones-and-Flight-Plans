@@ -46,7 +46,7 @@ export class MapController {
     @Post('update')
     async update(@Body('name') name) {
         const mapFeatures = await this.mapUpdaterService.updateMap(name);
-        console.log(mapFeatures);
+        // console.log(mapFeatures);
         return mapFeatures;
     }
 }

@@ -26,6 +26,7 @@
     "@nestjs/platform-express": "^6.0.0",
     "@turf/helpers": "^6.1.4",
     "@turf/point-to-line-distance": "^6.0.0",
+    "@turf/simplify": "^5.1.5",
     "@turf/square-grid": "^6.0.2",
     "@types/geolib": "^2.0.23",
     "@types/xmldom": "^0.1.29",
