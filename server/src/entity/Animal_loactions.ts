@@ -7,13 +7,34 @@ export class Animal_locations {
     id: number;
 
     @Column("text")
-    Animal_ID: number;
+    animal_id: number;
 
     @Column("text")
-    date: Date;
+    date: string;
 
     @Column("text")
-    longatude: string; 
+    year: string;
+
+    @Column("text")
+    month: string;
+
+    @Column("text")
+    day: string;
+
+    @Column("text")
+    time: string;
+
+    @Column("text")
+    hour: string;
+    
+    @Column("text")
+    minute: string;
+
+    @Column("text")
+    second: string;
+
+    @Column("text")
+    longitude: string; 
 
     @Column("text")
     latitude: string;
