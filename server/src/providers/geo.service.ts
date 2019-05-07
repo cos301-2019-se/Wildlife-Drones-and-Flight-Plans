@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import * as pointInPolygon from 'point-in-polygon';
+import * as geojsonExtent from '@mapbox/geojson-extent';
+import { getDistance } from 'geolib';
+import pointToLineDistance from '@turf/point-to-line-distance';
+import { lengthToDegrees } from '@turf/helpers';
 
 /**
  * Provides helped functions for geometry calculation
@@ -13,6 +17,47 @@ export class GeoService {
    */
   public findFeaturesInArea(features: any[], area) {
     return features.filter(feature => this.isInPolygon(feature.geometry.coordinates, area.geometry.coordinates))
+  }
+
+  /**
+   * Returns the bounding box of a GeoJSON object.
+   * @param geoJSON GeoJSON object
+   * @returns [West, South, East, North] or [left, bottom, right, top]
+   */
+  public getBoundingBox(geoJSON) {
+    return geojsonExtent(geoJSON);
+  }
+
+  /**
+   * Returns the distance between a polgyon and a point
+   * @param point
+   * @param poly
+   */
+  public getDistanceToPoly(point: {lat: number; lng: number}, poly) {
+    return pointToLineDistance([point.lat, point.lng], poly);
+  }
+
+  /**
+   * Get the distance between two points
+   * @param a source point
+   * @param b destination point
+   */
+  public getDistance(a: {lat: number, lng: number}, b: {lat: number, lng: number}) {
+    return getDistance({
+      latitude: a.lat,
+      longitude: a.lng,
+    }, {
+      latitude: b.lat,
+      longitude: b.lng,
+    });
+  }
+
+  /**
+   * Convert a number in km to degrees
+   * @param distanceInKm 
+   */
+  public distanceToDegrees(distanceInKm) {
+    return lengthToDegrees(distanceInKm, 'kilometers');
   }
 
   /**

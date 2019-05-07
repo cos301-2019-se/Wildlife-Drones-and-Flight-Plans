@@ -1,11 +1,15 @@
 import { Injectable } from '@nestjs/common';
 
 import { OverpassService } from './overpass.service';
+import { MapPartitionerService } from './map-partitioner.service';
 
 @Injectable()
 export class MapUpdaterService {
 
-  constructor(private overpass: OverpassService) {}
+  constructor(
+    private overpass: OverpassService,
+    private mapPartitioner: MapPartitionerService,
+  ) {}
 
   /**
    * Updates the map given the name of a reserve
@@ -20,10 +24,7 @@ export class MapUpdaterService {
       /*end of auto repair*/
       out geom meta;
     `);
-    console.log('reserve:');
-    console.dir(reserve, {
-      depth: null,
-    });
+    console.log('reserve', reserve.features.length);
     const dams = await this.overpass.query(`area["name"="${name}"]->.boundaryarea;
     (
       nwr(area.boundaryarea)[leisure=reserve];
@@ -32,7 +33,7 @@ export class MapUpdaterService {
       nwr(area.boundaryarea)[natural="water"];
     );
     out geom meta;`);
-    console.log('dams', dams);
+    console.log('dams', dams.features.length);
 
     const roads = await this.overpass.query(`area["name"="${name}"]->.boundaryarea;
     (
@@ -40,7 +41,7 @@ export class MapUpdaterService {
       nwr(area.boundaryarea)[route=road];
     );
     out geom meta;`);
-    console.log('roads', roads);
+    console.log('roads', roads.features.length);
 
     console.log('downloaded map data');
 
@@ -49,6 +50,12 @@ export class MapUpdaterService {
       dams: dams.features,
       roads: roads.features,
     };
+
+    const grid = this.mapPartitioner.partitionMap(allFeatures.reserve, {
+      roads: allFeatures.roads,
+      water: allFeatures.dams,
+    });
+
     return allFeatures;
   }
 
@@ -62,21 +69,6 @@ export class MapUpdaterService {
    */
   async findReservesInArea(left, bottom, right, top) {
     const query = `node[leisure=nature_reserve](${bottom},${left},${top},${right});out;`;
-    // const query = `relation[leisure=nature_reserve]["type"="boundary"](${bottom},${left},${top},${right});
-    //   /*added by auto repair*/
-    //   (._;>;);
-    //   /*end of auto repair*/
-    //   out;
-    // `;
-    console.log(query);
     return await this.overpass.query(query);
   }
-
-
-
-}/*
-This is an example Overpass query.
-Try it out by pressing the Run button above!
-You can find more examples with the Load tool.
-*/
-// node[leisure=nature_reserve](-25.562265014427492,30.794677734375,-22.263680482353216,32.1405029296875);out;
+}

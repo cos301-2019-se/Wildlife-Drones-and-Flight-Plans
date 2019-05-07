@@ -8,6 +8,7 @@ import { DatabaseService } from './services/db.service';
 import { UserService } from './services/user.service';
 import { OverpassService } from './providers/overpass.service';
 import { GeoService } from './providers/geo.service';
+import { MapPartitionerService } from './providers/map-partitioner.service';
 
 @Module({
   imports: [],
@@ -19,6 +20,7 @@ import { GeoService } from './providers/geo.service';
     UserService,
     OverpassService,
     GeoService,
+    MapPartitionerService,
   ],
 })
 export class AppModule {}
