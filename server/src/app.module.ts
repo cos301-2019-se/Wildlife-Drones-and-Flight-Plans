@@ -6,10 +6,19 @@ import { ShortestPathService } from './providers/shortest-path.service';
 import { UserController } from './controllers/user.controller';
 import { DatabaseService } from './services/db.service';
 import { UserService } from './services/user.service';
+import { OverpassService } from './providers/overpass.service';
+import { GeoService } from './providers/geo.service';
 
 @Module({
   imports: [],
   controllers: [MapController, UserController],
-  providers: [MapUpdaterService, ShortestPathService, DatabaseService, UserService],
+  providers: [
+    MapUpdaterService,
+    ShortestPathService,
+    DatabaseService,
+    UserService,
+    OverpassService,
+    GeoService,
+  ],
 })
 export class AppModule {}
