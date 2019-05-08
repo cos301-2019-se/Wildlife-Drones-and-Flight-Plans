@@ -1,9 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import * as pointInPolygon from 'point-in-polygon';
+import pointInPolygon from '@turf/boolean-point-in-polygon';
+import overlaps from '@turf/boolean-overlap';
+import within from '@turf/boolean-within';
+import lineToPolygon from '@turf/line-to-polygon'
 import * as geojsonExtent from '@mapbox/geojson-extent';
-import { getDistance } from 'geolib';
+import getDistance from '@turf/distance';
 import pointToLineDistance from '@turf/point-to-line-distance';
-import { lengthToDegrees } from '@turf/helpers';
+import { lengthToDegrees, point } from '@turf/helpers';
 
 /**
  * Provides helped functions for geometry calculation
@@ -42,14 +45,8 @@ export class GeoService {
    * @param a source point
    * @param b destination point
    */
-  public getDistance(a: {lat: number, lng: number}, b: {lat: number, lng: number}) {
-    return getDistance({
-      latitude: a.lat,
-      longitude: a.lng,
-    }, {
-      latitude: b.lat,
-      longitude: b.lng,
-    });
+  public getDistance(a, b) {
+    return getDistance(a, b);
   }
 
   /**
@@ -61,31 +58,34 @@ export class GeoService {
   }
 
   /**
-   * Determine whether a polygon (list of points) a falls within polygon b.
+   * Determine whether a GeoJSON feature a falls within GeoJSON polygon b.
    * The requirements for being within a polygon is that any of the points
    * of a must be within b.
    * 
-   * @param {*} a 
-   * @param {*} b 
+   * @param {*} a A GeoJSON feature (may be a point, line, multiline, polygon, multipolygon)
+   * @param {*} b A GeoJSON polygon or multipolygon
    */
   public isInPolygon(a, b) {
-    a = JSON.parse(JSON.stringify(a));
-    b = JSON.parse(JSON.stringify(b));
-    // if a is a line
-    if (Array.isArray(a[0]) && typeof a[0][0] === 'number') {
-      a = [a];
-    }
-    // if a is a single point
-    if (typeof a[0] === 'number') {
-      a = [a];
+    if (a.geometry.type === 'Point') {
+      return pointInPolygon(a, b);
     }
 
-    // convert multi polygon b so there are no instances of double bracketing
-    for (const [i, el] of b.entries()) {
-      if (Array.isArray(el) && el.length == 1) {
-        b[i] = el[0];
-      }
+    if (a.geometry.type === 'LineString' || a.geometry.type === 'MultiLineString') {
+      a = lineToPolygon(a);
     }
-    return b.some(bPoints => a.some(aPoints => aPoints.some(a => pointInPolygon(a, bPoints))));
+
+    return overlaps(a, b) || within(a, b) || within(b, a);
+  }
+
+  /**
+   * Returns whether two bounding boxes overlap
+   * @param a [left, bottom, right, top]
+   * @param b [left, bottom, right, top]
+   */
+  public bboxesOverlap(a, b) {
+    return !(b[0] > a[2]
+      || b[2] < a[0]
+      || b[3] < a[1]
+      || b[1] > a[3]);
   }
 }

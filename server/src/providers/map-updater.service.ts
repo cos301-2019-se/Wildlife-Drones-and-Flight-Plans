@@ -3,6 +3,9 @@ import { Injectable } from '@nestjs/common';
 import { OverpassService } from './overpass.service';
 import { MapPartitionerService } from './map-partitioner.service';
 
+import * as fs from 'fs';
+import * as bigJson from 'big-json';
+
 @Injectable()
 export class MapUpdaterService {
 
@@ -54,9 +57,18 @@ export class MapUpdaterService {
     const grid = this.mapPartitioner.partitionMap(allFeatures.reserve, {
       roads: allFeatures.roads,
       water: allFeatures.dams,
+    }, 4, 32);
+
+    grid.forEach(cell => {
+      cell.properties.quadtreeCell = undefined;
     });
 
-    console.log(grid.features.length);
+    const fStream = fs.createWriteStream('grid.json');
+    const outStream = bigJson.createStringifyStream({
+      body: grid,
+    });
+
+    outStream.pipe(fStream);
 
     return allFeatures;
   }
