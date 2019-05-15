@@ -9,10 +9,20 @@ import { UserService } from './services/user.service';
 import { OverpassService } from './providers/overpass.service';
 import { GeoService } from './providers/geo.service';
 import { MapPartitionerService } from './providers/map-partitioner.service';
+import { AnimalController } from './controllers/animal-location.controller';
+import { AnimalIntrestPointController } from './controllers/animal-interest-point.controller';
+import { AnimalLocationService } from './services/animal-location.service';
+import { AnimalInterestPointService } from './services/animal-interest-point.service';
+import { CsvReader } from './services/csv-reader.service';
 
 @Module({
   imports: [],
-  controllers: [MapController, UserController],
+  controllers: [
+    MapController,
+    UserController,
+    AnimalController,
+    AnimalIntrestPointController,
+  ],
   providers: [
     MapUpdaterService,
     ShortestPathService,
@@ -21,6 +31,9 @@ import { MapPartitionerService } from './providers/map-partitioner.service';
     OverpassService,
     GeoService,
     MapPartitionerService,
+    AnimalLocationService,
+    AnimalInterestPointService,
+    CsvReader,
   ],
 })
 export class AppModule {}
