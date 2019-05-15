@@ -16,4 +16,9 @@ export class AnimalController {
     //return true
   }
 
+  @Get('getAllAnimalLocationTableData')
+  getAllUsers(): JSON {
+    return this.animalLocationService.getAllAnimalLocationTableData();
+  }
+
 }
