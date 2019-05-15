@@ -77,7 +77,7 @@ export class AnimalLocationService {
                 timestamp: rowDate,
                 temperature: row['external-temperature'],
                 habitat: row['habitat'],
-                month: rowDate.getMonth(),
+                month: rowDate.getMonth()+1,
                 time: rowDate.getHours() * 60 + rowDate.getMinutes(),
                 id: id++,
             };
