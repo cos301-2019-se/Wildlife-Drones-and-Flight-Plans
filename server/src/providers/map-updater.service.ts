@@ -57,11 +57,16 @@ export class MapUpdaterService {
     const grid = this.mapPartitioner.partitionMap(allFeatures.reserve, {
       roads: allFeatures.roads,
       water: allFeatures.dams,
-    }, 4, 32);
+    }, 1, 32);
 
     grid.forEach(cell => {
-      cell.properties.quadtreeCell = undefined;
+      cell.properties['fill-opacity'] = cell.properties.distanceToWater;
+      cell.properties['fill-opacity'] = 1 / cell.properties['fill-opacity'];
     });
+
+    const max = grid.reduce((max, cell) => cell.properties['fill-opacity'] > max ? cell.properties['fill-opacity'] : max, -Infinity);
+
+    grid.forEach(cell => cell.properties['fill-opacity'] /= max);
 
     const fStream = fs.createWriteStream('grid.json');
     const outStream = bigJson.createStringifyStream({
@@ -70,7 +75,7 @@ export class MapUpdaterService {
 
     outStream.pipe(fStream);
 
-    return allFeatures;
+    return {};
   }
 
 
