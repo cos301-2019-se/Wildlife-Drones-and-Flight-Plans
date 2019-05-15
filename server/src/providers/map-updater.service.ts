@@ -57,7 +57,7 @@ export class MapUpdaterService {
     const grid = this.mapPartitioner.partitionMap(allFeatures.reserve, {
       roads: allFeatures.roads,
       water: allFeatures.dams,
-    }, 1, 32);
+    }, 1);
 
     grid.forEach(cell => {
       cell.properties['fill-opacity'] = cell.properties.distanceToWater;
@@ -75,7 +75,10 @@ export class MapUpdaterService {
 
     outStream.pipe(fStream);
 
-    return {};
+    return {
+      // ...allFeatures,
+      // grid,
+    };
   }
 
 

@@ -3,8 +3,6 @@ import { GeoService } from './geo.service';
 import squareGrid from '@turf/square-grid';
 import simplify from '@turf/simplify';
 import center from '@turf/center';
-import { kdTree } from '../libraries/kd-tree';
-import flatten from '@turf/flatten';
 
 @Injectable()
 export class MapPartitionerService {
@@ -35,45 +33,30 @@ export class MapPartitionerService {
     console.log('simple area len ', simplifiedArea.geometry.coordinates[0].length);
 
     console.time('build kd');
-    const kd = new kdTree(
-      features.water.reduce((points, feature) => {
-        const featurePoints = flatten(feature).features[0].geometry.coordinates
-          .map(point => {
-            return {
-              x: point[0],
-              y: point[1],
-            };
-          });
-
-        points.push(...featurePoints);
-        return points;
-      }, []),
-      (a, b) => Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y)),
-      ['x', 'y'],
-    );
+    const kd = this.geo.createFastSearchDataset(features.water);
     console.timeEnd('build kd');
 
     console.time('calculate grid');
     const grid = squareGrid(bounds, cellSizeKm, {
       units: 'kilometers',
-      mask: simplifiedArea,
-    }).features;
+    }).features
+      .filter(feature => this.geo.isInPolygon(feature, simplifiedArea));
     console.log('calculated grid', grid.length);
     console.timeEnd('calculate grid');
 
     console.time('distances');
     grid.forEach((cell, count) => {
-      console.time('cellDistance');
+      // console.time('cellDistance');
       const cellCenter = center(cell);
 
-      const nearest = kd.nearest({
-        x: cellCenter.geometry.coordinates[0],
-        y: cellCenter.geometry.coordinates[1]
-      }, 1)[0];
-      cell.properties['distanceToWater'] = nearest[1];
-      cell.properties['closestPoint'] = nearest[0];
+      const nearest = kd.getNearest(
+        cellCenter.geometry.coordinates[0],
+        cellCenter.geometry.coordinates[1],
+      );
+      cell.properties['distanceToWater'] = nearest.distance;
+      cell.properties['closestPoint'] = nearest.point;
 
-      console.timeEnd('cellDistance');
+      // console.timeEnd('cellDistance');
       console.log(`${count + 1}/${grid.length} (${count / grid.length * 100}%)`);
     });
     console.timeEnd('distances');

@@ -7,6 +7,8 @@ import * as geojsonExtent from '@mapbox/geojson-extent';
 import getDistance from '@turf/distance';
 import pointToLineDistance from '@turf/point-to-line-distance';
 import { lengthToDegrees, point } from '@turf/helpers';
+import { kdTree } from '../libraries/kd-tree';
+import flatten from '@turf/flatten';
 
 /**
  * Provides helped functions for geometry calculation
@@ -87,5 +89,43 @@ export class GeoService {
       || b[2] < a[0]
       || b[3] < a[1]
       || b[1] > a[3]);
+  }
+
+  public createFastSearchDataset(features) {
+    return new GeoSearchSet(features);
+  }
+}
+
+export class GeoSearchSet {
+  private kd;
+  constructor(features) {
+    this.kd = new kdTree(
+      features.reduce((points, feature) => {
+        const featurePoints = flatten(feature).features[0].geometry.coordinates
+          .map(point => {
+            return {
+              x: point[0],
+              y: point[1],
+            };
+          });
+
+        points.push(...featurePoints);
+        return points;
+      }, []),
+      (a, b) => Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y)),
+      ['x', 'y'],
+    );
+  }
+
+  public getNearest(x: number, y: number) {
+    const nearest = this.kd.nearest({
+      x,
+      y,
+    }, 1);
+
+    return {
+      point: nearest[0][0],
+      distance: nearest[0][1],
+    };
   }
 }
