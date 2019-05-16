@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { GeoService } from './geo.service';
+import { GeoService, GeoSearchSet } from './geo.service';
 import squareGrid from '@turf/square-grid';
 import simplify from '@turf/simplify';
 import center from '@turf/center';
@@ -13,51 +13,45 @@ export class MapPartitionerService {
   /**
    * Returns a grid representation of the map.
    * 
-   * @param area 
-   * @param features 
-   * @param cellSize 
+   * @param area The area being partitioned
+   * @param mapFeatures Key-value list of features we want to get distances to
+   * @param cellSize How large cells should be (side length in km)
    */
-  public partitionMap(area, features: { roads: any[]; water: any[]; }, cellSizeKm: number = 1) {
+  public partitionMap(area, mapFeatures, cellSizeKm: number = 1) {
     console.log('partitioning map');
-    const bounds = this.geo.getBoundingBox(area);
-
-    // simplify the area. Kruger would require over 240 million iterations at cellSizeKm = 0.5km
-    console.time('simplify area');
-    const simplifiedArea = simplify(JSON.parse(JSON.stringify(area)), {
-      mutate: true,
-      tolerance: 0.01,
-      highQuality: false,
-    });
-    console.timeEnd('simplify area');
-    console.log('area len        ', area.geometry.coordinates[0].length);
-    console.log('simple area len ', simplifiedArea.geometry.coordinates[0].length);
-
-    console.time('build kd');
-    const kd = this.geo.createFastSearchDataset(features.water);
-    console.timeEnd('build kd');
-
     console.time('calculate grid');
-    const grid = squareGrid(bounds, cellSizeKm, {
-      units: 'kilometers',
-    }).features
-      .filter(feature => this.geo.isInPolygon(feature, simplifiedArea));
+    const grid = this.geo.partitionIntoGrid(area, cellSizeKm);
     console.log('calculated grid', grid.length);
     console.timeEnd('calculate grid');
 
+    // calculate distances for each cell
+
+    // construct search datasets
+    const searchDatasets: {[featureType: string]: GeoSearchSet} = Object.keys(mapFeatures)
+      .reduce((ob, featureType) => {
+        console.time('build kd');
+        console.log(featureType);
+        ob[featureType] = this.geo.createFastSearchDataset(mapFeatures[featureType]);
+        console.timeEnd('build kd');
+        return ob;
+      }, {});
+
+    // get distances for each cell
     console.time('distances');
-    grid.forEach((cell, count) => {
+    grid.forEach(cell => {
       // console.time('cellDistance');
       const cellCenter = center(cell);
+      cell.properties.distances = {};
 
-      const nearest = kd.getNearest(
-        cellCenter.geometry.coordinates[0],
-        cellCenter.geometry.coordinates[1],
-      );
-      cell.properties['distanceToWater'] = nearest.distance;
-      cell.properties['closestPoint'] = nearest.point;
+      Object.keys(mapFeatures).forEach(featureType => {
+        const featureList = mapFeatures[featureType];
 
-      // console.timeEnd('cellDistance');
-      console.log(`${count + 1}/${grid.length} (${count / grid.length * 100}%)`);
+        const nearest = searchDatasets[featureType].getNearest(
+          cellCenter.geometry.coordinates[0],
+          cellCenter.geometry.coordinates[1],
+        );
+        cell.properties.distances[featureType] = nearest.distance;
+      });
     });
     console.timeEnd('distances');
 

@@ -44,6 +44,8 @@ export class HomePage{
 
     const mapData = await this.mapService.getMap();
 
+    console.log(mapData);
+
     const reserve = geoJSON(mapData.reserve as any, {
       style: feature => {
         return {
@@ -69,6 +71,27 @@ export class HomePage{
           color: 'blue',
           fillColor: 'blue',
           fillOpacity: 1
+        };
+      }
+    }).addTo(map));
+
+    mapData.rivers.forEach(river => geoJSON(river as any, {
+      style: feature => {
+        return {
+          color: 'blue',
+          fillColor: 'blue',
+          fillOpacity: 1
+        };
+      }
+    }).addTo(map));
+
+    mapData.intermittentWater.forEach(water => geoJSON(water as any, {
+      style: feature => {
+        return {
+          color: 'blue',
+          fillColor: 'blue',
+          fillOpacity: 0.7,
+          dashArray: 3,
         };
       }
     }).addTo(map));

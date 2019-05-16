@@ -9,6 +9,8 @@ import pointToLineDistance from '@turf/point-to-line-distance';
 import { lengthToDegrees, point } from '@turf/helpers';
 import { kdTree } from '../libraries/kd-tree';
 import flatten from '@turf/flatten';
+import simplify from '@turf/simplify';
+import squareGrid from '@turf/square-grid';
 
 /**
  * Provides helped functions for geometry calculation
@@ -93,6 +95,35 @@ export class GeoService {
 
   public createFastSearchDataset(features) {
     return new GeoSearchSet(features);
+  }
+
+  /**
+   * Simplifies a GeoJSON geometry by removing points to a given tolerance.
+   * Returns a new GeoJSON object - does not modify input object.
+   * @param polygon The polygon to simplify
+   * @param tolerance Lower = more detail
+   */
+  public simplifyGeometry(polygon, tolerance = 0.01) {
+    return simplify(JSON.parse(JSON.stringify(polygon)), {
+      mutate: true,
+      tolerance,
+      highQuality: false,
+    });
+  }
+
+  /**
+   * Partitions a polygon into square cells of given size. The cells
+   * can overlap the boundary of the polygon.
+   * @param polygon The polygon to partition
+   * @param cellSizeKm The length of a cell's edge in kilometres
+   */
+  public partitionIntoGrid(polygon, cellSizeKm) {
+    const simplifiedPolygon = this.simplifyGeometry(polygon);
+    const bounds = this.getBoundingBox(polygon);
+    return squareGrid(bounds, cellSizeKm, {
+      units: 'kilometers',
+    }).features
+      .filter(feature => this.isInPolygon(feature, simplifiedPolygon));
   }
 }
 

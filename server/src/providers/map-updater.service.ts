@@ -3,9 +3,6 @@ import { Injectable } from '@nestjs/common';
 import { OverpassService } from './overpass.service';
 import { MapPartitionerService } from './map-partitioner.service';
 
-import * as fs from 'fs';
-import * as bigJson from 'big-json';
-
 @Injectable()
 export class MapUpdaterService {
 
@@ -21,63 +18,72 @@ export class MapUpdaterService {
   async updateMap(name: string) {
     name = name.replace(/[\[\]\(\)\"\']/, ''); // sanitise
 
-    const reserve = await this.overpass.query(`relation["name"="${name}"]["type"="boundary"];
-      /*added by auto repair*/
+    const reserves = await this.overpass.query(`relation["name"="${name}"]["type"="boundary"];
       (._;>;);
-      /*end of auto repair*/
-      out geom meta;
+      out geom;
     `);
-    console.log('reserve', reserve.features.length);
+    console.log('reserves', reserves.features.length);
+
     const dams = await this.overpass.query(`area["name"="${name}"]->.boundaryarea;
-    (
-      nwr(area.boundaryarea)[leisure=reserve];
-      nwr(area.boundaryarea)[water];
-      nwr(area.boundaryarea)[waterway];
-      nwr(area.boundaryarea)[natural="water"];
-    );
-    out geom meta;`);
+      (
+        (
+          (
+            nwr(area.boundaryarea)[water];
+            nwr(area.boundaryarea)[natural="water"];
+          ); -
+          nwr(area.boundaryarea)[waterway];
+        );
+        - nwr(area.boundaryarea)[intermittent=yes];
+      );
+      (._;>;);
+      out geom;
+      >;`);
     console.log('dams', dams.features.length);
+
+    const rivers = await this.overpass.query(`area["name"="${name}"]->.boundaryarea;
+    (
+      nwr(area.boundaryarea)[waterway=river];
+      - nwr(area.boundaryarea)[intermittent=yes];
+    );
+    (._;>;);
+    out geom;
+    >;`);
+    console.log('rivers', rivers.features.length);
+
+    const intermittentWater = await this.overpass.query(`area["name"="${name}"]->.boundaryarea;
+      (
+        nwr(area.boundaryarea)[water][intermittent=yes];
+        nwr(area.boundaryarea)[natural=water][intermittent=yes];
+        nwr(area.boundaryarea)[waterway][intermittent=yes];
+      );
+      out geom;`);
+    console.log('intermittent', intermittentWater.features.length);
 
     const roads = await this.overpass.query(`area["name"="${name}"]->.boundaryarea;
     (
       nwr(area.boundaryarea)[highway];
       nwr(area.boundaryarea)[route=road];
     );
-    out geom meta;`);
+    out geom;`);
     console.log('roads', roads.features.length);
 
     console.log('downloaded map data');
 
+    const reserve = reserves.features[0];
+
     const allFeatures = {
-      reserve: reserve.features[0],
       dams: dams.features,
+      rivers: rivers.features,
+      intermittentWater: intermittentWater.features,
       roads: roads.features,
     };
 
-    const grid = this.mapPartitioner.partitionMap(allFeatures.reserve, {
-      roads: allFeatures.roads,
-      water: allFeatures.dams,
-    }, 1);
-
-    grid.forEach(cell => {
-      cell.properties['fill-opacity'] = cell.properties.distanceToWater;
-      cell.properties['fill-opacity'] = 1 / cell.properties['fill-opacity'];
-    });
-
-    const max = grid.reduce((max, cell) => cell.properties['fill-opacity'] > max ? cell.properties['fill-opacity'] : max, -Infinity);
-
-    grid.forEach(cell => cell.properties['fill-opacity'] /= max);
-
-    const fStream = fs.createWriteStream('grid.json');
-    const outStream = bigJson.createStringifyStream({
-      body: grid,
-    });
-
-    outStream.pipe(fStream);
+    const grid = this.mapPartitioner.partitionMap(reserve, allFeatures, 1);
 
     return {
-      // ...allFeatures,
-      // grid,
+      ...allFeatures,
+      reserve,
+      grid,
     };
   }
 
