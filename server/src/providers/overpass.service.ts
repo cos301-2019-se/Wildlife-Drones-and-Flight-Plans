@@ -11,6 +11,7 @@ import * as sha256 from 'simple-sha256';
 export class OverpassService {
   public async query(query: string) {
     query = query.replace(/\r\n/, '');
+    console.log(query);
 
     const cachedQuery = await this.getCachedQuery(query);
     if (cachedQuery) {

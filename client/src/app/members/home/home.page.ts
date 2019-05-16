@@ -88,10 +88,10 @@ export class HomePage{
     mapData.intermittentWater.forEach(water => geoJSON(water as any, {
       style: feature => {
         return {
-          color: 'blue',
-          fillColor: 'blue',
+          color: 'grey',
+          fillColor: 'grey',
           fillOpacity: 0.7,
-          dashArray: 3,
+          dashArray: 10,
         };
       }
     }).addTo(map));

@@ -16,9 +16,10 @@ export class MapUpdaterService {
    * @param name The name of the reserve
    */
   async updateMap(name: string) {
+    console.log('map name', name);
     name = name.replace(/[\[\]\(\)\"\']/, ''); // sanitise
 
-    const reserves = await this.overpass.query(`relation["name"="${name}"]["type"="boundary"];
+    const reserves = await this.overpass.query(`relation["name"="${name}"];
       (._;>;);
       out geom;
     `);
@@ -96,7 +97,6 @@ export class MapUpdaterService {
     };
   }
 
-
   /**
    * Returns a list of reserves in a given bounding box
    * @param left 
@@ -105,7 +105,7 @@ export class MapUpdaterService {
    * @param top 
    */
   async findReservesInArea(left, bottom, right, top) {
-    const query = `node[leisure=nature_reserve](${bottom},${left},${top},${right});out;`;
+    const query = `nwr[leisure=nature_reserve](${bottom},${left},${top},${right});(._;>;);out;`;
     return await this.overpass.query(query);
   }
 }

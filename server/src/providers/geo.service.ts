@@ -2,15 +2,17 @@ import { Injectable } from '@nestjs/common';
 import pointInPolygon from '@turf/boolean-point-in-polygon';
 import overlaps from '@turf/boolean-overlap';
 import within from '@turf/boolean-within';
-import lineToPolygon from '@turf/line-to-polygon'
+import lineToPolygon from '@turf/line-to-polygon';
 import * as geojsonExtent from '@mapbox/geojson-extent';
 import getDistance from '@turf/distance';
 import pointToLineDistance from '@turf/point-to-line-distance';
-import { lengthToDegrees, point } from '@turf/helpers';
+import { lengthToDegrees } from '@turf/helpers';
 import { kdTree } from '../libraries/kd-tree';
 import flatten from '@turf/flatten';
 import simplify from '@turf/simplify';
 import squareGrid from '@turf/square-grid';
+import polygonToLine from '@turf/polygon-to-line';
+import explode from '@turf/explode';
 
 /**
  * Provides helped functions for geometry calculation
@@ -78,7 +80,13 @@ export class GeoService {
       a = lineToPolygon(a);
     }
 
-    return overlaps(a, b) || within(a, b) || within(b, a);
+    let bGeom = [b];
+
+    if (b.geometry.type === 'MultiPolygon') {
+      bGeom = flatten(b).features;
+    }
+
+    return bGeom.some(b => overlaps(a, b) || within(a, b) || within(b, a));
   }
 
   /**
@@ -125,6 +133,10 @@ export class GeoService {
     }).features
       .filter(feature => this.isInPolygon(feature, simplifiedPolygon));
   }
+
+  public flattenGeo(geoJSON) {
+    return flatten(geoJSON);
+  }
 }
 
 export class GeoSearchSet {
@@ -132,11 +144,11 @@ export class GeoSearchSet {
   constructor(features) {
     this.kd = new kdTree(
       features.reduce((points, feature) => {
-        const featurePoints = flatten(feature).features[0].geometry.coordinates
+        const featurePoints = explode(feature).features
           .map(point => {
             return {
-              x: point[0],
-              y: point[1],
+              x: point.geometry.coordinates[0],
+              y: point.geometry.coordinates[1],
             };
           });
 
@@ -153,6 +165,13 @@ export class GeoSearchSet {
       x,
       y,
     }, 1);
+
+    if (!nearest.length) {
+      return {
+        point: null,
+        distance: null,
+      };
+    }
 
     return {
       point: nearest[0][0],
