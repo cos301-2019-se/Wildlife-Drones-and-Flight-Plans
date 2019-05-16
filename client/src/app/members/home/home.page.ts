@@ -96,6 +96,16 @@ export class HomePage{
       }
     }).addTo(map));
 
+    mapData.residential.forEach(residence => geoJSON(residence as any, {
+      style: feature => {
+        return {
+          color: 'grey',
+          fillColor: 'grey',
+          fillOpacity: 0.7,
+        };
+      }
+    }).addTo(map));
+
     map.addLayer(this.pointsLayer);
     const drawControl = new Control.Draw({
       position: 'bottomleft',

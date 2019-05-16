@@ -13,7 +13,7 @@ export class MapUpdaterService {
 
   /**
    * Updates the map given the name of a reserve
-   * @param name 
+   * @param name The name of the reserve
    */
   async updateMap(name: string) {
     name = name.replace(/[\[\]\(\)\"\']/, ''); // sanitise
@@ -67,6 +67,14 @@ export class MapUpdaterService {
     out geom;`);
     console.log('roads', roads.features.length);
 
+    const residential = await this.overpass.query(`area["name"="${name}"]->.boundaryarea;
+      (
+        nwr(area.boundaryarea)[landuse=residential];
+        nwr(area.boundaryarea)[barrier=fence];
+      );
+      out geom;`);
+    console.log('residential', residential);
+
     console.log('downloaded map data');
 
     const reserve = reserves.features[0];
@@ -76,6 +84,7 @@ export class MapUpdaterService {
       rivers: rivers.features,
       intermittentWater: intermittentWater.features,
       roads: roads.features,
+      residential: residential.features,
     };
 
     const grid = this.mapPartitioner.partitionMap(reserve, allFeatures, 1);
