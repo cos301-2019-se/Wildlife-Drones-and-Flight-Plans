@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { createConnection, Entity, Connection, Repository } from 'typeorm';
-import { User } from '../entity/User';
+import { User } from '../entity/user';
+import { AnimalLocation } from '../entity/animal-location';
+import { AnimalInterestPoint} from '../entity/animal-interest-point';
 
 @Injectable()
 export class DatabaseService {
@@ -26,7 +28,9 @@ export class DatabaseService {
         type: "sqlite",
         database: "database.sqlite",
         entities: [
-            User
+            User,
+            AnimalLocation,
+            AnimalInterestPoint
         ],
         synchronize: true,
         logging: false    
