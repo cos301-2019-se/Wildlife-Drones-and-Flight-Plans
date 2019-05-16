@@ -9,9 +9,10 @@ export class AnimalPredictionModel {
     private inputMin:any;
     private outputMax:any;
     private outputMin:any;
+
     // Input data is input for machine learning
     private formatedData = [];
-    constructor(animalJson) {
+     constructor(animalJson) {
         this.animalFile = animalJson;
         this.fetchDataFromFile();
         this.organiseData();
@@ -20,52 +21,42 @@ export class AnimalPredictionModel {
 
         // put data into tensors
         const {inputs, outputs} = this.convertToTensor();
-
-        this.trainModel(inputs, outputs);
-        //console.log(prediction);
-            //this.denormalizeData(outputs, outputMax, outputMin);
-
+        
+        this.trainModel(inputs, outputs).then(res=>{
+            console.log('Final Accuracy',res.history.acc);
+            const [xs, preds] = tf.tidy(() => {
+    
+                const xs = tf.linspace(0, 1, 400);
+                const preds = this.model.predict(xs.reshape([100, 4]));      
+                
+                const unNormXs = xs
+                  .mul(this.inputMax.sub(this.inputMin))
+                  .add(this.inputMin);
+                
+                const unNormPreds = preds
+                  .mul(this.outputMax.sub(this.outputMin))
+                  .add(this.outputMin);
+                
+                // Un-normalize the data
+                return [unNormXs.dataSync(), unNormPreds.dataSync()];
+              });
+        });
         // Once our data has been converted we must train model on the data
-    }
-    // Denormalize the predicted data
-    private denormalizeData(prediction, max , min)
-    {
-        const unNormPreds = prediction.mul(max.sub(min)).add(min);
-        return unNormPreds;
-    }
-    private normalizeData(prediction, max , min)
-    {
-        const normPreds =  prediction.sub(min).div(max.sub(min));
-        return normPreds;
     }
 
     private saveModel(){
         this.model.save("file://./animalPredictionModel");
     }
     //Trains the model
-    private trainModel(inputs, outputs){
-        this.model.fit(inputs , outputs ,{
-            epochs:2,
-            batchSize:2000,
+    private async trainModel(inputs, outputs){
+        return await this.model.fit(inputs , outputs ,{
+            epochs: 2,
+            batchSize: 2000,
             validationSplit : 0.20,
-            callbacks: {onBatchEnd}
-        }).then(info=>{
-          console.log('Final Accuracy',info.history.acc);
-          console.log('Test1');
-           let inputPrediction = tf.tensor2d([[31.63961 , -24.2447699999999 ,31.6396599999999,-24.24483]]);
-            console.log('Test2');
-           // this.normalizeData(inputPrediction,this.inputMax,this.inputMin);
-            console.log('Test3');
-            let prediction = this.model.predict(inputPrediction);
-            prediction.print();
-           // this.denormalizeData(prediction,this.outputMax,this.inputMax).print();
-            this.saveModel();
         });
-        function onBatchEnd(batch, logs) {
-            console.log('Batch Accuracy', logs.acc);
-        }
-        // 31.6393899999999,-24.2448599999999
     }
+
+
     // Fetches the data from the file
     private fetchDataFromFile() {
         try {
@@ -110,7 +101,6 @@ export class AnimalPredictionModel {
             ]));
             const inputTensor = tf.tensor2d(inputs, [inputs.length, 4]);
             const outputTensor = tf.tensor2d(outputs, [outputs.length, 2]);
-
             // Step 3. Normalize the data to the range 0 - 1 using min-max scaling
             const inputMax = inputTensor.max();
             const inputMin = inputTensor.min();
@@ -122,7 +112,6 @@ export class AnimalPredictionModel {
             this.outputMax = outputMax;
             const normalizedInputs = inputTensor.sub(inputMin).div(inputMax.sub(inputMin));
             const normalizedOutputs = outputTensor.sub(outputMin).div(outputMax.sub(outputMin));
-
             return {
                 inputs: normalizedInputs,
                 outputs: normalizedOutputs,
