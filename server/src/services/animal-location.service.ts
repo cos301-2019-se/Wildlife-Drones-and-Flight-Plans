@@ -42,8 +42,8 @@ export class AnimalLocationService {
         return false;
     }
 
-    async addAnimalLocationDataCSV(): Promise<void> {
-        const csvFile = 'ThermochronTracking Elephants Kruger 2007.csv';
+    async addAnimalLocationDataCSV(filename): Promise<void> {
+        const csvFile = filename;//'ThermochronTracking Elephants Kruger 2007.csv';
         const MAX_BUFFER_SIZE = 50000;
         let buffer: AnimalLocation[] = [];
 
@@ -89,12 +89,19 @@ export class AnimalLocationService {
         });
     }
 
-    getAllAnimalLocationTableData(): any {
+    getAllAnimalsLocationTableData(): any {
 
         const con =  this.databaseService.getConnection();
         return con.then(async (data)=>{
-           //console.log(await data.getRepository(Animal_locations).find())
            return await data.getRepository(AnimalLocation).find(); 
+        })  
+    }
+
+    getIndividualAnimalLocationTableData(animalID): any {
+
+        const con =  this.databaseService.getConnection();
+        return con.then(async (data)=>{
+           return await data.getRepository(AnimalLocation).find({animalId : animalID}); 
         })  
     }
 
