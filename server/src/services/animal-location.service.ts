@@ -102,7 +102,6 @@ export class AnimalLocationService {
         const con =  this.databaseService.getConnection();
         return con.then(async (data)=>{
            return await data.getRepository(AnimalLocation).find({animalId : animalID}); 
-        })  
     }
 
 }
