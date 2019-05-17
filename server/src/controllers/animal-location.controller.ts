@@ -11,7 +11,7 @@ export class AnimalController {
   }
 
   @Get('addAnimalLocationDataCSV')
-  addAnimalLocationDataCSV(@Query('filename') filename:string ): void {
+  addAnimalLocationDataCSV(@Query('filename') filename: string ): void {
     this.animalLocationService.addAnimalLocationDataCSV(filename);
   }
 
