@@ -18,13 +18,25 @@ export class OverpassService {
       return cachedQuery;
     }
 
-    const url = `http://overpass-api.de/api/interpreter?data=${encodeURI(query)}`;
+    let res;
+    while (true) {
+      const url = `http://overpass-api.de/api/interpreter?data=${encodeURI(query)}`;
 
-    console.log('downloading map', url);
-
-    const res = await axios.get(url, {
-      responseType: 'arraybuffer',
-    });
+      console.log('downloading map', url);
+      try {
+        res = await axios.get(url, {
+          responseType: 'arraybuffer',
+        });
+      } catch (err) {
+        if (err.response.status === 429) {
+          console.log('hit rate limit. Retrying');
+          await new Promise(resolve => setTimeout(resolve, 15000));
+          continue;
+        }
+        throw err;
+      }
+      break;
+    }
 
     console.log('got axios');
 

@@ -10,7 +10,7 @@ import { HttpClient } from '@angular/common/http';
   templateUrl: './home.page.html',
   styleUrls: ['./home.page.scss'],
 })
-export class HomePage{
+export class HomePage {
   private map: Map;
   @ViewChild('leaflet') leaflet: LeafletDirective;
 
