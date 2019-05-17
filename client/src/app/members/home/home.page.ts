@@ -26,7 +26,8 @@ export class HomePage{
 
   mapOptions: MapOptions = {
     layers: [
-      tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      // alternative https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}
+      tileLayer('http://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
         maxZoom: 18,
         attribution: null
       })
