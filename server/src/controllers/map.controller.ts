@@ -37,10 +37,16 @@ export class MapController {
         return this.shortestPathService.getShortestPath(points);
     }
 
+    @Post('find-reserves')
+    async findReserves(@Body('top') top, @Body('left') left, @Body('bottom') bottom, @Body('right') right) {
+        console.log(left, bottom, right, top);
+        return await this.mapUpdaterService.findReservesInArea(left, bottom, right, top);
+    }
+
     @Post('update')
-    async update(@Body('top') top, @Body('left') left, @Body('bottom') bottom, @Body('right') right) {
-        const mapFeatures = await this.mapUpdaterService.updateMap(left, bottom, right, top);
-        console.log(mapFeatures);
+    async update(@Body('name') name) {
+        const mapFeatures = await this.mapUpdaterService.updateMap(name);
+        // console.log(mapFeatures);
         return mapFeatures;
     }
 }

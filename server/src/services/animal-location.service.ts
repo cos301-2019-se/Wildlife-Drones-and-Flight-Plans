@@ -1,14 +1,14 @@
 import { Injectable, RequestTimeoutException } from '@nestjs/common';
 import { DatabaseService } from './db.service';
 import { AnimalLocation } from '../entity/animal-location';
-import { csvReader } from './csv-reader.service'
+import { CsvReader } from './csv-reader.service'
 
 @Injectable()
 export class AnimalLocationService {
 
     constructor(
         private readonly databaseService: DatabaseService,
-        private readonly csvReader: csvReader,
+        private readonly csvReader: CsvReader,
     ) { }
 
     addAnimalLocationData(): boolean {

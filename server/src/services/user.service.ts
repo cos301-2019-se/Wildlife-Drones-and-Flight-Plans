@@ -1,6 +1,6 @@
 import { Injectable, RequestTimeoutException } from '@nestjs/common';
 import { DatabaseService } from './db.service';
-import { User } from '../entity/User';
+import { User } from '../entity/user';
 import * as bcrypt from 'bcrypt';
 import * as uuidv4 from 'uuid/v4';
 import { defaultCoreCipherList } from 'constants';
