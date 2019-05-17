@@ -5,12 +5,16 @@ import * as bcrypt from 'bcrypt';
 import * as uuidv4 from 'uuid/v4';
 import { defaultCoreCipherList } from 'constants';
 import { STATUS_CODES } from 'http';
+import { AuthService } from 'src/auth/auth.service';
+import { JwtService } from '@nestjs/jwt/dist/jwt.service';
 
 @Injectable()
 export class UserService {
 
-    constructor(private readonly databaseService: DatabaseService) {}
- 
+    constructor(private readonly databaseService: DatabaseService){}
+     // private readonly authService: AuthService,
+     //private readonly jwtService: JwtService) {}
+    
      getAllUsers(): any {
         const con =  this.databaseService.getConnection();
         return con.then(async (data)=>{
@@ -19,7 +23,7 @@ export class UserService {
         })  
     }
 
-    login(_email,_pass):any {
+  async login(_email,_pass):Promise<any> {
 
  
         const con =  this.databaseService.getConnection();
@@ -37,29 +41,13 @@ export class UserService {
            let valid  = false;
            if(bcrypt.compareSync(_pass, ExistingUser.password) == true)
            {
-                if((c - d) < (24*60*60*1000))
-                {
-                    console.log("The token is still valid");
-                        var newDate = new Date();
-                        newDate.setDate(newDate.getDate() + 1);
-                        ExistingUser.expires = newDate.toString();
-                }
-                else if( (c-d) > (24*60*60*1000))
-                {
-                    ExistingUser.token = uuidv4();
-                }
-                return {"token":ExistingUser.token};
-             }
+               return true;
+           }
              else
              {
                 console.log('Password incorrect');
-                return {"token":""};
+                return  false;
              }
-            }
-            else
-            {
-                console.log('User does not exist');
-                return {"token":""};
             }
         })
     

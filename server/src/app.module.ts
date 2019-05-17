@@ -7,9 +7,28 @@ import { UserController } from './controllers/user.controller';
 import { DatabaseService } from './services/db.service';
 import { UserService } from './services/user.service';
 
+
+import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
+import { AuthService } from './auth/auth.service';
+import { JwtStrategy } from './jwt.strategy';
+import { AuthModule } from './auth/auth.module';
+import { AuthController } from './auth/auth.controller';
+
 @Module({
-  imports: [],
-  controllers: [MapController, UserController],
-  providers: [MapUpdaterService, ShortestPathService, DatabaseService, UserService],
+  imports: [
+    PassportModule.register({ defaultStrategy: 'jwt' }),
+    JwtModule.register({
+      secretOrPrivateKey: 'secretKey',
+      signOptions: {
+        expiresIn: 3600,
+      },
+    }),
+   // AppModule,
+  ],
+  controllers: [MapController, UserController,AuthController],
+  providers: [MapUpdaterService, ShortestPathService, DatabaseService, UserService,AuthService, JwtStrategy],
+  exports: [PassportModule, AuthService],
 })
+
 export class AppModule {}

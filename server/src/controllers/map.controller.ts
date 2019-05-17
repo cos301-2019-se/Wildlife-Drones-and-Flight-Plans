@@ -1,11 +1,13 @@
-import { Controller, Get, Param, Query, Post, Body } from '@nestjs/common';
+import { Controller, Get, Param, Query, Post, Body, UseGuards } from '@nestjs/common';
 import { ShortestPathService } from '../providers/shortest-path.service';
 import { MapUpdaterService } from '../providers/map-updater.service';
+import { AuthGuard } from '@nestjs/passport';
 
 // jest.setTimeout(-1);
 //jest.useFakeTimers();
 
 @Controller('map')
+@UseGuards(AuthGuard('jwt'))
 export class MapController {
 
     constructor(
