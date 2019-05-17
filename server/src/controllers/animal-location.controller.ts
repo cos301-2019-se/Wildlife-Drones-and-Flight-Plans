@@ -16,12 +16,12 @@ export class AnimalController {
   }
 
   @Get('getAllAnimalLocationTableData')
-  getAllAnimalsLocationData(): JSON {
+  getAllAnimalsLocationData(): Promise<JSON> {
     return this.animalLocationService.getAllAnimalsLocationTableData();
   }
 
   @Get('getIndividualAnimalLocationTableData')
-  getIndividualAnimalLocationData(@Query('animalID') animalID: string): JSON {
+  getIndividualAnimalLocationData(@Query('animalID') animalID: string): Promise<JSON> {
     return this.animalLocationService.getIndividualAnimalLocationTableData(animalID);
   }
 
