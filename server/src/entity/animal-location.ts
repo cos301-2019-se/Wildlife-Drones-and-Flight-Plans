@@ -48,4 +48,7 @@ export class AnimalLocation {
     @Column()
     altitude: number;
 
+    @Column()
+    slopiness: number;
+
 }

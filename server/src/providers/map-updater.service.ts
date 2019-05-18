@@ -16,6 +16,18 @@ export class MapUpdaterService {
    * @param name The name of the reserve
    */
   async updateMap(name: string) {
+    const { reserve, features } = await this.getMapFeatures(name);
+
+    const grid = this.mapPartitioner.partitionMap(reserve, features, 1);
+
+    return {
+      ...features,
+      reserve,
+      grid,
+    };
+  }
+
+  async getMapFeatures(name: string) {
     console.log('map name', name);
     name = name.replace(/[\[\]\(\)\"\']/, ''); // sanitise
 
@@ -80,20 +92,15 @@ export class MapUpdaterService {
 
     const reserve = reserves.features[0];
 
-    const allFeatures = {
-      dams: dams.features,
-      rivers: rivers.features,
-      intermittentWater: intermittentWater.features,
-      roads: roads.features,
-      residential: residential.features,
-    };
-
-    const grid = this.mapPartitioner.partitionMap(reserve, allFeatures, 1);
-
     return {
-      ...allFeatures,
       reserve,
-      grid,
+      features: {
+        dams: dams.features,
+        rivers: rivers.features,
+        intermittentWater: intermittentWater.features,
+        roads: roads.features,
+        residential: residential.features,
+      },
     };
   }
 

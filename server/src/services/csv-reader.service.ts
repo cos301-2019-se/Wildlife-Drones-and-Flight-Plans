@@ -4,8 +4,20 @@ import csv = require('csv-parser');
 
 @Injectable()
 export class CsvReader {
-    readCSV(csvfilename: string, mapper: (row) => void): void {
-        fs.createReadStream(csvfilename)
+    readCSV(csvFileName: string): CsvReaderStream {
+        return new CsvReaderStream(csvFileName);
+    }
+}
+
+export class CsvReaderStream {
+    private handle: fs.ReadStream;
+
+    constructor(filename) {
+        this.handle = fs.createReadStream(filename);
+    }
+
+    public onData(mapper) {
+        this.handle
             .pipe(csv())
             .on('data', (row) => {
                 mapper(row);
@@ -13,5 +25,13 @@ export class CsvReader {
             .on('end', () => {
                 mapper(undefined);
             });
+    }
+
+    public resume() {
+        this.handle.resume();
+    }
+
+    public pause() {
+        this.handle.pause();
     }
 }
