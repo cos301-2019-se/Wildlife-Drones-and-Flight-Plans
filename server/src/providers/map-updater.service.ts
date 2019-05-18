@@ -74,7 +74,7 @@ export class MapUpdaterService {
         nwr(area.boundaryarea)[barrier=fence];
       );
       out geom;`);
-    console.log('residential', residential);
+    console.log('residential', residential.features.length);
 
     console.log('downloaded map data');
 

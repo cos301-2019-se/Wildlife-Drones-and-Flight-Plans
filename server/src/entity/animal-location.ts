@@ -29,6 +29,23 @@ export class AnimalLocation {
 
     @Column()
     habitat: string;
-   
+
+    @Column()
+    distanceToRivers: number;
+
+    @Column()
+    distanceToDams: number;
+
+    @Column()
+    distanceToRoads: number;
+
+    @Column()
+    distanceToResidences: number;
+
+    @Column()
+    distanceToIntermittentWater: number;
+
+    @Column()
+    altitude: number;
 
 }
