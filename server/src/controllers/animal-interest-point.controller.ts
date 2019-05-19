@@ -7,7 +7,7 @@ export class AnimalInterestPointController {
 
   @Get('addAnimalInterestPoint')
   addAnimalInterestPoint(): boolean {
-    return this.animalInterestPointService.addAnimalIntretPoint();
+    return this.animalInterestPointService.addAnimalInterestPoint();
   }
 
 

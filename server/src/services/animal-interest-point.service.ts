@@ -7,27 +7,23 @@ export class AnimalInterestPointService {
 
     constructor(private readonly databaseService: DatabaseService) { }
 
-    addAnimalIntretPoint(): boolean {
+    addAnimalInterestPoint(): boolean {
 
         const con = this.databaseService.getConnection();
-        let addAnimal = con.then(async (data) => {
-            let animalIntrestPoints = new AnimalInterestPoint();
+        const addAnimal = con.then(async (data) => {
+            const animalInterestPoints = new AnimalInterestPoint();
 
-            animalIntrestPoints.name = "saltLick";
-            animalIntrestPoints.pointDescription = "Saltlick at dam point A";
-            animalIntrestPoints.longitude = "28.282984";
-            animalIntrestPoints.latitude = "-25.865828";
-            return data.manager.save(animalIntrestPoints).then(animalIntrestPoints => { console.log("Saved a new animal intrestpoint with id: " + animalIntrestPoints.id) });
+            animalInterestPoints.name = 'saltLick';
+            animalInterestPoints.pointDescription = 'Saltlick at dam point A';
+            animalInterestPoints.longitude = '28.282984';
+            animalInterestPoints.latitude = '-25.865828';
+            // tslint:disable-next-line:no-console
+            return data.manager.save(animalInterestPoints).then(animalInterestPoints => {console.log(
+              'Saved a new animal interest point with id: ' + animalInterestPoints.id); });
         });
 
 
-        if (addAnimal != null) {
-            return true;
-        }
-        else {
-
-            return false;
-        }
+        return addAnimal != null;
     }
 }
 
