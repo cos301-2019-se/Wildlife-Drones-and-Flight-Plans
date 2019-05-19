@@ -14,8 +14,8 @@ export class AnimalInterestPointService {
             let animalIntrestPoints = new AnimalInterestPoint();
 
             animalIntrestPoints.name = "saltLick";
-            animalIntrestPoints.Point_description = "Saltlick at dam point A";
-            animalIntrestPoints.longatude = "28.282984";
+            animalIntrestPoints.pointDescription = "Saltlick at dam point A";
+            animalIntrestPoints.longitude = "28.282984";
             animalIntrestPoints.latitude = "-25.865828";
             return data.manager.save(animalIntrestPoints).then(animalIntrestPoints => { console.log("Saved a new animal intrestpoint with id: " + animalIntrestPoints.id) });
         });
