@@ -1,3 +1,4 @@
+/* tslint:disable:no-console */
 import { Injectable, RequestTimeoutException } from '@nestjs/common';
 import { DatabaseService } from './db.service';
 import { AnimalInterestPoint } from '../entity/animal-interest-point';
@@ -8,22 +9,17 @@ export class AnimalInterestPointService {
     constructor(private readonly databaseService: DatabaseService) { }
 
     addAnimalInterestPoint(): boolean {
+        const con = await this.databaseService.getConnection();
+        const animalInterestPoints = new AnimalInterestPoint();
 
-        const con = this.databaseService.getConnection();
-        const addAnimal = con.then(async (data) => {
-            const animalInterestPoints = new AnimalInterestPoint();
-
-            animalInterestPoints.name = 'saltLick';
-            animalInterestPoints.pointDescription = 'Saltlick at dam point A';
-            animalInterestPoints.longitude = '28.282984';
-            animalInterestPoints.latitude = '-25.865828';
+        animalInterestPoints.name = 'saltLick';
+        animalInterestPoints.pointDescription = 'Saltlick at dam point A';
+        animalInterestPoints.longitude = '28.282984';
+        animalInterestPoints.latitude = '-25.865828';
             // tslint:disable-next-line:no-console
-            return data.manager.save(animalInterestPoints).then(animalInterestPoints => {console.log(
-              'Saved a new animal interest point with id: ' + animalInterestPoints.id); });
-        });
-
-
-        return addAnimal != null;
+        const addedAnimal = await con.manager.save(animalInterestPoints);
+        console.log('Saved a new animal interest point with id: ' + animalInterestPoints.id);
+        return addedAnimal != null;
     }
 }
 

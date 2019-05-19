@@ -69,10 +69,10 @@ export class UserService {
                     user.jobType = aJob;
                     user.email = aEmail;
                     user.token = uuidv4();
-                    const temp = new Date();
-                    temp.setDate(temp.getDate() + 1);
-                    console.log(temp);
-                    user.expires = temp.toString();
+                    const now = new Date();
+                    now.setDate(now.getDate() + 1);
+                    console.log(now);
+                    user.expires = now.toString();
                     return  data.manager.save(user).then(user => {console.log('Saved a new user with id: ' + user.id); });
                     });
                 });
@@ -111,5 +111,3 @@ export class UserService {
     }
 
 }
-
-

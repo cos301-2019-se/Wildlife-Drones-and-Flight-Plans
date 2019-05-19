@@ -9,8 +9,8 @@ describe('Unit Testing', () => {
     const mapUpdater = new MapUpdaterService();
     ///////////////// All tests for shortest path///////////////////
     const onePoints = [[8, 5]];
-    const TwoPoints = [[8, 5], [2, 2]];
-    const FivePoints = [[8, 5], [2, 2], [13, 16], [22, 27], [6, 90]];
+    const twoPoints = [[8, 5], [2, 2]];
+    const fivePoints = [[8, 5], [2, 2], [13, 16], [22, 27], [6, 90]];
     const expectedOnePoints = [[8, 5], [8, 5]];
     const expectedTwoPoints = [[8, 5], [2, 2], [8, 5]];
     const expectedFivePoints =  [[8, 5], [2, 2], [6, 90], [22, 27], [13, 16], [8, 5]];
@@ -23,7 +23,7 @@ describe('Unit Testing', () => {
 
     describe('Get shortest path between two point(s)', () => {
         it('Was shortest path', async () => {
-            const res = shortestPath.getShortestPath(TwoPoints);
+            const res = shortestPath.getShortestPath(twoPoints);
             expect(
               JSON.stringify(res) === JSON.stringify(expectedTwoPoints) ||
               JSON.stringify(res) === JSON.stringify(expectedTwoPoints.reverse())
@@ -33,7 +33,7 @@ describe('Unit Testing', () => {
 
     describe('Get shortest path between five point(s)', () => {
         it('Was shortest path', async () => {
-            const res = shortestPath.getShortestPath(FivePoints);
+            const res = shortestPath.getShortestPath(fivePoints);
             expect(
               JSON.stringify(res) === JSON.stringify(expectedFivePoints) ||
               JSON.stringify(res) === JSON.stringify(expectedFivePoints.reverse())
@@ -125,34 +125,34 @@ describe('Unit Testing', () => {
 
 
 // -check features received from openView maps (roads > 0, dams > 0)
-    const Correcttop = - 25.8415;
-    const Correctleft = 28.2560;
-    const Correctbottom = - 25.9392;
-    const Correctright = 28.3320;
+    const correctTop = - 25.8415;
+    const correctLeft = 28.2560;
+    const correctBottom = - 25.9392;
+    const correctRight = 28.3320;
 // var Wrongtop =-26.236496215382555;
 // var Wrongleft =28.429269790649414;
 // var Wrongbottom = -26.239845151660266;
 // var Wrongright =28.435921669006348;
-    let Correctres;
+    let correctRes;
   // tslint:disable-next-line:prefer-const
     let Wrongres;
     describe('Tests to see if there is more than 0 dams on the map', () => {
         it('More than 0 dams are on the map', async () => {
-            Correctres = await mapUpdater.updateMap(Correctleft, Correctbottom, Correctright, Correcttop);
-            expect(Correctres.dams.length).toBeGreaterThan(0);
+            correctRes = await mapUpdater.updateMap(correctLeft, correctBottom, correctRight, correctTop);
+            expect(correctRes.dams.length).toBeGreaterThan(0);
 
         });
     });
 
     describe('Tests to see if there is more than 0 roads on the map', () => {
         it('More than 0 roads are on the map', async () => {
-                expect(Correctres.roads.length).toBeGreaterThan(0);
+                expect(correctRes.roads.length).toBeGreaterThan(0);
         });
     });
 
     describe('Tests to see if there are reserves on the map', () => {
         it('There are reserves', async () => {
-                expect(Correctres.reserve).toBeDefined();
+                expect(correctRes.reserve).toBeDefined();
         });
     });
 

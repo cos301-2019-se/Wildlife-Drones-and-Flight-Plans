@@ -47,15 +47,14 @@ Path.prototype.delta_distance = function(i, j) {
     jp1 = this.index(j + 1),
     im1 = this.index(i - 1),
     ip1 = this.index(i + 1);
-  let s =
-    this.distance(jm1, i  )
+  let s = this.distance(jm1, i)
     + this.distance(i  , jp1)
-    + this.distance(im1, j  )
+    + this.distance(im1, j)
     + this.distance(j  , ip1)
-    - this.distance(im1, i  )
+    - this.distance(im1, i)
     - this.distance(i  , ip1)
-    - this.distance(jm1, j  )
-    - this.distance(j  , jp1);
+    - this.distance(jm1, j)
+    - this.distance(j, jp1);
   if (jm1 === i || jp1 === i) {
       s += 2 * this.distance(i, j);
   }
@@ -82,13 +81,13 @@ function solve(points, tempCoeff?, callback?) {
   if (!tempCoeff) {
       tempCoeff = 1 - Math.exp(-10 - Math.min(points.length, 1e6) / 1e5);
   }
-  const has_callback = typeof(callback) === 'function';
+  const hasCallback = typeof(callback) === 'function';
 
   for (let temperature = 100 * distance(path.access(0), path.access(1));
        temperature > 1e-6;
        temperature *= tempCoeff) {
       path.change(temperature);
-      if (has_callback) { callback(path.order); }
+      if (hasCallback) { callback(path.order); }
   }
   return path.order;
 }
