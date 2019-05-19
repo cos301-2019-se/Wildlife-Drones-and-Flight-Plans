@@ -96,9 +96,8 @@ export class AnimalLocationService {
     }
 
     async getIndividualAnimalLocationTableData(animalID): Promise<JSON> {
-        const con = await this.databaseService.getConnection();
-        let animaldata =  JSON.parse(JSON.stringify( await con.getRepository(AnimalLocation).find({ animalId : animalID })));
-        return animaldata;
+        const con = await this.databaseService.getConnection();       
+        return JSON.parse(JSON.stringify( await con.getRepository(AnimalLocation).find({ animalId : animalID })));
     }
 
 }
