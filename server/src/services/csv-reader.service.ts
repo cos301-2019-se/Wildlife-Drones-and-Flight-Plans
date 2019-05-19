@@ -1,12 +1,9 @@
-import { Injectable, RequestTimeoutException } from '@nestjs/common';
+import { Injectable} from '@nestjs/common';
 import * as fs from 'fs';
 import csv = require('csv-parser');
 
-
 @Injectable()
-export class csvReader {
-    constructor() { }
-
+export class CsvReader {
     readCSV(csvfilename: string, mapper: (row) => void): void {
         fs.createReadStream(csvfilename)
             .pipe(csv())

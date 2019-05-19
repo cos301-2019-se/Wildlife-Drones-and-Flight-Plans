@@ -1,4 +1,4 @@
-import {Entity, PrimaryGeneratedColumn, Column} from "typeorm";
+import {Entity, PrimaryGeneratedColumn, Column} from 'typeorm';
 
 @Entity()
 export class AnimalInterestPoint {
@@ -6,16 +6,16 @@ export class AnimalInterestPoint {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column("text")
+    @Column('text')
     name: string;
 
-    @Column("text")
-    Point_description: string;   
+    @Column('text')
+    pointDescription: string;
 
-    @Column("text")
-    longatude: string; 
+    @Column('text')
+    longitude: string;
 
-    @Column("text")
+    @Column('text')
     latitude: string;
 
 }

@@ -1,14 +1,14 @@
-import { Injectable, RequestTimeoutException } from '@nestjs/common';
+import { Injectable} from '@nestjs/common';
 import { DatabaseService } from './db.service';
 import { AnimalLocation } from '../entity/animal-location';
-import { csvReader } from './csv-reader.service'
+import { CsvReader } from './csv-reader.service';
 
 @Injectable()
 export class AnimalLocationService {
 
     constructor(
         private readonly databaseService: DatabaseService,
-        private readonly csvReader: csvReader,
+        private readonly csvReader: CsvReader,
     ) { }
 
     addAnimalLocationData(): boolean {
@@ -26,11 +26,12 @@ export class AnimalLocationService {
         //             animalLocations.minute = '00';
         //             animalLocations.second = '00.000';
         //             animalLocations.longitude = '31.87399';
-        //             animalLocations.latitude = '-24.81483';            
-        //         return data.manager.save(animalLocations).then(animalLocations => { console.log('Saved a new animal loction with id: ' + animalLocations.id) });
+        //             animalLocations.latitude = '-24.81483';
+        //         return data.manager.save(animalLocations).then(animalLocations =>
+        //         { console.log('Saved a new animal loction with id: ' + animalLocations.id) });
         //     });
-       
-        
+
+
         // if (addAnimal != null) {
         //     return true;
         // }
@@ -59,7 +60,7 @@ export class AnimalLocationService {
                 chunk: 100,
 
             });
-        }
+        };
 
         this.csvReader.readCSV(csvFile, row => {
             if (typeof row === 'undefined') {
@@ -68,7 +69,7 @@ export class AnimalLocationService {
                 return;
             }
 
-            const rowDate = new Date(row['timestamp']);
+            const rowDate = new Date(row.timestamp);
 
             const location: AnimalLocation = {
                 animalId: row['individual-local-identifier'],
@@ -76,14 +77,14 @@ export class AnimalLocationService {
                 longitude: row['location-long'],
                 timestamp: rowDate,
                 temperature: row['external-temperature'],
-                habitat: row['habitat'],
-                month: rowDate.getMonth()+1,
+                habitat: row.habitat,
+                month: rowDate.getMonth() + 1,
                 time: rowDate.getHours() * 60 + rowDate.getMinutes(),
                 id: id++,
             };
 
             buffer.push(location);
-            if (buffer.length == MAX_BUFFER_SIZE) {
+            if (buffer.length === MAX_BUFFER_SIZE) {
                 insertRow();
             }
         });
