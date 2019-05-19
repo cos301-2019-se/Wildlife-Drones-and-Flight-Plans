@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import * as fs from 'fs';
 import axios from 'axios';
 import * as GeoTiff from 'geotiff';
-import { MultiPromise } from 'src/libraries/MultiPromise';
+import { MultiPromise } from 'src/libraries/multi-promise';
 import * as computeVariance from 'compute-variance';
 
 const TIFF_WIDTH = 2048;

@@ -7,7 +7,6 @@ import { GeoService, GeoSearchSet } from '../providers/geo.service';
 import { SRTMService } from '../providers/srtm.service';
 import bbox from '@turf/bbox';
 import { lengthToDegrees } from '@turf/helpers';
-import { MultiPromise } from '../libraries/MultiPromise';
 
 const LOCATION_BIAS = lengthToDegrees(300, 'meters');
 
