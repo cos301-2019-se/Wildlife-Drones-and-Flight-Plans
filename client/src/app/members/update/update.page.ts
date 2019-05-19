@@ -30,8 +30,7 @@ export class UpdatePage implements OnInit {
     private alertCtrl: AlertController,
   ) { }
 
-  logout()
-  {
+  logout() {
     this.authentication.logout();
   }
 

@@ -1,4 +1,4 @@
-import { Controller, Get, Post } from '@nestjs/common';
+import { Controller, Get} from '@nestjs/common';
 import { AnimalLocationService } from '../services/animal-location.service';
 
 @Controller()
@@ -13,7 +13,7 @@ export class AnimalController {
   @Get('addAnimalLocationDataCSV')
   addAnimalLocationDataCSV(): void {
     this.animalLocationService.addAnimalLocationDataCSV();
-    //return true
+    // return true
   }
 
   @Get('getAllAnimalLocationTableData')

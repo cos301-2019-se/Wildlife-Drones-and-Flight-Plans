@@ -1,4 +1,4 @@
-import {Entity, PrimaryGeneratedColumn, Column} from "typeorm";
+import {Entity, PrimaryGeneratedColumn, Column} from 'typeorm';
 
 @Entity()
 export class AnimalLocation {
@@ -19,7 +19,7 @@ export class AnimalLocation {
     time: number;
 
     @Column()
-    longitude: number; 
+    longitude: number;
 
     @Column()
     latitude: number;
@@ -29,6 +29,6 @@ export class AnimalLocation {
 
     @Column()
     habitat: string;
-   
+
 
 }
