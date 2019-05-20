@@ -1,10 +1,10 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import {AnimalPredictionModel} from './providers/animal-prediction-model';
+import {AnimalPredictionService} from './providers/animal-prediction.service';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors();
-  const model = new AnimalPredictionModel('all-elephant-data.json');
+  const model = new AnimalPredictionService(true);
   await app.listen(3000);
 }
 bootstrap();
