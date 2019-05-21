@@ -158,7 +158,3 @@ export class AnimalLocationService {
     }
 
 }
-
-
-
-

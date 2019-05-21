@@ -22,7 +22,3 @@ export class AnimalInterestPointService {
         return addedAnimal != null;
     }
 }
-
-
-
-
