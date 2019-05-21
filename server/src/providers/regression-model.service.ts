@@ -2,9 +2,11 @@ import { Injectable } from '@nestjs/common';
 import MLR from 'ml-regression-multivariate-linear';
 import * as fs from 'fs';
 @Injectable()
-export class AnimalPredictionService {
+export class RegressionModel {
     private model: any;
     private logsEnabled: boolean;
+    private inputs:any;
+    private outputs:any;
     constructor(logsEnabled= false){
         this.logsEnabled = logsEnabled;
     }
@@ -17,6 +19,19 @@ export class AnimalPredictionService {
             throw err;
         }
     }
+
+    public predict(inputs) {
+        try {
+            var predictions = [];
+            inputs.forEach(input => {
+                predictions.push(this.model.predict(input));
+            });
+            return predictions;
+        } catch (err){
+            throw err;
+        }
+    }
+
     // Saves a model to HDD 
     public saveModel(modelName) {
         try {
