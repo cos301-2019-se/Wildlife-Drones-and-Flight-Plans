@@ -31,10 +31,18 @@ export class AnimalPredictionService {
     // Loads a model from storage
     public loadModel(modelName) {
         try {
-        const jsonModel =  fs.readFileSync(modelName + '.json');
-        const tempModel = new MLR();
-        this.model = tempModel.load(JSON.parse(tempModel));
-        this.log('Model has been loaded');
+            if(fs.existsSync(modelName + '.json'))
+            {
+                const jsonModel =  fs.readFileSync(modelName + '.json',"utf8");
+                const mlr = MLR.load(JSON.parse(jsonModel));
+                this.log('Model has been loaded');
+                return mlr;
+            }
+            else
+            {
+                this.log('Model does not exist');
+                return null;
+            }
         } catch (err) {
             throw err;
         }
