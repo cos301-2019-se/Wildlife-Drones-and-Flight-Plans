@@ -3,6 +3,7 @@ import { MapOptions, Map, Draw, Control, tileLayer, FeatureGroup } from 'leaflet
 import { MapService } from '../../services/map/map.service';
 import { Router } from '@angular/router';
 import { AuthenticationService } from '../../services/authentication.service';
+import { AlertController } from '@ionic/angular';
 @Component({
   selector: 'app-update',
   templateUrl: './update.page.html',
@@ -25,11 +26,11 @@ export class UpdatePage implements OnInit {
   constructor(
     private mapService: MapService,
     private router: Router,
-    private authentication:AuthenticationService
+    private authentication: AuthenticationService,
+    private alertCtrl: AlertController,
   ) { }
 
-  logout()
-  {
+  logout() {
     this.authentication.logout();
   }
 
@@ -69,13 +70,36 @@ export class UpdatePage implements OnInit {
       const right = bounds._northEast.lng;
       const top = bounds._northEast.lat;
 
-      this.boxLayer.addLayer(layer);
-      const map = await this.mapService.updateMap(left, bottom, right, top);
+      console.log(top, left, bottom, right);
 
-      //this.router.navigateByUrl('/home');
-      this.router.navigate(['home']);
-      
-      console.log('map', map);
+      this.boxLayer.addLayer(layer);
+      const reserves = await this.mapService.findReserves(top, left, bottom, right);
+      console.log(reserves);
+      const reserveNames = reserves.features.map(feature => feature.properties.name);
+      console.log(reserveNames);
+
+      const alert = await this.alertCtrl.create({
+        header: 'Select reserve',
+        inputs: reserveNames.sort().map(name => {
+          return {
+            value: name,
+            label: name,
+            type: 'radio'
+          };
+        }),
+        buttons: [
+          {
+            text: 'Select',
+            handler: async (data) => {
+              console.log(data);
+              await this.mapService.updateMap(data);
+              this.router.navigate(['home']);
+            }
+          }
+        ]
+      });
+
+      alert.present();
     });
 
     map.addControl(drawControl);
