@@ -28,13 +28,15 @@ export class MapUpdaterService {
   }
 
   async getMapFeatures(name: string) {
+    // tslint:disable-next-line:no-console
     console.log('map name', name);
-    name = name.replace(/[\[\]\(\)\"\']/, ''); // sanitise
+    name = name.replace(/[\[\]()"']/, ''); // sanitise
 
     const reserves = await this.overpass.query(`relation["name"="${name}"];
       (._;>;);
       out geom;
     `);
+    // tslint:disable-next-line:no-console
     console.log('reserves', reserves.features.length);
 
     const dams = await this.overpass.query(`area["name"="${name}"]->.boundaryarea;
@@ -51,6 +53,7 @@ export class MapUpdaterService {
       (._;>;);
       out geom;
       >;`);
+    // tslint:disable-next-line:no-console
     console.log('dams', dams.features.length);
 
     const rivers = await this.overpass.query(`area["name"="${name}"]->.boundaryarea;
@@ -61,6 +64,7 @@ export class MapUpdaterService {
     (._;>;);
     out geom;
     >;`);
+    // tslint:disable-next-line:no-console
     console.log('rivers', rivers.features.length);
 
     const intermittentWater = await this.overpass.query(`area["name"="${name}"]->.boundaryarea;
@@ -70,6 +74,7 @@ export class MapUpdaterService {
         nwr(area.boundaryarea)[waterway][intermittent=yes];
       );
       out geom;`);
+    // tslint:disable-next-line:no-console
     console.log('intermittent', intermittentWater.features.length);
 
     const roads = await this.overpass.query(`area["name"="${name}"]->.boundaryarea;
@@ -78,6 +83,7 @@ export class MapUpdaterService {
       nwr(area.boundaryarea)[route=road];
     );
     out geom;`);
+    // tslint:disable-next-line:no-console
     console.log('roads', roads.features.length);
 
     const residential = await this.overpass.query(`area["name"="${name}"]->.boundaryarea;
@@ -86,8 +92,10 @@ export class MapUpdaterService {
         nwr(area.boundaryarea)[barrier=fence];
       );
       out geom;`);
-    console.log('residential', residential.features.length);
 
+    // tslint:disable-next-line:no-console
+    console.log('residential', residential.features.length);
+    // tslint:disable-next-line:no-console
     console.log('downloaded map data');
 
     const reserve = reserves.features[0];
@@ -106,10 +114,10 @@ export class MapUpdaterService {
 
   /**
    * Returns a list of reserves in a given bounding box
-   * @param left 
-   * @param bottom 
-   * @param right 
-   * @param top 
+   * @param left
+   * @param bottom
+   * @param right
+   * @param top
    */
   async findReservesInArea(left, bottom, right, top) {
     const query = `nwr[leisure=nature_reserve](${bottom},${left},${top},${right});(._;>;);out;`;

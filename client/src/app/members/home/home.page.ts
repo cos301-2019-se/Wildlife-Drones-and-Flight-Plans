@@ -1,5 +1,6 @@
 import { Component, ViewChild } from '@angular/core';
-import { Draw, MapOptions, ControlOptions, Control, tileLayer, geoJSON, Map, point, polyline, DrawOptions, icon, FeatureGroup, featureGroup } from 'leaflet';
+import { Draw, MapOptions, ControlOptions, Control, tileLayer, geoJSON, Map,
+  point, polyline, DrawOptions, icon, FeatureGroup, featureGroup } from 'leaflet';
 import 'leaflet-draw';
 import { LeafletDirective } from '@asymmetrik/ngx-leaflet';
 import { MapService } from '../../services/map/map.service';

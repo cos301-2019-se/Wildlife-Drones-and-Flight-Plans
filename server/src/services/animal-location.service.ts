@@ -1,7 +1,7 @@
-import { Injectable, RequestTimeoutException } from '@nestjs/common';
+import { Injectable} from '@nestjs/common';
 import { DatabaseService } from './db.service';
 import { AnimalLocation } from '../entity/animal-location';
-import { CsvReader } from './csv-reader.service'
+import { CsvReader } from './csv-reader.service';
 import { MapUpdaterService } from '../providers/map-updater.service';
 import { GeoService, GeoSearchSet } from '../providers/geo.service';
 import { SRTMService } from '../providers/srtm.service';
@@ -36,11 +36,12 @@ export class AnimalLocationService {
         //             animalLocations.minute = '00';
         //             animalLocations.second = '00.000';
         //             animalLocations.longitude = '31.87399';
-        //             animalLocations.latitude = '-24.81483';            
-        //         return data.manager.save(animalLocations).then(animalLocations => { console.log('Saved a new animal loction with id: ' + animalLocations.id) });
+        //             animalLocations.latitude = '-24.81483';
+        //         return data.manager.save(animalLocations).then(animalLocations =>
+        //         { console.log('Saved a new animal loction with id: ' + animalLocations.id) });
         //     });
-       
-        
+
+
         // if (addAnimal != null) {
         //     return true;
         // }
@@ -52,8 +53,8 @@ export class AnimalLocationService {
         return false;
     }
 
-    async addAnimalLocationDataCSV(): Promise<void> {
-        const csvFile = 'ThermochronTracking Elephants Kruger 2007.csv';
+    async addAnimalLocationDataCSV(filename): Promise<void> {
+        const csvFile = filename;
         const MAX_BUFFER_SIZE = 50000;
         let buffer: AnimalLocation[] = [];
 
@@ -105,7 +106,6 @@ export class AnimalLocationService {
                 insertRow();
                 return;
             }
-            const rowDate = new Date(row.timestamp);
 
             const lat = parseFloat(row['location-lat']);
             const lng = parseFloat(row['location-long']);
@@ -117,6 +117,8 @@ export class AnimalLocationService {
             ];
 
             const altitudeInfo = await this.altitude.getAltitude(locationBounds, bounds);
+
+            const rowDate = new Date(row.timestamp);
 
             const location: AnimalLocation = {
                 animalId: row['individual-local-identifier'],
@@ -144,11 +146,15 @@ export class AnimalLocationService {
         });
     }
 
-    getAllAnimalLocationTableData(): any {
-        const con =  this.databaseService.getConnection();
-        return con.then(async (data)=>{
-           return await data.getRepository(AnimalLocation).find(); 
-        });
+    async getAllAnimalsLocationTableData(): Promise<JSON> {
+        const con = await this.databaseService.getConnection();
+        let animaldata = JSON.parse(JSON.stringify( await con.getRepository(AnimalLocation).find()));
+        return animaldata;
+    }
+
+    async getIndividualAnimalLocationTableData(animalID): Promise<JSON> {
+        const con = await this.databaseService.getConnection();
+        return JSON.parse(JSON.stringify( await con.getRepository(AnimalLocation).find({ animalId : animalID })));
     }
 
 }

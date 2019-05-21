@@ -6,13 +6,12 @@ import lineToPolygon from '@turf/line-to-polygon';
 import * as geojsonExtent from '@mapbox/geojson-extent';
 import getDistance from '@turf/distance';
 import pointToLineDistance from '@turf/point-to-line-distance';
-import { lengthToDegrees, convertDistance } from '@turf/helpers';
+import { lengthToDegrees, convertLength } from '@turf/helpers';
 import { kdTree } from '../libraries/kd-tree';
 import flatten from '@turf/flatten';
 import simplify from '@turf/simplify';
 import squareGrid from '@turf/square-grid';
 import explode from '@turf/explode';
-import { convertLength } from '@turf/helpers';
 
 /**
  * Provides helped functions for geometry calculation
@@ -20,12 +19,12 @@ import { convertLength } from '@turf/helpers';
 @Injectable()
 export class GeoService {
   /**
-   * Returns all GeoJSON features within a given 
-   * @param features GeoJSON 
-   * @param area GeoJSON 
+   * Returns all GeoJSON features within a given
+   * @param features GeoJSON
+   * @param area GeoJSON
    */
   public findFeaturesInArea(features: any[], area) {
-    return features.filter(feature => this.isInPolygon(feature.geometry.coordinates, area.geometry.coordinates))
+    return features.filter(feature => this.isInPolygon(feature.geometry.coordinates, area.geometry.coordinates));
   }
 
   /**
@@ -38,7 +37,7 @@ export class GeoService {
   }
 
   /**
-   * Returns the distance between a polgyon and a point
+   * Returns the distance between a polygon and a point
    * @param point
    * @param poly
    */
@@ -57,7 +56,7 @@ export class GeoService {
 
   /**
    * Convert a number in km to degrees
-   * @param distanceInKm 
+   * @param distanceInKm
    */
   public distanceToDegrees(distanceInKm) {
     return lengthToDegrees(distanceInKm, 'kilometers');
@@ -67,7 +66,7 @@ export class GeoService {
    * Determine whether a GeoJSON feature a falls within GeoJSON polygon b.
    * The requirements for being within a polygon is that any of the points
    * of a must be within b.
-   * 
+   *
    * @param {*} a A GeoJSON feature (may be a point, line, multiline, polygon, multipolygon)
    * @param {*} b A GeoJSON polygon or multipolygon
    */
