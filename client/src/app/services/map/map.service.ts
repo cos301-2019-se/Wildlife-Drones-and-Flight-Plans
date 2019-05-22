@@ -32,7 +32,7 @@ export class MapService {
 
 }).toPromise();
 
-    //this.map = map;
+
     this.center = [(top + bottom) / 2, (left + right) / 2];
     console.log(await this.storage.get('accessToken'));
 
