@@ -4,7 +4,7 @@ import { MapUpdaterService } from '../providers/map-updater.service';
 import { AuthGuard } from '@nestjs/passport';
 
 // jest.setTimeout(-1);
-//jest.useFakeTimers();
+// jest.useFakeTimers();
 
 @Controller('map')
 @UseGuards(AuthGuard('jwt'))
@@ -24,9 +24,9 @@ export class MapController {
                   @Query('startY') startY: number) {
         const NUM_POINTS = 5;
         const points = new Array(NUM_POINTS).fill(undefined)
-          .map(p => [
-                (Math.random() * (right - left)) + (left - 0),
-                (Math.random() * (top - bottom)) + (bottom - 0)
+          .map(() => [
+                (Math.random() * (right - left)) + Number(left),
+                (Math.random() * (top - bottom)) + Number(bottom)
             ]);
 
         points.unshift([startX, startY]);
@@ -39,10 +39,16 @@ export class MapController {
         return this.shortestPathService.getShortestPath(points);
     }
 
+    @Post('find-reserves')
+    async findReserves(@Body('top') top, @Body('left') left, @Body('bottom') bottom, @Body('right') right) {
+        // tslint:disable-next-line:no-console
+        console.log(left, bottom, right, top);
+        return await this.mapUpdaterService.findReservesInArea(left, bottom, right, top);
+    }
+
     @Post('update')
-    async update(@Body('top') top, @Body('left') left, @Body('bottom') bottom, @Body('right') right) {
-        const mapFeatures = await this.mapUpdaterService.updateMap(left, bottom, right, top);
-        console.log(mapFeatures);
-        return mapFeatures;
+    async update(@Body('name') name) {
+        // console.log(mapFeatures);
+        return await this.mapUpdaterService.updateMap(name);
     }
 }

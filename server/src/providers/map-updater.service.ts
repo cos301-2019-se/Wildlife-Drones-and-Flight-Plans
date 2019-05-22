@@ -1,95 +1,126 @@
 import { Injectable } from '@nestjs/common';
 
-import axios from 'axios';
-import * as xmldom from 'xmldom';
-import * as osmToGeoJson from 'osmtogeojson';
-import * as pointInPolygon from 'point-in-polygon';
+import { OverpassService } from './overpass.service';
+import { MapPartitionerService } from './map-partitioner.service';
 
 @Injectable()
 export class MapUpdaterService {
 
-  async updateMap(left: number, bottom: number, right: number, top: number) {
-    console.log(left, bottom, right, top);
-    const mapData = await this.downloadMap(left, bottom, right, top);
+  constructor(
+    private overpass: OverpassService,
+    private mapPartitioner: MapPartitionerService,
+  ) {}
+
+  /**
+   * Updates the map given the name of a reserve
+   * @param name The name of the reserve
+   */
+  async updateMap(name: string) {
+    const { reserve, features } = await this.getMapFeatures(name);
+
+    const grid = this.mapPartitioner.partitionMap(reserve, features, 1);
+
+    return {
+      ...features,
+      reserve,
+      grid,
+    };
+  }
+
+  async getMapFeatures(name: string) {
+    // tslint:disable-next-line:no-console
+    console.log('map name', name);
+    name = name.replace(/[\[\]()"']/, ''); // sanitise
+
+    const reserves = await this.overpass.query(`relation["name"="${name}"];
+      (._;>;);
+      out geom;
+    `);
+    // tslint:disable-next-line:no-console
+    console.log('reserves', reserves.features.length);
+
+    const dams = await this.overpass.query(`area["name"="${name}"]->.boundaryarea;
+      (
+        (
+          (
+            nwr(area.boundaryarea)[water];
+            nwr(area.boundaryarea)[natural="water"];
+          ); -
+          nwr(area.boundaryarea)[waterway];
+        );
+        - nwr(area.boundaryarea)[intermittent=yes];
+      );
+      (._;>;);
+      out geom;
+      >;`);
+    // tslint:disable-next-line:no-console
+    console.log('dams', dams.features.length);
+
+    const rivers = await this.overpass.query(`area["name"="${name}"]->.boundaryarea;
+    (
+      nwr(area.boundaryarea)[waterway=river];
+      - nwr(area.boundaryarea)[intermittent=yes];
+    );
+    (._;>;);
+    out geom;
+    >;`);
+    // tslint:disable-next-line:no-console
+    console.log('rivers', rivers.features.length);
+
+    const intermittentWater = await this.overpass.query(`area["name"="${name}"]->.boundaryarea;
+      (
+        nwr(area.boundaryarea)[water][intermittent=yes];
+        nwr(area.boundaryarea)[natural=water][intermittent=yes];
+        nwr(area.boundaryarea)[waterway][intermittent=yes];
+      );
+      out geom;`);
+    // tslint:disable-next-line:no-console
+    console.log('intermittent', intermittentWater.features.length);
+
+    const roads = await this.overpass.query(`area["name"="${name}"]->.boundaryarea;
+    (
+      nwr(area.boundaryarea)[highway];
+      nwr(area.boundaryarea)[route=road];
+    );
+    out geom;`);
+    // tslint:disable-next-line:no-console
+    console.log('roads', roads.features.length);
+
+    const residential = await this.overpass.query(`area["name"="${name}"]->.boundaryarea;
+      (
+        nwr(area.boundaryarea)[landuse=residential];
+        nwr(area.boundaryarea)[barrier=fence];
+      );
+      out geom;`);
+
+    // tslint:disable-next-line:no-console
+    console.log('residential', residential.features.length);
+    // tslint:disable-next-line:no-console
     console.log('downloaded map data');
 
-    const reserves = mapData.features
-      .filter(feature => feature.properties.leisure && feature.properties.leisure === 'nature_reserve');
-  
-    const dams = mapData.features
-      .filter(feature =>
-        feature.properties.waterway &&
-        feature.properties.waterway === 'dam' ||
-        feature.properties.natural &&
-        feature.properties.natural === 'water' ||
-        feature.properties.water
-      );
+    const reserve = reserves.features[0];
 
-    const roads = mapData.features
-      .filter(feature => 
-        // feature.properties.type && feature.properties.type === 'route' ||
-        feature.properties.route && feature.properties.route === 'road' ||
-        feature.properties.highway
-      );
-    const reserve = reserves[0];
-
-    const allFeatures = {
+    return {
       reserve,
-      dams: this.findFeaturesInArea(dams, reserve),
-      roads: this.findFeaturesInArea(roads, reserve),
+      features: {
+        dams: dams.features,
+        rivers: rivers.features,
+        intermittentWater: intermittentWater.features,
+        roads: roads.features,
+        residential: residential.features,
+      },
     };
-    return allFeatures;
-  }
-
-  private findFeaturesInArea(features, reserve) {
-    return features.filter(feature => this.isInPolygon(feature.geometry.coordinates, reserve.geometry.coordinates))
-  }
-
-  private async downloadMap(left: number, bottom: number, right: number, top:number) {
-    const url = `http://api.openstreetmap.org/api/0.6/map?bbox=${left},${bottom},${right},${top}`;
-
-    console.log('downloading map', url);
-
-    const res = await axios.get(url, {
-      responseType: 'arraybuffer',
-    });
-
-    console.log('got axios');
-
-    const parser = new xmldom.DOMParser();
-    const dom = parser.parseFromString(res.data.toString());
-    console.log('parsed dom');
-    return osmToGeoJson(dom);
   }
 
   /**
-   * Determine whether a polygon (list of points) a falls within polygon b.
-   * The requirements for being within a polygon is that any of the points
-   * of a must be within b.
-   * 
-   * @param {*} a 
-   * @param {*} b 
+   * Returns a list of reserves in a given bounding box
+   * @param left
+   * @param bottom
+   * @param right
+   * @param top
    */
-  public isInPolygon(a, b) {
-    a = JSON.parse(JSON.stringify(a));
-    b = JSON.parse(JSON.stringify(b));
-    // if a is a line
-    if (Array.isArray(a[0]) && typeof a[0][0] === 'number') {
-      a = [a];
-      
-    }
-    // if a is a single point
-    if (typeof a[0] === 'number') {
-      a = [a];
-    }
-
-    // convert multi polygon b so there are no instances of double bracketing
-    for (const [i, el] of b.entries()) {
-      if (Array.isArray(el) && el.length == 1) {
-        b[i] = el[0];
-      }
-    }
-    return b.some(bPoints => a.some(aPoints => aPoints.some(a => pointInPolygon(a, bPoints))));
+  async findReservesInArea(left, bottom, right, top) {
+    const query = `nwr[leisure=nature_reserve](${bottom},${left},${top},${right});(._;>;);out;`;
+    return await this.overpass.query(query);
   }
-
 }

@@ -20,8 +20,9 @@ export class MapService {
     return this.center;
   }
 
-  public async updateMap(left, bottom, right, top) {
-    const map = await this.http.post(`http://localhost:3000/map/update`, {
+  public async findReserves(top, left, bottom, right) {
+    const res = await this.http.post(`http://localhost:3000/map/find-reserves`, {
+      top,
       left,
       bottom,
       right,
@@ -34,6 +35,16 @@ export class MapService {
     this.map = map;
     this.center = [(top + bottom) / 2, (left + right) / 2];
     console.log(await this.storage.get('accessToken'));
+
+    return res as any;
+  }
+
+  public async updateMap(name: string) {
+    const map = await this.http.post(`http://localhost:3000/map/update`, {
+      name
+    }).toPromise();
+
+    this.map = map;
     return map;
   }
 

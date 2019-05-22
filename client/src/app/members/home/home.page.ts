@@ -1,5 +1,6 @@
 import { Component, ViewChild } from '@angular/core';
-import { Draw, MapOptions, ControlOptions, Control, tileLayer, geoJSON, Map, point, polyline, DrawOptions, icon, FeatureGroup, featureGroup } from 'leaflet';
+import { Draw, MapOptions, ControlOptions, Control, tileLayer, geoJSON, Map,
+  point, polyline, DrawOptions, icon, FeatureGroup, featureGroup } from 'leaflet';
 import 'leaflet-draw';
 import { LeafletDirective } from '@asymmetrik/ngx-leaflet';
 import { MapService } from '../../services/map/map.service';
@@ -11,7 +12,7 @@ import { Storage } from '@ionic/storage';
   templateUrl: './home.page.html',
   styleUrls: ['./home.page.scss'],
 })
-export class HomePage{
+export class HomePage {
   private map: Map;
   @ViewChild('leaflet') leaflet: LeafletDirective;
 
@@ -28,7 +29,8 @@ export class HomePage{
 
   mapOptions: MapOptions = {
     layers: [
-      tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      // alternative https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}
+      tileLayer('http://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
         maxZoom: 18,
         attribution: null
       })
@@ -45,6 +47,8 @@ export class HomePage{
     }, 0);
 
     const mapData = await this.mapService.getMap();
+
+    console.log(mapData);
 
     const reserve = geoJSON(mapData.reserve as any, {
       style: feature => {
@@ -71,6 +75,37 @@ export class HomePage{
           color: 'blue',
           fillColor: 'blue',
           fillOpacity: 1
+        };
+      }
+    }).addTo(map));
+
+    mapData.rivers.forEach(river => geoJSON(river as any, {
+      style: feature => {
+        return {
+          color: 'blue',
+          fillColor: 'blue',
+          fillOpacity: 1
+        };
+      }
+    }).addTo(map));
+
+    mapData.intermittentWater.forEach(water => geoJSON(water as any, {
+      style: feature => {
+        return {
+          color: 'grey',
+          fillColor: 'grey',
+          fillOpacity: 0.7,
+          dashArray: 10,
+        };
+      }
+    }).addTo(map));
+
+    mapData.residential.forEach(residence => geoJSON(residence as any, {
+      style: feature => {
+        return {
+          color: 'grey',
+          fillColor: 'grey',
+          fillOpacity: 0.7,
         };
       }
     }).addTo(map));
