@@ -7,7 +7,10 @@ export class RegressionModel {
     private logsEnabled: boolean;
     private inputs: any;
     private outputs: any;
-    constructor(logsEnabled= false) {
+    constructor() { }
+
+    public enableLogs(logsEnabled)
+    {
         this.logsEnabled = logsEnabled;
         this.log('Logs are enabled');
     }
@@ -24,10 +27,7 @@ export class RegressionModel {
     // Prediction of the model
     public predict(inputs) {
         try {
-            const predictions = [];
-            inputs.forEach(input => {
-                predictions.push(this.model.predict(input));
-            });
+            const predictions = this.model.predict(inputs);
             this.log('Model has predicted');
             return predictions;
         } catch (err) {
@@ -52,9 +52,9 @@ export class RegressionModel {
             if(fs.existsSync('ai_models/' + modelName + '.json'))
             {
                 const jsonModel =  fs.readFileSync('ai_models/' + modelName + '.json', 'utf8');
-                const mlr = MLR.load(JSON.parse(jsonModel));
+                this.model = MLR.load(JSON.parse(jsonModel));
                 this.log('Model has been loaded');
-                return mlr;
+                return this;
             } else {
                 this.log('Model does not exist');
                 return null;

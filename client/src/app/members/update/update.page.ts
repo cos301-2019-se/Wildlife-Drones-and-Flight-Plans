@@ -33,7 +33,10 @@ export class UpdatePage implements OnInit {
   logout() {
     this.authentication.logout();
   }
-
+  routes()
+  {
+    this.router.navigate(['routes']);
+  }
   ngOnInit() {
   }
 

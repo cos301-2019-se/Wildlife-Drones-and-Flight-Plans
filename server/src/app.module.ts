@@ -10,10 +10,13 @@ import { GeoService } from './providers/geo.service';
 import { MapPartitionerService } from './providers/map-partitioner.service';
 import { AnimalController } from './controllers/animal-location.controller';
 import { AnimalInterestPointController } from './controllers/animal-interest-point.controller';
+import { ModelPrediction } from './controllers/model-prediction.controller';
 import { AnimalLocationService } from './services/animal-location.service';
+import { ModelTraining } from './services/model-training.service';
 import { AnimalInterestPointService } from './services/animal-interest-point.service';
 import { CsvReader } from './services/csv-reader.service';
 import { SRTMService } from './providers/srtm.service';
+import { RegressionModel } from './providers/regression-model.service';
 
 @Module({
   imports: [],
@@ -22,12 +25,14 @@ import { SRTMService } from './providers/srtm.service';
     UserController,
     AnimalController,
     AnimalInterestPointController,
+    ModelPrediction,
   ],
   providers: [
     MapUpdaterService,
     ShortestPathService,
     DatabaseService,
     UserService,
+    RegressionModel,
     OverpassService,
     GeoService,
     MapPartitionerService,
@@ -35,6 +40,7 @@ import { SRTMService } from './providers/srtm.service';
     AnimalInterestPointService,
     CsvReader,
     SRTMService,
+    ModelTraining,
   ],
 })
 export class AppModule {}

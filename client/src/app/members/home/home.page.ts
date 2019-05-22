@@ -6,6 +6,7 @@ import { LeafletDirective } from '@asymmetrik/ngx-leaflet';
 import { MapService } from '../../services/map/map.service';
 import { antPath } from 'leaflet-ant-path';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-home',
   templateUrl: './home.page.html',
@@ -23,6 +24,7 @@ export class HomePage {
   constructor(
     private mapService: MapService,
     private http: HttpClient,
+    private router: Router,
   ) {}
 
   mapOptions: MapOptions = {

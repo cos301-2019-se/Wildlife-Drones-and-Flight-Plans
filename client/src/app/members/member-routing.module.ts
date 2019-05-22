@@ -3,7 +3,9 @@ import { Routes, RouterModule } from '@angular/router';
 
 const routes: Routes = [
   { path: 'update', loadChildren: './update/update.module#UpdatePageModule' },
-  { path: 'home', loadChildren: './home/home.module#HomePageModule' }
+  { path: 'home', loadChildren: './home/home.module#HomePageModule' },  { path: 'routes', loadChildren: './routes/routes.module#RoutesPageModule' },
+
+
 ];
 @NgModule({
   imports: [RouterModule.forChild(routes)],
