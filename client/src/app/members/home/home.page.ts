@@ -60,6 +60,37 @@ export class HomePage {
       }
     }).addTo(map);
 
+    const maxDistance = mapData.grid.reduce((max, cell) => {
+      if (cell.properties.distances.dams > max) {
+        return cell.properties.distances.dams;
+      }
+      return max;
+    }, -Infinity);
+
+    console.log(maxDistance);
+
+    mapData.grid = mapData.grid.map(cell => {
+      return {
+        ...cell,
+        properties: {
+          ...cell.properties,
+          distanceToWater: 1 - cell.properties.distances.dams / maxDistance,
+        }
+      };
+    });
+
+    console.log(maxDistance);
+
+    mapData.grid.forEach(cell => geoJSON(cell as any, {
+      style: feature => {
+        return {
+          color: '#000',
+          fillColor: 'purple',
+          fillOpacity: Math.pow(cell.properties.distanceToWater, 2),
+        };
+      }
+    }).addTo(map));
+
     mapData.roads.forEach(road => geoJSON(road as any, {
       style: feature => {
         return {
