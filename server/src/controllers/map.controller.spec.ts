@@ -39,8 +39,8 @@ describe('MapController (e2e)', () => {
       });
 
     expect(
-      JSON.stringify(res.body) == JSON.stringify(result) ||
-      JSON.stringify(res.body) == JSON.stringify(result.reverse())
+      JSON.stringify(res.body) === JSON.stringify(result) ||
+      JSON.stringify(res.body) === JSON.stringify(result.reverse())
     ).toBeTruthy();
   });
 });

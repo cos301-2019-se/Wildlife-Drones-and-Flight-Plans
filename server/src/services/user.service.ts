@@ -1,27 +1,32 @@
-import { Injectable, RequestTimeoutException } from '@nestjs/common';
+/* tslint:disable:no-console */
+import { Injectable} from '@nestjs/common';
 import { DatabaseService } from './db.service';
 import { User } from '../entity/user';
 import * as bcrypt from 'bcrypt';
 import * as uuidv4 from 'uuid/v4';
 import { defaultCoreCipherList } from 'constants';
 import { STATUS_CODES } from 'http';
+import { AuthService } from 'src/auth/auth.service';
+import { JwtService } from '@nestjs/jwt/dist/jwt.service';
 
 @Injectable()
 export class UserService {
 
-    constructor(private readonly databaseService: DatabaseService) {}
- 
+    constructor(private readonly databaseService: DatabaseService){}
+     // private readonly authService: AuthService,
+     //private readonly jwtService: JwtService) {}
+    
      getAllUsers(): any {
         const con =  this.databaseService.getConnection();
-        return con.then(async (data)=>{
-           console.log(await data.getRepository(User).find())
-           return await data.getRepository(User).find(); 
-        })  
+        return con.then(async (data) => {
+           console.log(await data.getRepository(User).find());
+           return await data.getRepository(User).find();
+        });
     }
 
     login(_email,_pass):any {
 
- 
+
         const con =  this.databaseService.getConnection();
         return con.then(async (data)=>{
            
@@ -37,103 +42,71 @@ export class UserService {
            let valid  = false;
            if(bcrypt.compareSync(_pass, ExistingUser.password) == true)
            {
-                if((c - d) < (24*60*60*1000))
-                {
-                    console.log("The token is still valid");
-                        var newDate = new Date();
-                        newDate.setDate(newDate.getDate() + 1);
-                        ExistingUser.expires = newDate.toString();
-                }
-                else if( (c-d) > (24*60*60*1000))
-                {
-                    ExistingUser.token = uuidv4();
-                }
-                return {"token":ExistingUser.token};
-             }
+               return true;
+           }
              else
              {
                 console.log('Password incorrect');
-                return {"token":""};
+                return  false;
              }
-            }
-            else
-            {
-                console.log('User does not exist');
-                return {"token":""};
             }
         })
     
     }
 
-    addUser(_name,_username,_password,_job,_email):boolean {
+    addUser(aName, aUsername, aPassword, aJob, aEmail): boolean {
 
         const con =  this.databaseService.getConnection();
-        let registerUser = con.then(async (data)=>{
-        let user = new User();
+        const registerUser = con.then(async (data) => {
+        const user = new User();
 
-        bcrypt.genSalt(5, function(err, salt) {
-                 bcrypt.hash(_password, salt, function(err, hash) {
-                    user.name = _name;
-                    user.userName = _username;
+        bcrypt.genSalt(5, (err, salt) => {
+                 bcrypt.hash(aPassword, salt, (err, hash) => {
+                    user.name = aName;
+                    user.userName = aUsername;
                     user.password = hash;
-                    user.jobType = _job;
-                    user.email = _email;        
+                    user.jobType = aJob;
+                    user.email = aEmail;
                     user.token = uuidv4();
-                    var temp = new Date();
-                    temp.setDate(temp.getDate() + 1);
-                    console.log(temp)
-                    user.expires = temp.toString();
-                    return  data.manager.save(user).then(user => {console.log("Saved a new user with id: " + user.id)});
+                    const now = new Date();
+                    now.setDate(now.getDate() + 1);
+                    console.log(now);
+                    user.expires = now.toString();
+                    return  data.manager.save(user).then(user => {console.log('Saved a new user with id: ' + user.id); });
                     });
                 });
-            })
+            });
 
-    if(registerUser != null)
-    {
-            return true;
-    }
-    else{
-
-    return false;
-    }
+        return registerUser != null;
     }
 
-    vToken(_email,_token):any {
-      
+    vToken(aEmail, aToken): any {
+
         const con =  this.databaseService.getConnection();
-        return con.then(async (data)=>{
-            const ExistingUser = await data.getRepository(User).findOne({email : _email});
-            if(ExistingUser)
-            {
-            //console.log(" compare result : " +  bcrypt.compareSync(_pass, ExistingUser.password));
-            //console.log(ExistingUser);
-            if(ExistingUser.token != _token)
-            {
+        return con.then(async (data) => {
+            const ExistingUser = await data.getRepository(User).findOne({email : aEmail});
+            if (ExistingUser) {
+            // console.log(" compare result : " +  bcrypt.compareSync(_pass, ExistingUser.password));
+            // console.log(ExistingUser);
+            if (ExistingUser.token !== aToken) {
                 return await false;
             }
-            if(ExistingUser.token == _token)
-            {
+            if (ExistingUser.token === aToken) {
                // console.log("User token in database" + ExistingUser.token);
-               var temp = new Date();
+               const temp = new Date();
                temp.setDate(temp.getDate() + 1);
-               console.log(temp)
+               console.log(temp);
                ExistingUser.expires = temp.toString();
-                //console.log("User token sent in " +_token)
-                 return  await true;
-            }
-            else
-            {
+                // console.log("User token sent in " +token)
+               return  await true;
+            } else {
                 return await false;
             }
-        }
-        else
-        {
+        } else {
             return await false;
         }
-           
-        })
+
+        });
     }
 
 }
-
-

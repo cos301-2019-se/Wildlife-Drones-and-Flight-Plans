@@ -1,13 +1,13 @@
-import { Controller, Get, Post } from '@nestjs/common';
+import { Controller, Get} from '@nestjs/common';
 import { AnimalInterestPointService } from '../services/animal-interest-point.service';
 
 @Controller()
-export class AnimalIntrestPointController {
-  constructor(private readonly animalIntrestPointService: AnimalInterestPointService) {}
+export class AnimalInterestPointController {
+  constructor(private readonly animalInterestPointService: AnimalInterestPointService) {}
 
-  @Get('addAnimalIntretPoint')
-  addAnimalIntretPoint(): boolean {
-    return this.animalIntrestPointService.addAnimalIntretPoint();
+  @Get('addAnimalInterestPoint')
+  async addAnimalInterestPoint(): Promise<boolean> {
+    return this.animalInterestPointService.addAnimalInterestPoint();
   }
 
 

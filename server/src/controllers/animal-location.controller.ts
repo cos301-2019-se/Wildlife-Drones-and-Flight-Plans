@@ -1,4 +1,4 @@
-import { Controller, Get, Post } from '@nestjs/common';
+import { Controller, Get, Post, Query } from '@nestjs/common';
 import { AnimalLocationService } from '../services/animal-location.service';
 
 @Controller()
@@ -11,14 +11,18 @@ export class AnimalController {
   }
 
   @Get('addAnimalLocationDataCSV')
-  addAnimalLocationDataCSV(): void {
-    this.animalLocationService.addAnimalLocationDataCSV();
-    //return true
+  addAnimalLocationDataCSV(@Query('filename') filename: string ): void {
+    this.animalLocationService.addAnimalLocationDataCSV(filename);
   }
 
   @Get('getAllAnimalLocationTableData')
-  getAllUsers(): JSON {
-    return this.animalLocationService.getAllAnimalLocationTableData();
+  getAllAnimalsLocationData(): Promise<JSON> {
+    return this.animalLocationService.getAllAnimalsLocationTableData();
+  }
+
+  @Get('getIndividualAnimalLocationTableData')
+  getIndividualAnimalLocationData(@Query('animalID') animalID: string): Promise<JSON> {
+    return this.animalLocationService.getIndividualAnimalLocationTableData(animalID);
   }
 
 }

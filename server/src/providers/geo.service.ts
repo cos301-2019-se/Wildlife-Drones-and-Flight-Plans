@@ -6,12 +6,11 @@ import lineToPolygon from '@turf/line-to-polygon';
 import * as geojsonExtent from '@mapbox/geojson-extent';
 import getDistance from '@turf/distance';
 import pointToLineDistance from '@turf/point-to-line-distance';
-import { lengthToDegrees } from '@turf/helpers';
+import { lengthToDegrees, convertLength } from '@turf/helpers';
 import { kdTree } from '../libraries/kd-tree';
 import flatten from '@turf/flatten';
 import simplify from '@turf/simplify';
 import squareGrid from '@turf/square-grid';
-import polygonToLine from '@turf/polygon-to-line';
 import explode from '@turf/explode';
 
 /**
@@ -20,12 +19,12 @@ import explode from '@turf/explode';
 @Injectable()
 export class GeoService {
   /**
-   * Returns all GeoJSON features within a given 
-   * @param features GeoJSON 
-   * @param area GeoJSON 
+   * Returns all GeoJSON features within a given
+   * @param features GeoJSON
+   * @param area GeoJSON
    */
   public findFeaturesInArea(features: any[], area) {
-    return features.filter(feature => this.isInPolygon(feature.geometry.coordinates, area.geometry.coordinates))
+    return features.filter(feature => this.isInPolygon(feature.geometry.coordinates, area.geometry.coordinates));
   }
 
   /**
@@ -38,7 +37,7 @@ export class GeoService {
   }
 
   /**
-   * Returns the distance between a polgyon and a point
+   * Returns the distance between a polygon and a point
    * @param point
    * @param poly
    */
@@ -57,7 +56,7 @@ export class GeoService {
 
   /**
    * Convert a number in km to degrees
-   * @param distanceInKm 
+   * @param distanceInKm
    */
   public distanceToDegrees(distanceInKm) {
     return lengthToDegrees(distanceInKm, 'kilometers');
@@ -67,7 +66,7 @@ export class GeoService {
    * Determine whether a GeoJSON feature a falls within GeoJSON polygon b.
    * The requirements for being within a polygon is that any of the points
    * of a must be within b.
-   * 
+   *
    * @param {*} a A GeoJSON feature (may be a point, line, multiline, polygon, multipolygon)
    * @param {*} b A GeoJSON polygon or multipolygon
    */
@@ -160,10 +159,10 @@ export class GeoSearchSet {
     );
   }
 
-  public getNearest(x: number, y: number) {
+  public getNearest(xLng: number, yLat: number) {
     const nearest = this.kd.nearest({
-      x,
-      y,
+      x: xLng,
+      y: yLat,
     }, 1);
 
     if (!nearest.length) {
@@ -175,7 +174,7 @@ export class GeoSearchSet {
 
     return {
       point: nearest[0][0],
-      distance: nearest[0][1],
+      distance: convertLength(nearest[0][1], 'degrees', 'kilometers'),
     };
   }
 }

@@ -11,6 +11,7 @@ import * as sha256 from 'simple-sha256';
 export class OverpassService {
   public async query(query: string) {
     query = query.replace(/\r\n/, '');
+    // tslint:disable-next-line:no-console
     console.log(query);
 
     const cachedQuery = await this.getCachedQuery(query);
@@ -21,7 +22,7 @@ export class OverpassService {
     let res;
     while (true) {
       const url = `http://overpass-api.de/api/interpreter?data=${encodeURI(query)}`;
-
+      // tslint:disable-next-line:no-console
       console.log('downloading map', url);
       try {
         res = await axios.get(url, {
@@ -29,6 +30,7 @@ export class OverpassService {
         });
       } catch (err) {
         if (err.response.status === 429) {
+          // tslint:disable-next-line:no-console
           console.log('hit rate limit. Retrying');
           await new Promise(resolve => setTimeout(resolve, 15000));
           continue;
@@ -37,7 +39,7 @@ export class OverpassService {
       }
       break;
     }
-
+    // tslint:disable-next-line:no-console
     console.log('got axios');
 
     const parser = new xmldom.DOMParser();
@@ -54,7 +56,7 @@ export class OverpassService {
    * @param queryValue
    */
   public sanitise(queryValue: string) {
-    return queryValue.replace(/[\[\]\(\)\"\']/, '');
+    return queryValue.replace(/[\[\]()"']/, '');
   }
 
   private async getCachedQueryPath(query) {

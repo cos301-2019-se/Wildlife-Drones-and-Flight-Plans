@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { createConnection, Entity, Connection, Repository } from 'typeorm';
+import { createConnection, Connection} from 'typeorm';
 import { User } from '../entity/user';
 import { AnimalLocation } from '../entity/animal-location';
 import { AnimalInterestPoint} from '../entity/animal-interest-point';
@@ -11,12 +11,12 @@ export class DatabaseService {
   private isInitialising = false;
 
   /**
-   * Usage: 
+   * Usage:
    * const users = (await new DatabaseService().getConnection()).getRepository(User);
    */
   getConnection(): Promise<Connection> {
     return new Promise(async resolve => {
-      if (this.connection) return resolve(this.connection);
+      if (this.connection) { return resolve(this.connection); }
 
       this.readyListeners.push(resolve);
       if (this.isInitialising) {
@@ -25,15 +25,15 @@ export class DatabaseService {
       this.isInitialising = true;
 
       this.connection = await createConnection({
-        type: "sqlite",
-        database: "database.sqlite",
+        type: 'sqlite',
+        database: 'database.sqlite',
         entities: [
             User,
             AnimalLocation,
             AnimalInterestPoint
         ],
         synchronize: true,
-        logging: false    
+        logging: false
       });
 
       while (this.readyListeners.length) {
