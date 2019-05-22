@@ -12,11 +12,11 @@ services:
 
 before_script:
 # - sudo ln -s /var/lib/dbus/machine-id /etc/machine-id
+  - cd ./server 
   - npm install -g ionic cordova
   - npm install
   
   
 
 script:
-  - cd ./server
   - npm test
