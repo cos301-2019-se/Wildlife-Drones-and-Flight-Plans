@@ -6,6 +6,7 @@ import { LeafletDirective } from '@asymmetrik/ngx-leaflet';
 import { MapService } from '../../services/map/map.service';
 import { antPath } from 'leaflet-ant-path';
 import { HttpClient } from '@angular/common/http';
+import { Storage } from '@ionic/storage';
 @Component({
   selector: 'app-home',
   templateUrl: './home.page.html',
@@ -23,6 +24,7 @@ export class HomePage {
   constructor(
     private mapService: MapService,
     private http: HttpClient,
+    private storage: Storage
   ) {}
 
   mapOptions: MapOptions = {
@@ -144,8 +146,10 @@ export class HomePage {
       console.log('this points', this.points);
 
       const shortestPath: any[] = await this.http.post('http://localhost:3000/map/shortest-path', {
-        points: this.points
-      }).toPromise() as any;
+        points: this.points, 
+      },
+      {headers :{ 'Authorization': 'Bearer ' + await this.storage.get('accessToken')},
+     }).toPromise() as any;
 
       console.log(shortestPath);
 

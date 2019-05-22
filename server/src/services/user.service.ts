@@ -4,12 +4,18 @@ import { DatabaseService } from './db.service';
 import { User } from '../entity/user';
 import * as bcrypt from 'bcrypt';
 import * as uuidv4 from 'uuid/v4';
+import { defaultCoreCipherList } from 'constants';
+import { STATUS_CODES } from 'http';
+import { AuthService } from 'src/auth/auth.service';
+import { JwtService } from '@nestjs/jwt/dist/jwt.service';
 
 @Injectable()
 export class UserService {
 
-    constructor(private readonly databaseService: DatabaseService) {}
-
+    constructor(private readonly databaseService: DatabaseService){}
+     // private readonly authService: AuthService,
+     //private readonly jwtService: JwtService) {}
+    
      getAllUsers(): any {
         const con =  this.databaseService.getConnection();
         return con.then(async (data) => {
@@ -18,41 +24,34 @@ export class UserService {
         });
     }
 
-    login(aEmail, aPass): any {
+    login(_email,_pass):any {
 
 
         const con =  this.databaseService.getConnection();
-        return con.then(async (data) => {
-
-            const ExistingUser = await data.getRepository(User).findOne({email : aEmail});
-            if (ExistingUser) {
-            console.log(' compare result : ' +  bcrypt.compareSync(aPass, ExistingUser.password));
-            const today = new Date();
-            const d = Date.parse(ExistingUser.expires);
-            const d2 = new Date();
-            const dateT = d2.toDateString();
-            const c = Date.parse(dateT);
-            const valid  = false;
-            if (bcrypt.compareSync(aPass, ExistingUser.password) === true) {
-                if ((c - d) < (24 * 60 * 60 * 1000)) {
-                    console.log('The token is still valid');
-                    const newDate = new Date();
-                    newDate.setDate(newDate.getDate() + 1);
-                    ExistingUser.expires = newDate.toString();
-                } else if ( (c - d) > (24 * 60 * 60 * 1000)) {
-                    ExistingUser.token = uuidv4();
-                }
-                return {token: ExistingUser.token};
-             } else {
+        return con.then(async (data)=>{
+           
+            const ExistingUser = await data.getRepository(User).findOne({email : _email})
+            if(ExistingUser)
+            {
+            console.log(" compare result : " +  bcrypt.compareSync(_pass, ExistingUser.password));
+            var today = new Date();
+            var d = Date.parse(ExistingUser.expires)
+            var d2 = new Date();
+            var dateT = d2.toDateString();
+            var c = Date.parse(dateT)
+           let valid  = false;
+           if(bcrypt.compareSync(_pass, ExistingUser.password) == true)
+           {
+               return true;
+           }
+             else
+             {
                 console.log('Password incorrect');
-                return {token: ''};
+                return  false;
              }
-            } else {
-                console.log('User does not exist');
-                return {token: ''};
             }
-        });
-
+        })
+    
     }
 
     addUser(aName, aUsername, aPassword, aJob, aEmail): boolean {
