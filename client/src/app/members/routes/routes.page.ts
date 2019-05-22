@@ -39,45 +39,43 @@ export class RoutesPage {
         previousRoute = route;
       }
       else {
+        // Takes previous known point and draws to next input
         const prevPointA = new leaflet.LatLng(previousRoute.output[0], previousRoute.output[1]);
         const prevPointB = new leaflet.LatLng(route.input[0], route.input[1]);
+        this.drawPoints(prevPointA,prevPointB, 'red');
+        ///////////////////////////////////////////////////////
+        // Takes previous prediction and draws to next known point
         const predPrevPointA = new leaflet.LatLng(previousRoute.prediction[0], previousRoute.prediction[1]);
         const predPrevPointB = new leaflet.LatLng(route.input[0], route.input[1]);
-        const prevPointList = [prevPointA, prevPointB];
-        const predPrevPointList = [predPrevPointA, predPrevPointB];
-        const prevFirstpolyline = new leaflet.Polyline(prevPointList, {
-          color: 'red',
-          weight: 2,
-        });
-        prevFirstpolyline.addTo(this.map);
-        const predPrevFirstpolyline = new leaflet.Polyline(predPrevPointList, {
-          color: 'blue',
-          weight: 2,
-        });
-        predPrevFirstpolyline.addTo(this.map);
+        this.drawPoints(predPrevPointA, predPrevPointB, 'blue');
+        ////////////////////////////////////////////////////////////
       }
+
+      // Takes input and draws to next known point
       const pointA = new leaflet.LatLng(route.input[0], route.input[1]);
       const pointB = new leaflet.LatLng(route.output[0], route.output[1]);
-      const pointList = [pointA, pointB];
+      this.drawPoints(pointA , pointB, 'red');
+      ///////////////////////////////////////////
 
-      const firstpolyline = new leaflet.Polyline(pointList, {
-        color: 'red',
-        weight: 2,
-      });
-      firstpolyline.addTo(this.map);
-
+      // Takes inputs and draws to next predicted point
       const predPointB = new leaflet.LatLng(route.prediction[0], route.prediction[1]);
-      const predPointList = [pointA, predPointB];
-
-      const predFirstpolyline = new leaflet.Polyline(predPointList, {
-        color: 'blue',
-        weight: 2,
-      });
-      predFirstpolyline.addTo(this.map);
-
+      this.drawPoints(pointA, predPointB, 'blue');
+      /////////////////////////////////////////////////
       previousRoute = route;
     });
     console.log(routes);
+
+  }
+
+  drawPoints(from,to,color)
+  {
+      const pointList = [from, to];
+
+      const firstpolyline = new leaflet.Polyline(pointList, {
+        color: color,
+        weight: 2,
+      });
+      firstpolyline.addTo(this.map);
 
   }
 
