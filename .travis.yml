@@ -18,4 +18,5 @@ before_script:
   
 
 script:
-  - cd ./server npm test
+  - cd ./server
+  - npm test
