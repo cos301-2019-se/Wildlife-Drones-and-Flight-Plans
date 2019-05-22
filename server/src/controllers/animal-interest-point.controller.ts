@@ -6,7 +6,7 @@ export class AnimalInterestPointController {
   constructor(private readonly animalInterestPointService: AnimalInterestPointService) {}
 
   @Get('addAnimalInterestPoint')
-  addAnimalInterestPoint(): boolean {
+  async addAnimalInterestPoint(): Promise<boolean> {
     return this.animalInterestPointService.addAnimalInterestPoint();
   }
 
