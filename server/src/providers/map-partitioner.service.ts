@@ -1,64 +1,67 @@
 import { Injectable } from '@nestjs/common';
 import { GeoService, GeoSearchSet } from './geo.service';
+import squareGrid from '@turf/square-grid';
+import simplify from '@turf/simplify';
 import center from '@turf/center';
+import bbox from '@turf/bbox';
+import { SRTMService } from './srtm.service';
 
 @Injectable()
 export class MapPartitionerService {
   constructor(
-    private geo: GeoService,
+    private geoService: GeoService,
+    private altitudeService: SRTMService,
   ) {}
+
   /**
    * Returns a grid representation of the map.
-   *
+   * 
    * @param area The area being partitioned
    * @param mapFeatures Key-value list of features we want to get distances to
-   * @param cellSizeKm How large cells should be (side length in km)
+   * @param cellSize How large cells should be (side length in km)
    */
-  public partitionMap(area, mapFeatures, cellSizeKm: number = 1) {
-    // tslint:disable-next-line:no-console
+  public async partitionMap(area, mapFeatures, cellSizeKm: number = 1) {
+    const areaBounds = bbox(area);
+
     console.log('partitioning map');
-    // tslint:disable-next-line:no-console
     console.time('calculate grid');
-    const grid = this.geo.partitionIntoGrid(area, cellSizeKm);
-    // tslint:disable-next-line:no-console
+    const grid = this.geoService.partitionIntoGrid(area, cellSizeKm);
     console.log('calculated grid', grid.length);
-    // tslint:disable-next-line:no-console
     console.timeEnd('calculate grid');
 
     // calculate distances for each cell
 
-    // construct search dataSets
-    const searchDataSets: {[featureType: string]: GeoSearchSet} = Object.keys(mapFeatures)
+    // construct search datasets
+    const searchDatasets: {[featureType: string]: GeoSearchSet} = Object.keys(mapFeatures)
       .reduce((ob, featureType) => {
-        // tslint:disable-next-line:no-console
         console.time('build kd');
-        // tslint:disable-next-line:no-console
         console.log(featureType);
-        ob[featureType] = this.geo.createFastSearchDataset(mapFeatures[featureType]);
-        // tslint:disable-next-line:no-console
+        ob[featureType] = this.geoService.createFastSearchDataset(mapFeatures[featureType]);
         console.timeEnd('build kd');
         return ob;
       }, {});
 
     // get distances for each cell
-    // tslint:disable-next-line:no-console
     console.time('distances');
-    grid.forEach(cell => {
+    for (const cell of grid) {
       // console.time('cellDistance');
       const cellCenter = center(cell);
       cell.properties.distances = {};
 
+      const { averageAltitude, variance } = await this.altitudeService.getAltitude(bbox(cell), areaBounds);
+      cell.properties.altitude = averageAltitude;
+      cell.properties.slopiness = variance;
+
       Object.keys(mapFeatures).forEach(featureType => {
         const featureList = mapFeatures[featureType];
 
-        const nearest = searchDataSets[featureType].getNearest(
+        const nearest = searchDatasets[featureType].getNearest(
           cellCenter.geometry.coordinates[0],
           cellCenter.geometry.coordinates[1],
         );
         cell.properties.distances[featureType] = nearest.distance;
       });
-    });
-    // tslint:disable-next-line:no-console
+    }
     console.timeEnd('distances');
 
     return grid;
@@ -73,5 +76,5 @@ export interface Cell {
     vegetation: number;
     settlement: number;
     road: number;
-  };
+  }
 }
