@@ -84,9 +84,9 @@ export class HomePage {
     mapData.grid.forEach(cell => geoJSON(cell as any, {
       style: feature => {
         return {
-          color: null,
+          color: '#000',
           fillColor: 'purple',
-          fillOpacity: cell.properties.distanceToWater,
+          fillOpacity: Math.pow(cell.properties.distanceToWater, 2),
         };
       }
     }).addTo(map));
