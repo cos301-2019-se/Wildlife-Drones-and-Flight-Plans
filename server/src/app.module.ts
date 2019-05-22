@@ -13,6 +13,7 @@ import { AnimalInterestPointController } from './controllers/animal-interest-poi
 import { AnimalLocationService } from './services/animal-location.service';
 import { AnimalInterestPointService } from './services/animal-interest-point.service';
 import { CsvReader } from './services/csv-reader.service';
+import { SRTMService } from './providers/srtm.service';
 
 @Module({
   imports: [],
@@ -33,6 +34,7 @@ import { CsvReader } from './services/csv-reader.service';
     AnimalLocationService,
     AnimalInterestPointService,
     CsvReader,
+    SRTMService,
   ],
 })
 export class AppModule {}

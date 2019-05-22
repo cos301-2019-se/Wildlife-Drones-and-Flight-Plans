@@ -6,7 +6,7 @@ import lineToPolygon from '@turf/line-to-polygon';
 import * as geojsonExtent from '@mapbox/geojson-extent';
 import getDistance from '@turf/distance';
 import pointToLineDistance from '@turf/point-to-line-distance';
-import { lengthToDegrees } from '@turf/helpers';
+import { lengthToDegrees, convertLength } from '@turf/helpers';
 import { kdTree } from '../libraries/kd-tree';
 import flatten from '@turf/flatten';
 import simplify from '@turf/simplify';
@@ -159,10 +159,10 @@ export class GeoSearchSet {
     );
   }
 
-  public getNearest(x: number, y: number) {
+  public getNearest(xLng: number, yLat: number) {
     const nearest = this.kd.nearest({
-      x,
-      y,
+      x: xLng,
+      y: yLat,
     }, 1);
 
     if (!nearest.length) {
@@ -174,7 +174,7 @@ export class GeoSearchSet {
 
     return {
       point: nearest[0][0],
-      distance: nearest[0][1],
+      distance: convertLength(nearest[0][1], 'degrees', 'kilometers'),
     };
   }
 }
