@@ -18,5 +18,5 @@ deploy:
  github-token: $GITHUB_TOKEN 
  keep-history: true
  on:
-   branch: development
+   branch: travis-setup
  local_dir: www
