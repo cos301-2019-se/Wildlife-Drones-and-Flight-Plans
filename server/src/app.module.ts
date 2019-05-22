@@ -38,9 +38,8 @@ import { AuthController } from './auth/auth.controller';
     UserController,
     AnimalController,
     AnimalInterestPointController,
+    AuthController
   ],
-  controllers: [MapController, UserController,AuthController],
-  providers: [MapUpdaterService, ShortestPathService, DatabaseService, UserService,AuthService, JwtStrategy],
   providers: [
     MapUpdaterService,
     ShortestPathService,
@@ -53,6 +52,8 @@ import { AuthController } from './auth/auth.controller';
     AnimalInterestPointService,
     CsvReader,
     SRTMService,
+    AuthService, 
+    JwtStrategy,
   ],
   exports: [PassportModule, AuthService],
 })

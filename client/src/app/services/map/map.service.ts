@@ -26,13 +26,13 @@ export class MapService {
       left,
       bottom,
       right,
-      top,
+
     },{headers :{ 'Authorization': 'Bearer ' + await this.storage.get('accessToken')}
   
 
 }).toPromise();
 
-    this.map = map;
+    //this.map = map;
     this.center = [(top + bottom) / 2, (left + right) / 2];
     console.log(await this.storage.get('accessToken'));
 
@@ -42,7 +42,7 @@ export class MapService {
   public async updateMap(name: string) {
     const map = await this.http.post(`http://localhost:3000/map/update`, {
       name
-    }).toPromise();
+    },{headers :{ 'Authorization': 'Bearer ' + await this.storage.get('accessToken')}}).toPromise();
 
     this.map = map;
     return map;

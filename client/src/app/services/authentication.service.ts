@@ -17,13 +17,13 @@ export class AuthenticationService {
 
   //This validates users login details and fetches token for user
   async validateLogin(email, password) {
-    // need to make call to validate token
-    // Then get token
+    //need to make call to validate token
+    //Then get token
     const apiFunction = 'login';
-    // Once have token wrap api calls
+    //Once have token wrap api calls
     const httpOptions = {
       headers: new HttpHeaders({
-        Accept: 'application/json',
+        'Accept': 'application/json',
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'POST',
@@ -32,24 +32,28 @@ export class AuthenticationService {
       )};
 
     const postData = {
-      email: email,
-      password: password
+      'email': email,
+      'password': password
     };
-    return await this.http.post(this.url + apiFunction, postData, httpOptions).toPromise();
+    const result = await this.http.post(this.url + apiFunction, postData, httpOptions).toPromise();
+    return result;
   }
 
   //login and create token.Change state to true
-  login(email, password) {
+  async login(email, password) {
     //need to get custom token
     //Save email
-    this.validateLogin(email, password).then((res: any) => {
-      if (res.token != '') {
-         this.storage.set(TOKEN_KEY, res.token).then(() => {
-           this.storage.set(EMAIL_KEY, email).then(() => {
+     this.validateLogin(email, password).then(async (res: any) => {
+      if (res.accessToken != '') {
+        console.log(res);
+        let Token = await res.accessToken;
+        await this.storage.set(TOKEN_KEY, res.accessToken).then(async () => {
+          await this.storage.set(EMAIL_KEY, email).then( () => {
             this.authenticationState.next(true);
           });
         });
-      } else {
+      }
+      else {
         console.log('User does not exist');
         this.authenticationState.next(false);
       }
@@ -59,18 +63,18 @@ export class AuthenticationService {
      console.log("Token received from server side " + await this.storage.get(TOKEN_KEY));
   }
 
-  // Remove token key
+  //Remove token key
   logout() {
      this.storage.remove(TOKEN_KEY).then(() => {
       console.log('Removed Token');
-      this.storage.remove(EMAIL_KEY).then(() => {
+       this.storage.remove(EMAIL_KEY).then(() => {
         console.log('Removed Email');
       });
       this.authenticationState.next(false);
     });
   }
 
-  // Check if authenticated by viewing state of token key
+  //Check if authenticated by viewing state of token key
   isAuthenticated() {
     return this.authenticationState.value;
   }
