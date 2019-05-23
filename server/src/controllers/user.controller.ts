@@ -1,40 +1,42 @@
-import { Controller, Get, Post, Body } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common';
 import { UserService } from '../services/user.service';
+import { AuthGuard } from '@nestjs/passport';
+import { AuthService } from 'src/auth/auth.service';
+import { User } from 'src/entity/user';
 
 @Controller()
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly authService: AuthService,
+  ) {}
 
   @Get('getUsers')
-  getAllUsers(): JSON {
-    return this.userService.getAllUsers();
+  @UseGuards(AuthGuard('jwt'))
+  async getAllUsers(): Promise<User[]> {
+    return await this.userService.getAllUsers();
   }
+
   @Post('login')
-  loginUser(@Body() body): JSON {
-    // var email =
-    // console.log();
-   // var temp1 =@Body(email);
-   return this.userService.login(body.email, body.password);
+  async loginUser(@Body() body): Promise<JSON> {
+    const status = await this.userService.login(body.email, body.password);
+    if (status) {
+      return await this.authService.createToken(body.email);
+    }
   }
 
   @Post('addUser')
-  addUser(@Body() body): boolean {
-
-
-
-    return this.userService.addUser(body.name, body.username, body.password, body.job, body.email);
-    // return //something
+  async addUser(@Body() body): Promise<boolean> {
+    return await this.userService.addUser(
+      body.name,
+      body.email,
+      body.password,
+      body.job,
+    );
   }
 
-@Post('vToken')
+  @Post('vToken')
   vToken(@Body() body): boolean {
-    // var email =
-    // console.log();
-   // var temp1 =@Body(email);
-
-   // console.log(body.email);
-   // console.log(body.password);
-    return this.userService.vToken(body.email, body.token);
+    return this.authService.validateToken(body.token);
   }
-
 }

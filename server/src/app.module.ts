@@ -17,8 +17,22 @@ import { AnimalInterestPointService } from './services/animal-interest-point.ser
 import { CsvReader } from './services/csv-reader.service';
 import { SRTMService } from './providers/srtm.service';
 
+
+import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
+import { AuthService } from './auth/auth.service';
+import { JwtStrategy } from './auth/jwt.strategy';
+
 @Module({
-  imports: [],
+  imports: [
+    PassportModule.register({ defaultStrategy: 'jwt' }),
+    JwtModule.register({
+      secretOrPrivateKey: 'secretKey',
+      signOptions: {
+        expiresIn: 3600,
+      },
+    }),
+  ],
   controllers: [
     MapController,
     UserController,
@@ -39,6 +53,11 @@ import { SRTMService } from './providers/srtm.service';
     CsvReader,
     SRTMService,
     ModelTraining,
+    AuthService,
+    JwtStrategy,
+
   ],
+  exports: [PassportModule, AuthService],
 })
+
 export class AppModule {}
