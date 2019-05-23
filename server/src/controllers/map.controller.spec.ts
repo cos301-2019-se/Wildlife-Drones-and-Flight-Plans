@@ -4,11 +4,11 @@ import { AppModule } from '../app.module';
 
 jest.useFakeTimers();
 jest.setTimeout(30000);
-
+let token;
 describe('MapController (e2e)', () => {
   let app;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -16,15 +16,31 @@ describe('MapController (e2e)', () => {
     app = moduleFixture.createNestApplication();
     await app.init();
   });
+  
+  let session = null;
+  it('/login (POST)', async() => {
+    const result  = await request(app.getHttpServer())
+      .post('/login')
+      .send({
+        email : 'gst@gmail.com',
+        password : '123'
+      }).then( (response)=> {
+    
+     
+       // console.log("The token that is given back " + response.body.accessToken)
+
+     token = response.body.accessToken;
+      })
+  });
+
+
 
   it('/map/update (POST)', () => {
     return request(app.getHttpServer())
       .post('/map/update')
+      .set('Authorization',`Bearer ${token}`)
       .send({
-        top: -25.8415,
-        left: 28.2560,
-        bottom:  -25.9392,
-        right: 28.3320,
+        name : "Rietvlei Nature Reserve"
       })
       .expect(201);
   });
@@ -34,6 +50,7 @@ describe('MapController (e2e)', () => {
     const result = [[8, 5], [2, 2], [6, 90], [22, 27], [13, 16], [8, 5]];
     const res = await request(app.getHttpServer())
       .post('/map/shortest-path')
+      .set('Authorization',`Bearer ${token}`).expect(201)
       .send({
         points,
       });
