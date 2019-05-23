@@ -8,14 +8,15 @@ import { AuthenticationService } from './../../services/authentication.service';
 export class LoginPage implements OnInit {
   enteredPassword: string;
   enteredEmail: string;
-  constructor(private authService: AuthenticationService) {
+  constructor(
+    private authService: AuthenticationService,
+  ) {
   }
 
   ngOnInit() {
   }
 
-   login() {
-   // console.log(JSON.stringify(form));
+  login() {
     this.authService.login(this.enteredEmail, this.enteredPassword);
   }
 }

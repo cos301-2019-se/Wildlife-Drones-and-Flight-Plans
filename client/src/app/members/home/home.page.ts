@@ -1,12 +1,10 @@
 import { Component, ViewChild } from '@angular/core';
-import { Draw, MapOptions, ControlOptions, Control, tileLayer, geoJSON, Map,
-  point, polyline, DrawOptions, icon, FeatureGroup, featureGroup } from 'leaflet';
+import { Draw, MapOptions, Control, tileLayer, geoJSON, Map,
+  polyline, icon, FeatureGroup } from 'leaflet';
 import 'leaflet-draw';
 import { LeafletDirective } from '@asymmetrik/ngx-leaflet';
 import { MapService } from '../../services/map/map.service';
-import { antPath } from 'leaflet-ant-path';
-import { HttpClient } from '@angular/common/http';
-import { Storage } from '@ionic/storage';
+import { AuthenticationService } from '../../services/authentication.service';
 @Component({
   selector: 'app-home',
   templateUrl: './home.page.html',
@@ -23,8 +21,7 @@ export class HomePage {
 
   constructor(
     private mapService: MapService,
-    private http: HttpClient,
-    private storage: Storage
+    private authService: AuthenticationService,
   ) {}
 
   mapOptions: MapOptions = {
@@ -47,6 +44,9 @@ export class HomePage {
     }, 0);
 
     const mapData = await this.mapService.getMap();
+    if (!mapData.reserve) {
+      return;
+    }
 
     console.log(mapData);
 
@@ -176,11 +176,9 @@ export class HomePage {
 
       console.log('this points', this.points);
 
-      const shortestPath: any[] = await this.http.post('http://localhost:3000/map/shortest-path', {
+      const shortestPath: any[] = await this.authService.post('map/shortest-path', {
         points: this.points, 
-      },
-      {headers :{ 'Authorization': 'Bearer ' + await this.storage.get('accessToken')},
-     }).toPromise() as any;
+      }) as any;
 
       console.log(shortestPath);
 

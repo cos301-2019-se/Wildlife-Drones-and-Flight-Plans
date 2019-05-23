@@ -3,12 +3,12 @@ import * as request from 'supertest';
 import { AppModule } from '../app.module';
 
 jest.useFakeTimers();
-jest.setTimeout(30000);
-
+jest.setTimeout(12000000);
+let token;
 describe('MapController (e2e)', () => {
   let app;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -16,24 +16,56 @@ describe('MapController (e2e)', () => {
     app = moduleFixture.createNestApplication();
     await app.init();
   });
-
-  it('/map/update (POST)', () => {
-    return request(app.getHttpServer())
-      .post('/map/update')
+  
+  let session = null;
+  it('/addUser (POST)', async() => {
+    const result  = await request(app.getHttpServer())
+      .post('/addUser')
       .send({
-        top: -25.8415,
-        left: 28.2560,
-        bottom:  -25.9392,
-        right: 28.3320,
-      })
-      .expect(201);
+        
+            name: "Anne",
+            username: "jm",
+            password: "123",
+            job :"Pilot",
+            email :"gst@gmail.com"
+        
+      }).expect('true')
   });
+
+  it('/login (POST)', async() => {
+    const result  = await request(app.getHttpServer())
+      .post('/login')
+      .send({
+        email : 'gst@gmail.com',
+        password : '123'
+      }).then( (response)=> {
+    
+     
+       // console.log("The token that is given back " + response.body.accessToken)
+
+     token = response.body.accessToken;
+     console.log('got token', token);
+    })
+  });
+
+
+
+  // it('/map/update (POST)', () => {
+  //   return request(app.getHttpServer())
+  //     .post('/map/update')
+  //     .set('Authorization',`Bearer ${token}`)
+  //     .send({
+  //       name : "Rietvlei Nature Reserve"
+  //     })
+  //     .expect(201);
+  // });
 
   it('/map/shortest-path (POST)', async () => {
     const points = [[8, 5], [2, 2], [13, 16], [22, 27], [6, 90]];
     const result = [[8, 5], [2, 2], [6, 90], [22, 27], [13, 16], [8, 5]];
     const res = await request(app.getHttpServer())
       .post('/map/shortest-path')
+      .set('Authorization',`Bearer ${token}`).expect(201)
       .send({
         points,
       });

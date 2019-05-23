@@ -10,7 +10,9 @@ import { GeoService } from './providers/geo.service';
 import { MapPartitionerService } from './providers/map-partitioner.service';
 import { AnimalController } from './controllers/animal-location.controller';
 import { AnimalInterestPointController } from './controllers/animal-interest-point.controller';
+import { ModelPrediction } from './controllers/model-prediction.controller';
 import { AnimalLocationService } from './services/animal-location.service';
+import { ModelTraining } from './services/model-training.service';
 import { AnimalInterestPointService } from './services/animal-interest-point.service';
 import { CsvReader } from './services/csv-reader.service';
 import { SRTMService } from './providers/srtm.service';
@@ -19,9 +21,7 @@ import { SRTMService } from './providers/srtm.service';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './auth/auth.service';
-import { JwtStrategy } from './jwt.strategy';
-import { AuthModule } from './auth/auth.module';
-import { AuthController } from './auth/auth.controller';
+import { JwtStrategy } from './auth/jwt.strategy';
 
 @Module({
   imports: [
@@ -38,7 +38,7 @@ import { AuthController } from './auth/auth.controller';
     UserController,
     AnimalController,
     AnimalInterestPointController,
-    AuthController
+    ModelPrediction,
   ],
   providers: [
     MapUpdaterService,
@@ -52,8 +52,10 @@ import { AuthController } from './auth/auth.controller';
     AnimalInterestPointService,
     CsvReader,
     SRTMService,
-    AuthService, 
+    ModelTraining,
+    AuthService,
     JwtStrategy,
+
   ],
   exports: [PassportModule, AuthService],
 })
