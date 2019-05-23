@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { LatLngExpression } from 'leaflet';
 import { Storage } from '@ionic/storage';
+import { AuthenticationService } from '../authentication.service';
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +13,7 @@ export class MapService {
   private center: LatLngExpression = [-25.8974, 28.2906];
 
   constructor(
-    private http: HttpClient,
+    private authService: AuthenticationService,
     private storage: Storage,
   ) { }
 
@@ -21,16 +22,13 @@ export class MapService {
   }
 
   public async findReserves(top, left, bottom, right) {
-    const res = await this.http.post(`http://localhost:3000/map/find-reserves`, {
+    const res = await this.authService.post(`map/find-reserves`, {
       top,
       left,
       bottom,
       right,
 
-    },{headers :{ 'Authorization': 'Bearer ' + await this.storage.get('accessToken')}
-  
-
-}).toPromise();
+    });
 
 
     this.center = [(top + bottom) / 2, (left + right) / 2];
@@ -40,9 +38,9 @@ export class MapService {
   }
 
   public async updateMap(name: string) {
-    const map = await this.http.post(`http://localhost:3000/map/update`, {
+    const map = await this.authService.post(`map/update`, {
       name
-    },{headers :{ 'Authorization': 'Bearer ' + await this.storage.get('accessToken')}}).toPromise();
+    });
 
     this.map = map;
     return map;
