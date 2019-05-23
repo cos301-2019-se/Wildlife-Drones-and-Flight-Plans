@@ -3,7 +3,7 @@ import * as request from 'supertest';
 import { AppModule } from '../app.module';
 
 jest.useFakeTimers();
-jest.setTimeout(30000);
+jest.setTimeout(12000000);
 let token;
 describe('MapController (e2e)', () => {
   let app;
