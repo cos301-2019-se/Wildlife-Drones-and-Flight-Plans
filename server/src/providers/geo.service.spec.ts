@@ -1,4 +1,4 @@
-import { GeoService,  GeoSearchSet } from './geo.service';
+import { GeoService, GeoSearchSet } from './geo.service';
 
 const geo = new GeoService();
 
@@ -119,61 +119,10 @@ describe('Distance in kilometer to distane in degrees', () => {
   });
 });
 
-describe('Distance from point to polygon', () => {
-
-  // {"type":"Polygon","coordinates":[[[30.498046875,-24.8864364907877],
-  // [31.354980468749996,-24.8864364907877],[31.354980468749996,
-  // -23.956136333969273],[30.498046875,-23.956136333969273],[30.498046875,-24.8864364907877]]]}
-
-  // {
-  //   "type": "Feature",
-  //   "geometry": {
-  //     "type": "Point",
-  //     "coordinates": [125.6, 10.1]
-  //   },
-  //   "properties": {
-  //     "name": "Dinagat Islands"
-  //   }
-  // }
-
-  const pointA = [31.360124524875123, -24.890245167845470];
-
-  //const pointA = JSON.parse('{"lat": 31.360124524875123,"lng": -24.890245167845470}');
-  const polyA = JSON.parse('{"type":"Polygon","coordinates":[[[30.498046875,-24.8864364907877],' +
-    '[31.354980468749996,-24.8864364907877],[31.354980468749996,-23.956136333969273],' +
-    '[30.498046875,-23.956136333969273],[30.498046875,-24.8864364907877]]]}')
-  let distanceC = 172.73544034152187;
-  let distanceD = 0;
-
-  const point = JSON.parse('{' +
-    '"{type": "Point",' +
-    '"coordinates": [125.6, 10.1]}'
-  );
-
-  it('should return 0.018619660480281425 ', () => {
-    expect(geo.getDistanceToPoly(JSON.parse('{"lat":5,"lng":3}'), polyA)).toEqual(0.018619660480281425);
-  });
-
-
-
-  // it('should return 2.524848588604988 on 280.7507413874539', () => {
-  //   expect(geo.distanceToDegrees(distanceB)).toEqual(2.524848588604988);
-  // });
-
-  // it('should return 1.5534449903605567 on 172.73544034152187', () => {
-  //   expect(geo.distanceToDegrees(distanceC)).toEqual(1.5534449903605567);
-  // });
-
-  // it('should return 0 on 0', () => {
-  //   expect(geo.distanceToDegrees(distanceD)).toEqual(0);
-  // });
-});
-
 describe('Binding boxes overlap', () => {
 
   const bbxA = [30.498046875, -24.8864364907877, 31.354980468749996, -24.8864364907877];
   const bbxB = [30.421142578125, -23.7048945023249, 31.201171875, -23.7048945023249];
-  const bbxC = [30.498046875, -24.88643648747, 31.354980465478, -24.8864364907877];
 
   it('should return true', () => {
     expect(geo.bboxesOverlap(bbxA, bbxB)).toBe(false);
@@ -202,8 +151,7 @@ describe('Get bounding box', () => {
 });
 
 describe('Partition into grid', () => {
-
-  const bbxA = JSON.parse(`{"type": "FeatureCollection","features": [
+  const polygon = JSON.parse(`{"type": "FeatureCollection","features": [
                 {"type": "Feature","properties": {},"geometry": 
                 {"type": "Polygon","coordinates": 
                 [[[31.206665039062496,-22.471954507739213],
@@ -217,32 +165,69 @@ describe('Partition into grid', () => {
   )
 
   it('should return [30.8660888671875, -23.770264160239776, 31.563720703125, -22.471954507739213,]', () => {
-    expect(geo.getBoundingBox(bbxA)).toEqual([30.8660888671875, -23.770264160239776, 31.563720703125, -22.471954507739213,]);
+    expect(geo.getBoundingBox(polygon)).toEqual([30.8660888671875, -23.770264160239776, 31.563720703125, -22.471954507739213,]);
   });
 
 });
 
 describe('Geo Search set', () => {
+  const features = [
+    {
+      "type": "Feature", "properties": {},
+      "geometry": {
+        "type": "Polygon", "coordinates": [
+          [[31.003417968749996, -22.874909909420122],
+          [31.0089111328125, -22.965980167474097],
+          [31.039123535156246, -22.99632330686715],
+          [31.069335937499996, -22.986209684312335],
+          [31.07208251953125, -22.895153032556724],
+          [31.019897460937504, -22.879970973215112],
+          [31.003417968749996, -22.874909909420122]
+          ]]
+      }
+    }];
 
+  const x1 = 31.04461669921875;
+  const y1 = -22.965980167474097;
+  const x2 = 31.3714599609375;
+  const y2 = -26.436146919246;
+  const geoSearch = new GeoSearchSet(features);
 
-  const bbxA = `{"type": "FeatureCollection","features": [
-        {"type": "Feature","properties": {},
-        "geometry": {"type": "Polygon","coordinates": [
-            [[31.003417968749996,-22.874909909420122],
-              [31.0089111328125,-22.965980167474097],
-              [31.039123535156246,-22.99632330686715],
-              [31.069335937499996,-22.986209684312335],
-              [31.07208251953125,-22.895153032556724],
-              [31.019897460937504,-22.879970973215112],
-              [31.003417968749996,-22.874909909420122]
-            ]]}}]}`;
-  const x = 31.04461669921875;
-  const y = -22.965980167474097;
-
-  const geoSearch = new GeoSearchSet(bbxA);
-
-  it('should return [30.8660888671875, -23.770264160239776, 31.563720703125, -22.471954507739213,]', () => {
-    expect(geoSearch.getNearest(x, y)).toEqual([30.8660888671875, -23.770264160239776, 31.563720703125, -22.471954507739213,]);
+  it('should return {"distance": 3.4328575271647703, "point": {"x": 31.039123535156246, "y": -22.99632330686715} from x = 31.04461669921875 and y = -22.965980167474097', () => {
+    expect(geoSearch.getNearest(x1, y1)).toEqual({ "distance": 3.4328575271647703, "point": { "x": 31.039123535156246, "y": -22.99632330686715 } });
   });
 
+  it('should return {"distance": 384.72145047148274, "point": {"x": 31.039123535156246, "y": -22.99632330686715}} from x = 31.3714599609375 and y = -26.436146919246', () => {
+    expect(geoSearch.getNearest(x2, y2)).toEqual({ "distance": 384.72145047148274, "point": { "x": 31.039123535156246, "y": -22.99632330686715 } });
+  });
+});
+
+describe('Create Fast Search Dataset', () => {
+  const features = [
+    {
+      "type": "Feature", "properties": {},
+      "geometry": {
+        "type": "Polygon", "coordinates": [
+          [[31.003417968749996, -22.874909909420122],
+          [31.0089111328125, -22.965980167474097],
+          [31.039123535156246, -22.99632330686715],
+          [31.069335937499996, -22.986209684312335],
+          [31.07208251953125, -22.895153032556724],
+          [31.019897460937504, -22.879970973215112],
+          [31.003417968749996, -22.874909909420122]
+          ]]
+      }
+    }];
+
+  it('should succeed to be true', () => {
+
+    let succeed = true;
+    try {
+      let returnObj = geo.createFastSearchDataset(features);
+    } catch (error) {
+      succeed = false;
+    }
+
+    expect(succeed).toBe(true);
+  });
 });

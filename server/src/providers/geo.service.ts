@@ -5,7 +5,6 @@ import within from '@turf/boolean-within';
 import lineToPolygon from '@turf/line-to-polygon';
 import * as geojsonExtent from '@mapbox/geojson-extent';
 import getDistance from '@turf/distance';
-import pointToLineDistance from '@turf/point-to-line-distance';
 import { lengthToDegrees, convertLength } from '@turf/helpers';
 import { kdTree } from '../libraries/kd-tree';
 import flatten from '@turf/flatten';
@@ -23,9 +22,7 @@ export class GeoService {
    * @param features GeoJSON
    * @param area GeoJSON
    */
-  public findFeaturesInArea(features: any[], area) {
-    return features.filter(feature => this.isInPolygon(feature.geometry.coordinates, area.geometry.coordinates));
-  }
+ 
 
   /**
    * Returns the bounding box of a GeoJSON object.
@@ -34,15 +31,6 @@ export class GeoService {
    */
   public getBoundingBox(geoJSON) {
     return geojsonExtent(geoJSON);
-  }
-
-  /**
-   * Returns the distance between a polygon and a point
-   * @param point
-   * @param poly
-   */
-  public getDistanceToPoly(point: {lat: number; lng: number}, poly) {
-    return pointToLineDistance([point.lat, point.lng], poly);
   }
 
   /**
