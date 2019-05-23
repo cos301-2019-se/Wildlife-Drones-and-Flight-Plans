@@ -10,7 +10,9 @@ import { GeoService } from './providers/geo.service';
 import { MapPartitionerService } from './providers/map-partitioner.service';
 import { AnimalController } from './controllers/animal-location.controller';
 import { AnimalInterestPointController } from './controllers/animal-interest-point.controller';
+import { ModelPrediction } from './controllers/model-prediction.controller';
 import { AnimalLocationService } from './services/animal-location.service';
+import { ModelTraining } from './services/model-training.service';
 import { AnimalInterestPointService } from './services/animal-interest-point.service';
 import { CsvReader } from './services/csv-reader.service';
 import { SRTMService } from './providers/srtm.service';
@@ -36,6 +38,7 @@ import { JwtStrategy } from './auth/jwt.strategy';
     UserController,
     AnimalController,
     AnimalInterestPointController,
+    ModelPrediction,
   ],
   providers: [
     MapUpdaterService,
@@ -49,8 +52,10 @@ import { JwtStrategy } from './auth/jwt.strategy';
     AnimalInterestPointService,
     CsvReader,
     SRTMService,
+    ModelTraining,
     AuthService,
     JwtStrategy,
+
   ],
   exports: [PassportModule, AuthService],
 })
