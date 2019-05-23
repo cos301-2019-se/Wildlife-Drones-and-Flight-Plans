@@ -18,6 +18,20 @@ describe('MapController (e2e)', () => {
   });
   
   let session = null;
+  it('/addUser (POST)', async() => {
+    const result  = await request(app.getHttpServer())
+      .post('/addUser')
+      .send({
+        
+            name: "Anne",
+            username: "jm",
+            password: "123",
+            job :"Pilot",
+            email :"gst@gmail.com"
+        
+      }).expect('true')
+  });
+
   it('/login (POST)', async() => {
     const result  = await request(app.getHttpServer())
       .post('/login')
@@ -30,7 +44,8 @@ describe('MapController (e2e)', () => {
        // console.log("The token that is given back " + response.body.accessToken)
 
      token = response.body.accessToken;
-      })
+     console.log('got token', token);
+    })
   });
 
 
