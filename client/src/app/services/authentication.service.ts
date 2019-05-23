@@ -80,7 +80,7 @@ export class AuthenticationService {
       throw err;
     }
 
-    if (res.accessToken === '') {
+    if (!res || !res.accessToken || res.accessToken === '') {
       console.log('User does not exist');
       this.authenticationState.next(false);
       return;
