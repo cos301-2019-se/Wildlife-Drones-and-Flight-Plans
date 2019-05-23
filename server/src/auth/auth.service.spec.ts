@@ -23,6 +23,20 @@ describe('Authorization service', () => {
 
      
 let session = null;
+  it('/addUser (POST)', async() => {
+    const result  = await request(app.getHttpServer())
+      .post('/addUser')
+      .send({
+        
+            name: "Anne",
+            username: "jm",
+            password: "123",
+            job :"Pilot",
+            email :"gst@gmail.com"
+        
+      }).expect('true')
+  });
+  
   it('/login (POST)', async() => {
     const result  = await request(app.getHttpServer())
       .post('/login')
