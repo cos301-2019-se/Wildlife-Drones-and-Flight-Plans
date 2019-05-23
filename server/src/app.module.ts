@@ -16,7 +16,6 @@ import { ModelTraining } from './services/model-training.service';
 import { AnimalInterestPointService } from './services/animal-interest-point.service';
 import { CsvReader } from './services/csv-reader.service';
 import { SRTMService } from './providers/srtm.service';
-import { RegressionModel } from './providers/regression-model.service';
 
 @Module({
   imports: [],
@@ -32,7 +31,6 @@ import { RegressionModel } from './providers/regression-model.service';
     ShortestPathService,
     DatabaseService,
     UserService,
-    RegressionModel,
     OverpassService,
     GeoService,
     MapPartitionerService,

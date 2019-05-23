@@ -6,8 +6,13 @@ export class ModelPrediction {
   constructor(private readonly modelTraining: ModelTraining) {}
 
   @Get('getPredictionData')
-  trainElephantModel(): Promise<JSON> {
+  getPredictionData(): Promise<JSON> {
     return this.modelTraining.predict('elephant_training_model');
+  }
+
+  @Get('trainModel')
+  trainElephantModel(): Promise<void> {
+    return this.modelTraining.trainModel('elephant_training_model');
   }
 
 }

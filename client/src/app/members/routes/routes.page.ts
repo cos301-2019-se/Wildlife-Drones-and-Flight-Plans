@@ -30,40 +30,68 @@ export class RoutesPage {
       maxZoom: 18
     }).addTo(this.map);
     const routes = await this.fetchData();
-    this.map.flyTo([routes[0].input[0], routes[0].input[1]], 10);
+    console.log('got routes', routes);
     const allRoutes = JSON.parse(JSON.stringify(routes));
-    var previousRoute = null;
-    allRoutes.forEach(route => {
+    this.map.flyTo([allRoutes.points[0][0], allRoutes.points[0][1]], 10);
 
-      if (previousRoute == null) {
-        previousRoute = route;
-      }
-      else {
-        // Takes previous known point and draws to next input
-        const prevPointA = new leaflet.LatLng(previousRoute.output[0], previousRoute.output[1]);
-        const prevPointB = new leaflet.LatLng(route.input[0], route.input[1]);
-        this.drawPoints(prevPointA,prevPointB, 'red');
-        ///////////////////////////////////////////////////////
-        // Takes previous prediction and draws to next known point
-        const predPrevPointA = new leaflet.LatLng(previousRoute.prediction[0], previousRoute.prediction[1]);
-        const predPrevPointB = new leaflet.LatLng(route.input[0], route.input[1]);
-        this.drawPoints(predPrevPointA, predPrevPointB, 'blue');
-        ////////////////////////////////////////////////////////////
+    (allRoutes.points as any[]).forEach((point, pointIndex, allPoints) => {
+      if (pointIndex === allPoints.length - 1) {
+        return;
       }
 
-      // Takes input and draws to next known point
-      const pointA = new leaflet.LatLng(route.input[0], route.input[1]);
-      const pointB = new leaflet.LatLng(route.output[0], route.output[1]);
-      this.drawPoints(pointA , pointB, 'red');
-      ///////////////////////////////////////////
+      const nextPoint = allPoints[pointIndex + 1];
 
-      // Takes inputs and draws to next predicted point
-      const predPointB = new leaflet.LatLng(route.prediction[0], route.prediction[1]);
-      this.drawPoints(pointA, predPointB, 'blue');
-      /////////////////////////////////////////////////
-      previousRoute = route;
+      const pointA = new leaflet.LatLng(point[0], point[1]);
+      const pointB = new leaflet.LatLng(nextPoint[0], nextPoint[1]);
+
+      this.drawPoints(pointA, pointB, 'red');
     });
-    console.log(routes);
+
+    (allRoutes.predictions as any[]).forEach((point, pointIndex, allPoints) => {
+      if (pointIndex === allPoints.length - 1) {
+        return;
+      }
+
+      const nextPoint = allPoints[pointIndex + 1];
+
+      const pointA = new leaflet.LatLng(allRoutes.points[pointIndex][0], allRoutes.points[pointIndex][1]);
+      const pointB = new leaflet.LatLng(nextPoint[0], nextPoint[1]);
+
+      this.drawPoints(pointA, pointB, 'blue');
+    });
+
+    // var previousRoute = null;
+    // allRoutes.points.forEach(route => {
+
+    //   if (previousRoute == null) {
+    //     previousRoute = route;
+    //   }
+    //   else {
+    //     // Takes previous known point and draws to next input
+    //     const prevPointA = new leaflet.LatLng(previousRoute.output[0], previousRoute.output[1]);
+    //     const prevPointB = new leaflet.LatLng(route.input[0], route.input[1]);
+    //     this.drawPoints(prevPointA,prevPointB, 'red');
+    //     ///////////////////////////////////////////////////////
+    //     // Takes previous prediction and draws to next known point
+    //     const predPrevPointA = new leaflet.LatLng(previousRoute.prediction[0], previousRoute.prediction[1]);
+    //     const predPrevPointB = new leaflet.LatLng(route.input[0], route.input[1]);
+    //     this.drawPoints(predPrevPointA, predPrevPointB, 'blue');
+    //     ////////////////////////////////////////////////////////////
+    //   }
+
+    //   // Takes input and draws to next known point
+    //   const pointA = new leaflet.LatLng(route.input[0], route.input[1]);
+    //   const pointB = new leaflet.LatLng(route.output[0], route.output[1]);
+    //   this.drawPoints(pointA , pointB, 'red');
+    //   ///////////////////////////////////////////
+
+    //   // Takes inputs and draws to next predicted point
+    //   const predPointB = new leaflet.LatLng(route.prediction[0], route.prediction[1]);
+    //   this.drawPoints(pointA, predPointB, 'blue');
+    //   /////////////////////////////////////////////////
+    //   previousRoute = route;
+    // });
+    // console.log(routes);
 
   }
 

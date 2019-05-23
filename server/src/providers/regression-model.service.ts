@@ -1,12 +1,9 @@
-import { Injectable } from '@nestjs/common';
 const MLR = require('ml-regression-multivariate-linear');
 import * as fs from 'fs';
-@Injectable()
+
 export class RegressionModel {
     private model: any;
     private logsEnabled: boolean;
-    private inputs: any;
-    private outputs: any;
     constructor() { }
 
     public enableLogs(logsEnabled)
@@ -18,6 +15,7 @@ export class RegressionModel {
     public trainModel(inputs, output) {
         try {
             this.model = new MLR(inputs, output);
+            console.log(JSON.stringify(this.model));
             this.log('Model has been trained');
         } catch (err){
             throw err;
@@ -48,20 +46,14 @@ export class RegressionModel {
 
     // Loads a model from storage
     public loadModel(modelName) {
-        try {
-            if(fs.existsSync('ai_models/' + modelName + '.json'))
-            {
-                const jsonModel =  fs.readFileSync('ai_models/' + modelName + '.json', 'utf8');
-                this.model = MLR.load(JSON.parse(jsonModel));
-                this.log('Model has been loaded');
-                return this;
-            } else {
-                this.log('Model does not exist');
-                return null;
-            }
-        } catch (err) {
-            throw err;
+        if(!fs.existsSync('ai_models/' + modelName + '.json')) {
+            this.log('Model does not exist');
+            return null;
         }
+        const jsonModel =  fs.readFileSync('ai_models/' + modelName + '.json', 'utf8');
+        this.model = MLR.load(JSON.parse(jsonModel));
+        this.log('Model has been loaded');
+        return this;
     }
 
     // Logs messages
