@@ -16,6 +16,20 @@ export class MapUpdaterService {
    * @param name The name of the reserve
    */
   async updateMap(name: string) {
+    const { reserve, features } = await this.getMapFeatures(name);
+
+    const grid = await this.mapPartitioner.partitionMap(reserve, features, 1);
+
+    console.log('grid', grid);
+
+    return {
+      ...features,
+      reserve,
+      grid,
+    };
+  }
+
+  async getMapFeatures(name: string) {
     // tslint:disable-next-line:no-console
     console.log('map name', name);
     name = name.replace(/[\[\]()"']/, ''); // sanitise
@@ -80,27 +94,23 @@ export class MapUpdaterService {
         nwr(area.boundaryarea)[barrier=fence];
       );
       out geom;`);
+
     // tslint:disable-next-line:no-console
-    console.log('residential', residential);
+    console.log('residential', residential.features.length);
     // tslint:disable-next-line:no-console
     console.log('downloaded map data');
 
     const reserve = reserves.features[0];
 
-    const allFeatures = {
-      dams: dams.features,
-      rivers: rivers.features,
-      intermittentWater: intermittentWater.features,
-      roads: roads.features,
-      residential: residential.features,
-    };
-
-    const grid = this.mapPartitioner.partitionMap(reserve, allFeatures, 1);
-
     return {
-      ...allFeatures,
       reserve,
-      grid,
+      features: {
+        dams: dams.features,
+        rivers: rivers.features,
+        intermittentWater: intermittentWater.features,
+        roads: roads.features,
+        residential: residential.features,
+      },
     };
   }
 

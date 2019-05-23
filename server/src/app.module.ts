@@ -13,14 +13,32 @@ import { AnimalInterestPointController } from './controllers/animal-interest-poi
 import { AnimalLocationService } from './services/animal-location.service';
 import { AnimalInterestPointService } from './services/animal-interest-point.service';
 import { CsvReader } from './services/csv-reader.service';
+import { SRTMService } from './providers/srtm.service';
+
+
+import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
+import { AuthService } from './auth/auth.service';
+import { JwtStrategy } from './jwt.strategy';
+import { AuthModule } from './auth/auth.module';
+import { AuthController } from './auth/auth.controller';
 
 @Module({
-  imports: [],
+  imports: [
+    PassportModule.register({ defaultStrategy: 'jwt' }),
+    JwtModule.register({
+      secretOrPrivateKey: 'secretKey',
+      signOptions: {
+        expiresIn: 3600,
+      },
+    }),
+  ],
   controllers: [
     MapController,
     UserController,
     AnimalController,
     AnimalInterestPointController,
+    AuthController
   ],
   providers: [
     MapUpdaterService,
@@ -33,6 +51,11 @@ import { CsvReader } from './services/csv-reader.service';
     AnimalLocationService,
     AnimalInterestPointService,
     CsvReader,
+    SRTMService,
+    AuthService, 
+    JwtStrategy,
   ],
+  exports: [PassportModule, AuthService],
 })
+
 export class AppModule {}

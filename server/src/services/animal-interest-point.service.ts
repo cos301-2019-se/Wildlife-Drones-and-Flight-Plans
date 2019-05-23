@@ -8,7 +8,7 @@ export class AnimalInterestPointService {
 
     constructor(private readonly databaseService: DatabaseService) { }
 
-    addAnimalInterestPoint(): boolean {
+    async addAnimalInterestPoint(): Promise<boolean> {
         const con = await this.databaseService.getConnection();
         const animalInterestPoints = new AnimalInterestPoint();
 
@@ -22,7 +22,3 @@ export class AnimalInterestPointService {
         return addedAnimal != null;
     }
 }
-
-
-
-

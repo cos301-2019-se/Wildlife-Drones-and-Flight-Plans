@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { LatLngExpression } from 'leaflet';
+import { Storage } from '@ionic/storage';
 
 @Injectable({
   providedIn: 'root'
@@ -12,6 +13,7 @@ export class MapService {
 
   constructor(
     private http: HttpClient,
+    private storage: Storage,
   ) { }
 
   public getCenter(): LatLngExpression {
@@ -23,10 +25,16 @@ export class MapService {
       top,
       left,
       bottom,
-      right
-    }).toPromise();
+      right,
+
+    },{headers :{ 'Authorization': 'Bearer ' + await this.storage.get('accessToken')}
+  
+
+}).toPromise();
+
 
     this.center = [(top + bottom) / 2, (left + right) / 2];
+    console.log(await this.storage.get('accessToken'));
 
     return res as any;
   }
@@ -34,7 +42,7 @@ export class MapService {
   public async updateMap(name: string) {
     const map = await this.http.post(`http://localhost:3000/map/update`, {
       name
-    }).toPromise();
+    },{headers :{ 'Authorization': 'Bearer ' + await this.storage.get('accessToken')}}).toPromise();
 
     this.map = map;
     return map;
