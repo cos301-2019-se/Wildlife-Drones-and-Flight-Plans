@@ -35,15 +35,15 @@ describe('MapController (e2e)', () => {
 
 
 
-  it('/map/update (POST)', () => {
-    return request(app.getHttpServer())
-      .post('/map/update')
-      .set('Authorization',`Bearer ${token}`)
-      .send({
-        name : "Rietvlei Nature Reserve"
-      })
-      .expect(201);
-  });
+  // it('/map/update (POST)', () => {
+  //   return request(app.getHttpServer())
+  //     .post('/map/update')
+  //     .set('Authorization',`Bearer ${token}`)
+  //     .send({
+  //       name : "Rietvlei Nature Reserve"
+  //     })
+  //     .expect(201);
+  // });
 
   it('/map/shortest-path (POST)', async () => {
     const points = [[8, 5], [2, 2], [13, 16], [22, 27], [6, 90]];
