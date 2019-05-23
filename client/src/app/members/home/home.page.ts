@@ -25,6 +25,7 @@ export class HomePage {
     private mapService: MapService,
     private http: HttpClient,
     private storage: Storage
+
   ) {}
 
   mapOptions: MapOptions = {
