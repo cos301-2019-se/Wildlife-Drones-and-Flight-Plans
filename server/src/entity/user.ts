@@ -1,4 +1,5 @@
-import {Entity, PrimaryGeneratedColumn, Column} from 'typeorm';
+import {Entity, PrimaryGeneratedColumn, Column, BeforeInsert} from 'typeorm';
+import * as bcrypt from 'bcrypt';
 
 @Entity()
 export class User {
@@ -10,29 +11,16 @@ export class User {
     name: string;
 
     @Column('text')
-    userName: string;
-
-    @Column('text')
     password: string;
 
-
-     /*@Column({
-        //collation: {"Pilot" : text, "Ranger"};
-        // enum: ['Pilot', 'Ranger']
-     })*/
     @Column('text')
-    jobType: 'manager' | 'pilot' | 'ranger'; // string;
+    jobType: 'manager' | 'pilot' | 'ranger';
 
     @Column('text')
     email: string;
 
-    @Column('text')
-    token: string;
-
-    @Column('text')
-    expires: string;
-
-
-
-
+    @BeforeInsert()
+    hashPassword() {
+        this.password = bcrypt.hashSync(this.password, 10);
+    }
 }

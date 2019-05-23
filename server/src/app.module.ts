@@ -19,9 +19,7 @@ import { SRTMService } from './providers/srtm.service';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './auth/auth.service';
-import { JwtStrategy } from './jwt.strategy';
-import { AuthModule } from './auth/auth.module';
-import { AuthController } from './auth/auth.controller';
+import { JwtStrategy } from './auth/jwt.strategy';
 
 @Module({
   imports: [
@@ -38,7 +36,6 @@ import { AuthController } from './auth/auth.controller';
     UserController,
     AnimalController,
     AnimalInterestPointController,
-    AuthController
   ],
   providers: [
     MapUpdaterService,
@@ -52,7 +49,7 @@ import { AuthController } from './auth/auth.controller';
     AnimalInterestPointService,
     CsvReader,
     SRTMService,
-    AuthService, 
+    AuthService,
     JwtStrategy,
   ],
   exports: [PassportModule, AuthService],
