@@ -5,7 +5,7 @@ import { AppModule } from '../app.module';
 import { getMaxListeners } from 'cluster';
 
 jest.useFakeTimers();
-jest.setTimeout(30000);
+jest.setTimeout(12000000);
 let token;
 describe('Authorization service', () => {
   let app;
