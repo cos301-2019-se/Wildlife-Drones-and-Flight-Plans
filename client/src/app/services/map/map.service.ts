@@ -27,7 +27,6 @@ export class MapService {
       left,
       bottom,
       right,
-
     });
 
 
