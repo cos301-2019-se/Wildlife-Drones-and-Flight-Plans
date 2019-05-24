@@ -15,6 +15,8 @@ To aid ERP rangers in anti-poaching patrolling, a system is being developed to a
 
 [User Manual](User%20Manual.pdf)
 
+[Trello Board](https://trello.com/b/GWit5JXi/capstone)
+
 ## Group members
 ![image](https://lh4.googleusercontent.com/sYkeIXRCdnU5gPxCxJOXc_I6xD2D_OMxqu9-eRN1WwPWEg5bAW_7SZ86O5U863usmgKeCJeqAwN-Ay0bMkrIqJnZelcAtLnpRAeiHbHnukEjuPdsahIV_iJfkl8ATyYRKPP_e5_N)
 ### Matthew Evans (16262949)
