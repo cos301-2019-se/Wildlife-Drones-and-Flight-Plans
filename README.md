@@ -6,6 +6,7 @@ DR BAM
 To aid ERP rangers in anti-poaching patrolling, a system is being developed to automatically create and optimise drone flight plans based on animal tracking information and reserve features. The project aims to increase the probability of drones covering key areas with endangered wildlife, while being random enough to prevent poachers identifying patrol routes. Rangers and drone pilots will be empowered with useful information through this dynamic application.
 
 [Drone Flight Plans SRS](Drone%20Flight%20Plans%20SRS.pdf)
+[Drone Flight Plans SRS Demo 1](Drone%20Flight%20Plans%20SRS(1).pdf)
 
 [Architectural Designs](./Architectural%20Designs.pdf)
 
