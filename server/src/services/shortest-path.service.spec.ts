@@ -1,13 +1,11 @@
 import {ShortestPathService} from './shortest-path.service';
 import {MapUpdaterService} from './map-updater.service';
 
-import { GeoService } from '../providers/geo.service';
-import { SRTMService } from '../providers/srtm.service';
-import { OverpassService } from '../providers/overpass.service'
-import { MapPartitionerService } from '../providers/map-partitioner.service'
+import { GeoService } from './geo.service';
+import { SRTMService } from './srtm.service';
+import { OverpassService } from './overpass.service';
+import { MapPartitionerService } from './map-partitioner.service';
 import { Test, TestingModule } from '@nestjs/testing';
-import { AnimalController } from '../controllers/animal-location.controller'
-import { AnimalLocation } from '../entity/animal-location';
 
 jest.setTimeout(30000);
 let controller

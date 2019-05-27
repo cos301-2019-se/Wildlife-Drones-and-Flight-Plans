@@ -1,13 +1,13 @@
 import { AnimalLocationService } from './animal-location.service';
 import { DatabaseService } from './db.service';
 import { CsvReader } from './csv-reader.service';
-import { MapUpdaterService } from '../providers/map-updater.service';
-import { GeoService } from '../providers/geo.service';
-import { SRTMService } from '../providers/srtm.service';
-import { OverpassService } from '../providers/overpass.service'
-import { MapPartitionerService } from '../providers/map-partitioner.service'
+import { MapUpdaterService } from './map-updater.service';
+import { GeoService } from './geo.service';
+import { SRTMService } from './srtm.service';
+import { OverpassService } from './overpass.service';
+import { MapPartitionerService } from '../services/map-partitioner.service';
 import { Test, TestingModule } from '@nestjs/testing';
-import { AnimalController } from '../controllers/animal-location.controller'
+import { AnimalController } from '../controllers/animal-location.controller';
 import { AnimalLocation } from '../entity/animal-location';
 
 let controller;

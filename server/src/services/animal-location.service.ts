@@ -2,9 +2,9 @@ import { Injectable} from '@nestjs/common';
 import { DatabaseService } from './db.service';
 import { AnimalLocation } from '../entity/animal-location';
 import { CsvReader } from './csv-reader.service';
-import { MapUpdaterService } from '../providers/map-updater.service';
-import { GeoService, GeoSearchSet } from '../providers/geo.service';
-import { SRTMService } from '../providers/srtm.service';
+import { MapUpdaterService } from './map-updater.service';
+import { GeoService, GeoSearchSet } from './geo.service';
+import { SRTMService } from './srtm.service';
 import bbox from '@turf/bbox';
 import { lengthToDegrees } from '@turf/helpers';
 

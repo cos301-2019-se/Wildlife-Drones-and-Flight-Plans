@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { RegressionModel } from '../providers/regression-model.service';
+import { RegressionModel } from './regression-model.service';
 import { AnimalLocationService } from '../services/animal-location.service';
 
 // This class trains the models from database data

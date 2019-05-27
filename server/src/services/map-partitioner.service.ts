@@ -1,7 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { GeoService, GeoSearchSet } from './geo.service';
-import squareGrid from '@turf/square-grid';
-import simplify from '@turf/simplify';
+import { GeoService, GeoSearchSet } from '../services/geo.service';
 import center from '@turf/center';
 import bbox from '@turf/bbox';
 import { SRTMService } from './srtm.service';
