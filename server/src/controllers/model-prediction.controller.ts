@@ -1,4 +1,4 @@
-import { Controller, Get, Post,Query } from '@nestjs/common';
+import { Controller, Get, Post, Query } from '@nestjs/common';
 import { ModelTraining } from '../services/model-training.service';
 
 @Controller()
@@ -14,5 +14,4 @@ export class ModelPrediction {
   trainElephantModel(): Promise<void> {
     return this.modelTraining.trainModel('elephant_training_model');
   }
-
 }

@@ -16,39 +16,34 @@ describe('MapController (e2e)', () => {
     app = moduleFixture.createNestApplication();
     await app.init();
   });
-  
-  let session = null;
-  it('/addUser (POST)', async() => {
-    const result  = await request(app.getHttpServer())
+
+  it('/addUser (POST)', async () => {
+    await request(app.getHttpServer())
       .post('/addUser')
       .send({
-        
-            name: "Anne",
-            username: "jm",
-            password: "123",
-            job :"Pilot",
-            email :"gst@gmail.com"
-        
-      }).expect('true')
+        name: 'Anne',
+        username: 'jm',
+        password: '123',
+        job: 'Pilot',
+        email: 'gst@gmail.com',
+      })
+      .expect('true');
   });
 
-  it('/login (POST)', async() => {
-    const result  = await request(app.getHttpServer())
+  it('/login (POST)', async () => {
+    await request(app.getHttpServer())
       .post('/login')
       .send({
-        email : 'gst@gmail.com',
-        password : '123'
-      }).then( (response)=> {
-    
-     
-       // console.log("The token that is given back " + response.body.accessToken)
+        email: 'gst@gmail.com',
+        password: '123',
+      })
+      .then(response => {
+        // console.log("The token that is given back " + response.body.accessToken)
 
-     token = response.body.accessToken;
-     console.log('got token', token);
-    })
+        token = response.body.accessToken;
+        console.log('got token', token);
+      });
   });
-
-
 
   // it('/map/update (POST)', () => {
   //   return request(app.getHttpServer())
@@ -65,14 +60,15 @@ describe('MapController (e2e)', () => {
     const result = [[8, 5], [2, 2], [6, 90], [22, 27], [13, 16], [8, 5]];
     const res = await request(app.getHttpServer())
       .post('/map/shortest-path')
-      .set('Authorization',`Bearer ${token}`).expect(201)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(201)
       .send({
         points,
       });
 
     expect(
       JSON.stringify(res.body) === JSON.stringify(result) ||
-      JSON.stringify(res.body) === JSON.stringify(result.reverse())
+        JSON.stringify(res.body) === JSON.stringify(result.reverse()),
     ).toBeTruthy();
   });
 });

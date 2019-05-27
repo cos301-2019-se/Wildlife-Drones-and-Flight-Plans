@@ -1,14 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { DatabaseService } from './db.service';
-import { User } from '../entity/user';
+import { User } from '../entity/user.entity';
 import * as bcrypt from 'bcrypt';
-import { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
+import { JwtPayload } from '../auth/jwt-payload.interface';
 
 @Injectable()
 export class UserService {
-  constructor(
-    private readonly databaseService: DatabaseService,
-    ) {}
+  constructor(private readonly databaseService: DatabaseService) {}
 
   async getAllUsers(): Promise<User[]> {
     const con = await this.databaseService.getConnection();
@@ -20,13 +18,13 @@ export class UserService {
     const usersRepo = con.getRepository(User);
 
     const existingUser = await usersRepo.findOne({
-        where: {
-            email,
-        }
+      where: {
+        email,
+      },
     });
 
     if (!existingUser) {
-        return false;
+      return false;
     }
 
     return bcrypt.compareSync(password, existingUser.password);
@@ -51,7 +49,7 @@ export class UserService {
     return await con.getRepository(User).findOne({
       where: {
         email: payload.email,
-      }
+      },
     });
   }
 }
