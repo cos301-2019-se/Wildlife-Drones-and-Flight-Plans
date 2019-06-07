@@ -5,7 +5,6 @@ import { MapPartitionerService } from './map-partitioner.service';
 
 @Injectable()
 export class MapUpdaterService {
-
   constructor(
     private overpass: OverpassService,
     private mapPartitioner: MapPartitionerService,
@@ -41,7 +40,8 @@ export class MapUpdaterService {
     // tslint:disable-next-line:no-console
     console.log('reserves', reserves.features.length);
 
-    const dams = await this.overpass.query(`area["name"="${name}"]->.boundaryarea;
+    const dams = await this.overpass
+      .query(`area["name"="${name}"]->.boundaryarea;
       (
         (
           (
@@ -58,7 +58,8 @@ export class MapUpdaterService {
     // tslint:disable-next-line:no-console
     console.log('dams', dams.features.length);
 
-    const rivers = await this.overpass.query(`area["name"="${name}"]->.boundaryarea;
+    const rivers = await this.overpass
+      .query(`area["name"="${name}"]->.boundaryarea;
     (
       nwr(area.boundaryarea)[waterway=river];
       - nwr(area.boundaryarea)[intermittent=yes];
@@ -69,7 +70,8 @@ export class MapUpdaterService {
     // tslint:disable-next-line:no-console
     console.log('rivers', rivers.features.length);
 
-    const intermittentWater = await this.overpass.query(`area["name"="${name}"]->.boundaryarea;
+    const intermittentWater = await this.overpass
+      .query(`area["name"="${name}"]->.boundaryarea;
       (
         nwr(area.boundaryarea)[water][intermittent=yes];
         nwr(area.boundaryarea)[natural=water][intermittent=yes];
@@ -79,7 +81,8 @@ export class MapUpdaterService {
     // tslint:disable-next-line:no-console
     console.log('intermittent', intermittentWater.features.length);
 
-    const roads = await this.overpass.query(`area["name"="${name}"]->.boundaryarea;
+    const roads = await this.overpass
+      .query(`area["name"="${name}"]->.boundaryarea;
     (
       nwr(area.boundaryarea)[highway];
       nwr(area.boundaryarea)[route=road];
@@ -88,7 +91,8 @@ export class MapUpdaterService {
     // tslint:disable-next-line:no-console
     console.log('roads', roads.features.length);
 
-    const residential = await this.overpass.query(`area["name"="${name}"]->.boundaryarea;
+    const residential = await this.overpass
+      .query(`area["name"="${name}"]->.boundaryarea;
       (
         nwr(area.boundaryarea)[landuse=residential];
         nwr(area.boundaryarea)[barrier=fence];

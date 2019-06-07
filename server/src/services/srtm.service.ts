@@ -13,7 +13,6 @@ const TIFF_HEIGHT = 2048;
  */
 @Injectable()
 export class SRTMService {
-
   private mapReadyWaiter: MultiPromise = null;
 
   /**
@@ -21,9 +20,12 @@ export class SRTMService {
    * @param point [minX, minY, maxX, maxY] or [lng0, lat0, lng1, lat1] or [left, bottom, right, top]
    * @param bounds [minX, minY, maxX, maxY] or [lng0, lat0, lng1, lat1] or [left, bottom, right, top]
    */
-  public async getAltitude(area, bounds): Promise<{
-    averageAltitude: number,
-    variance: number,
+  public async getAltitude(
+    area,
+    bounds,
+  ): Promise<{
+    averageAltitude: number;
+    variance: number;
   }> {
     const map = await this.download(bounds);
 
@@ -47,7 +49,9 @@ export class SRTMService {
       window,
     });
 
-    const averageAltitude = rasters[0].reduce((sum, altitude) => sum + altitude, 0) / (rasters.width * rasters.height);
+    const averageAltitude =
+      rasters[0].reduce((sum, altitude) => sum + altitude, 0) /
+      (rasters.width * rasters.height);
     const variance = computeVariance(rasters[0]);
 
     return {
@@ -81,7 +85,9 @@ export class SRTMService {
   }
 
   private buildUrl(bounds): string {
-    const url = `http://www.webservice-energy.org/mapserv/srtm?layers=srtm_s0&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&FORMAT=image%2Ftiff&SRS=EPSG:4326&BBOX=${bounds.join(',')}&width=${TIFF_WIDTH}&height=${TIFF_HEIGHT}`;
+    const url = `http://www.webservice-energy.org/mapserv/srtm?layers=srtm_s0&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&FORMAT=image%2Ftiff&SRS=EPSG:4326&BBOX=${bounds.join(
+      ',',
+    )}&width=${TIFF_WIDTH}&height=${TIFF_HEIGHT}`;
     console.log(url);
     return url;
   }

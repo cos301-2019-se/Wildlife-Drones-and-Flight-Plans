@@ -22,7 +22,6 @@ export class GeoService {
    * @param features GeoJSON
    * @param area GeoJSON
    */
- 
 
   /**
    * Returns the bounding box of a GeoJSON object.
@@ -63,7 +62,10 @@ export class GeoService {
       return pointInPolygon(a, b);
     }
 
-    if (a.geometry.type === 'LineString' || a.geometry.type === 'MultiLineString') {
+    if (
+      a.geometry.type === 'LineString' ||
+      a.geometry.type === 'MultiLineString'
+    ) {
       a = lineToPolygon(a);
     }
 
@@ -73,7 +75,7 @@ export class GeoService {
       bGeom = flatten(b).features;
     }
 
-    return bGeom.some(b => overlaps(a, b) || within(a, b) || within(b, a));
+    return bGeom.some(bg => overlaps(a, bg) || within(a, bg) || within(bg, a));
   }
 
   /**
@@ -82,10 +84,7 @@ export class GeoService {
    * @param b [left, bottom, right, top]
    */
   public bboxesOverlap(a, b) {
-    return !(b[0] > a[2]
-      || b[2] < a[0]
-      || b[3] < a[1]
-      || b[1] > a[3]);
+    return !(b[0] > a[2] || b[2] < a[0] || b[3] < a[1] || b[1] > a[3]);
   }
 
   public createFastSearchDataset(features) {
@@ -117,8 +116,7 @@ export class GeoService {
     const bounds = this.getBoundingBox(polygon);
     return squareGrid(bounds, cellSizeKm, {
       units: 'kilometers',
-    }).features
-      .filter(feature => this.isInPolygon(feature, simplifiedPolygon));
+    }).features.filter(feature => this.isInPolygon(feature, simplifiedPolygon));
   }
 
   public flattenGeo(geoJSON) {
@@ -131,27 +129,30 @@ export class GeoSearchSet {
   constructor(features) {
     this.kd = new kdTree(
       features.reduce((points, feature) => {
-        const featurePoints = explode(feature).features
-          .map(point => {
-            return {
-              x: point.geometry.coordinates[0],
-              y: point.geometry.coordinates[1],
-            };
-          });
+        const featurePoints = explode(feature).features.map(point => {
+          return {
+            x: point.geometry.coordinates[0],
+            y: point.geometry.coordinates[1],
+          };
+        });
 
         points.push(...featurePoints);
         return points;
       }, []),
-      (a, b) => Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y)),
+      (a, b) =>
+        Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y)),
       ['x', 'y'],
     );
   }
 
   public getNearest(xLng: number, yLat: number) {
-    const nearest = this.kd.nearest({
-      x: xLng,
-      y: yLat,
-    }, 1);
+    const nearest = this.kd.nearest(
+      {
+        x: xLng,
+        y: yLat,
+      },
+      1,
+    );
 
     if (!nearest.length) {
       return {

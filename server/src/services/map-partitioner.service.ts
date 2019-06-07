@@ -1,7 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { GeoService, GeoSearchSet } from './geo.service';
-import squareGrid from '@turf/square-grid';
-import simplify from '@turf/simplify';
+import { GeoService, GeoSearchSet } from '../services/geo.service';
 import center from '@turf/center';
 import bbox from '@turf/bbox';
 import { SRTMService } from './srtm.service';
@@ -15,7 +13,7 @@ export class MapPartitionerService {
 
   /**
    * Returns a grid representation of the map.
-   * 
+   *
    * @param area The area being partitioned
    * @param mapFeatures Key-value list of features we want to get distances to
    * @param cellSize How large cells should be (side length in km)
@@ -32,14 +30,17 @@ export class MapPartitionerService {
     // calculate distances for each cell
 
     // construct search datasets
-    const searchDatasets: {[featureType: string]: GeoSearchSet} = Object.keys(mapFeatures)
-      .reduce((ob, featureType) => {
-        console.time('build kd');
-        console.log(featureType);
-        ob[featureType] = this.geoService.createFastSearchDataset(mapFeatures[featureType]);
-        console.timeEnd('build kd');
-        return ob;
-      }, {});
+    const searchDatasets: { [featureType: string]: GeoSearchSet } = Object.keys(
+      mapFeatures,
+    ).reduce((ob, featureType) => {
+      console.time('build kd');
+      console.log(featureType);
+      ob[featureType] = this.geoService.createFastSearchDataset(
+        mapFeatures[featureType],
+      );
+      console.timeEnd('build kd');
+      return ob;
+    }, {});
 
     // get distances for each cell
     console.time('distances');
@@ -48,7 +49,10 @@ export class MapPartitionerService {
       const cellCenter = center(cell);
       cell.properties.distances = {};
 
-      const { averageAltitude, variance } = await this.altitudeService.getAltitude(bbox(cell), areaBounds);
+      const {
+        averageAltitude,
+        variance,
+      } = await this.altitudeService.getAltitude(bbox(cell), areaBounds);
       cell.properties.altitude = averageAltitude;
       cell.properties.slopiness = variance;
 
@@ -76,5 +80,5 @@ export interface Cell {
     vegetation: number;
     settlement: number;
     road: number;
-  }
+  };
 }

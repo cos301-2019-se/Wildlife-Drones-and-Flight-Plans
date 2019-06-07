@@ -1,14 +1,14 @@
 import { AnimalLocationService } from './animal-location.service';
 import { DatabaseService } from './db.service';
 import { CsvReader } from './csv-reader.service';
-import { MapUpdaterService } from '../providers/map-updater.service';
-import { GeoService } from '../providers/geo.service';
-import { SRTMService } from '../providers/srtm.service';
-import { OverpassService } from '../providers/overpass.service'
-import { MapPartitionerService } from '../providers/map-partitioner.service'
+import { MapUpdaterService } from './map-updater.service';
+import { GeoService } from './geo.service';
+import { SRTMService } from './srtm.service';
+import { OverpassService } from './overpass.service';
+import { MapPartitionerService } from '../services/map-partitioner.service';
 import { Test, TestingModule } from '@nestjs/testing';
-import { AnimalController } from '../controllers/animal-location.controller'
-import { AnimalLocation } from '../entity/animal-location';
+import { AnimalController } from '../controllers/animal-location.controller';
+import { AnimalLocation } from '../entity/animal-location.entity';
 
 let controller;
 
@@ -17,12 +17,19 @@ beforeAll(async () => {
     imports: [],
     controllers: [AnimalController],
     providers: [
-      AnimalLocationService, DatabaseService, CsvReader, MapUpdaterService, GeoService, SRTMService, OverpassService, MapPartitionerService
+      AnimalLocationService,
+      DatabaseService,
+      CsvReader,
+      MapUpdaterService,
+      GeoService,
+      SRTMService,
+      OverpassService,
+      MapPartitionerService,
     ],
   }).compile();
 
   controller = await module.get<DatabaseService>(DatabaseService);
-  const con = await controller.getConnection()
+  const con = await controller.getConnection();
   const animalCon = await con.getRepository(AnimalLocation);
 
   animalCon.clear();
@@ -131,21 +138,32 @@ beforeAll(async () => {
 describe('Get individual animal data', () => {
   it('should find only the rows with the given animal id AM105', async () => {
     const animalId = 'AM105';
-    let res: AnimalLocation[] = await controller.getIndividualAnimalLocationTableData(animalId);
+    const res: AnimalLocation[] = await controller.getIndividualAnimalLocationTableData(
+      animalId,
+    );
 
     expect(res.every(loc => loc.animalId === animalId)).toBe(true);
   });
 
   it('should not find the rows with the given animal id AM2', async () => {
     const animalId = 'AM2';
-    let res: AnimalLocation[] = await controller.getIndividualAnimalLocationTableData(animalId);
+    const res: AnimalLocation[] = await controller.getIndividualAnimalLocationTableData(
+      animalId,
+    );
     expect(res.length).toBe(0);
   });
 });
 
 describe('Get all animal data', () => {
   it('should find all the rows for animal location data AM105, AM107 and AM108', async () => {
-    let res: AnimalLocation[] = await controller.getAllAnimalsLocationTableData();
-    expect(res.every(loc => loc.animalId === 'AM105' || loc.animalId === 'AM107' || loc.animalId === 'AM108')).toBe(true);
+    const res: AnimalLocation[] = await controller.getAllAnimalsLocationTableData();
+    expect(
+      res.every(
+        loc =>
+          loc.animalId === 'AM105' ||
+          loc.animalId === 'AM107' ||
+          loc.animalId === 'AM108',
+      ),
+    ).toBe(true);
   });
 });

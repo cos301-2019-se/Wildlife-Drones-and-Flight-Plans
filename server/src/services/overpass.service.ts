@@ -21,7 +21,9 @@ export class OverpassService {
 
     let res;
     while (true) {
-      const url = `http://overpass-api.de/api/interpreter?data=${encodeURI(query)}`;
+      const url = `http://overpass-api.de/api/interpreter?data=${encodeURI(
+        query,
+      )}`;
       // tslint:disable-next-line:no-console
       console.log('downloading map', url);
       try {

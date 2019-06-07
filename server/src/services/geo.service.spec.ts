@@ -68,8 +68,7 @@ describe('Overlapping geometry', () => {
 });
 
 describe('Distance between 2 coordinates', () => {
-
-  const pointA = [31.360124524875123, -24.890245167845470];
+  const pointA = [31.360124524875123, -24.89024516784547];
   const pointB = [31.351245784236458, -24.873457812457845];
   const pointC = [32.845754782478365, -24.124784583652477];
   const pointD = [30.423651247852364, -25.364364872159885];
@@ -96,7 +95,6 @@ describe('Distance between 2 coordinates', () => {
 });
 
 describe('Distance in kilometer to distane in degrees', () => {
-
   const distanceA = 2.070414641026035;
   const distanceB = 280.7507413874539;
   const distanceC = 172.73544034152187;
@@ -120,9 +118,18 @@ describe('Distance in kilometer to distane in degrees', () => {
 });
 
 describe('Binding boxes overlap', () => {
-
-  const bbxA = [30.498046875, -24.8864364907877, 31.354980468749996, -24.8864364907877];
-  const bbxB = [30.421142578125, -23.7048945023249, 31.201171875, -23.7048945023249];
+  const bbxA = [
+    30.498046875,
+    -24.8864364907877,
+    31.354980468749996,
+    -24.8864364907877,
+  ];
+  const bbxB = [
+    30.421142578125,
+    -23.7048945023249,
+    31.201171875,
+    -23.7048945023249,
+  ];
 
   it('should return true', () => {
     expect(geo.bboxesOverlap(bbxA, bbxB)).toBe(false);
@@ -131,29 +138,29 @@ describe('Binding boxes overlap', () => {
   it('should return true', () => {
     expect(geo.bboxesOverlap(bbxA, bbxA)).toBe(true);
   });
-
 });
 
 describe('Get bounding box', () => {
-
   const bbxA = JSON.parse(`{"type": "FeatureCollection","features": [
-              {"type": "Feature","properties": {},"geometry": 
+              {"type": "Feature","properties": {},"geometry":
               {"type": "Polygon", "coordinates": [[[30.7562255859375,-23.02918734674458],
               [31.26708984375,-23.02918734674458],[31.26708984375,-22.700187924834427],
-              [30.7562255859375,-22.700187924834427],[30.7562255859375,-23.02918734674458]]]}}]}`
-  )
+              [30.7562255859375,-22.700187924834427],[30.7562255859375,-23.02918734674458]]]}}]}`);
 
   it('should return [30.7562255859375,-23.02918734674458,31.26708984375,-22.700187924834427,]', () => {
-    expect(geo.getBoundingBox(bbxA)).toEqual([30.7562255859375, -23.02918734674458,
-      31.26708984375, -22.700187924834427,]);
+    expect(geo.getBoundingBox(bbxA)).toEqual([
+      30.7562255859375,
+      -23.02918734674458,
+      31.26708984375,
+      -22.700187924834427,
+    ]);
   });
-
 });
 
 describe('Partition into grid', () => {
   const polygon = JSON.parse(`{"type": "FeatureCollection","features": [
-                {"type": "Feature","properties": {},"geometry": 
-                {"type": "Polygon","coordinates": 
+                {"type": "Feature","properties": {},"geometry":
+                {"type": "Polygon","coordinates":
                 [[[31.206665039062496,-22.471954507739213],
                 [31.047363281250004,-22.507482299898438],
                 [30.8660888671875,-23.195911787809486],
@@ -161,31 +168,39 @@ describe('Partition into grid', () => {
                 [31.563720703125,-23.73004055946544],
                 [31.497802734375,-23.180763583129433],
                 [31.3604736328125,-22.654571520098994],
-                [31.206665039062496,-22.471954507739213]]]}}]}`
-  )
+                [31.206665039062496,-22.471954507739213]]]}}]}`);
 
   it('should return [30.8660888671875, -23.770264160239776, 31.563720703125, -22.471954507739213,]', () => {
-    expect(geo.getBoundingBox(polygon)).toEqual([30.8660888671875, -23.770264160239776, 31.563720703125, -22.471954507739213,]);
+    expect(geo.getBoundingBox(polygon)).toEqual([
+      30.8660888671875,
+      -23.770264160239776,
+      31.563720703125,
+      -22.471954507739213,
+    ]);
   });
-
 });
 
 describe('Geo Search set', () => {
   const features = [
     {
-      "type": "Feature", "properties": {},
-      "geometry": {
-        "type": "Polygon", "coordinates": [
-          [[31.003417968749996, -22.874909909420122],
-          [31.0089111328125, -22.965980167474097],
-          [31.039123535156246, -22.99632330686715],
-          [31.069335937499996, -22.986209684312335],
-          [31.07208251953125, -22.895153032556724],
-          [31.019897460937504, -22.879970973215112],
-          [31.003417968749996, -22.874909909420122]
-          ]]
-      }
-    }];
+      type: 'Feature',
+      properties: {},
+      geometry: {
+        type: 'Polygon',
+        coordinates: [
+          [
+            [31.003417968749996, -22.874909909420122],
+            [31.0089111328125, -22.965980167474097],
+            [31.039123535156246, -22.99632330686715],
+            [31.069335937499996, -22.986209684312335],
+            [31.07208251953125, -22.895153032556724],
+            [31.019897460937504, -22.879970973215112],
+            [31.003417968749996, -22.874909909420122],
+          ],
+        ],
+      },
+    },
+  ];
 
   const x1 = 31.04461669921875;
   const y1 = -22.965980167474097;
@@ -194,36 +209,46 @@ describe('Geo Search set', () => {
   const geoSearch = new GeoSearchSet(features);
 
   it('should return {"distance": 3.4328575271647703, "point": {"x": 31.039123535156246, "y": -22.99632330686715} from x = 31.04461669921875 and y = -22.965980167474097', () => {
-    expect(geoSearch.getNearest(x1, y1)).toEqual({ "distance": 3.4328575271647703, "point": { "x": 31.039123535156246, "y": -22.99632330686715 } });
+    expect(geoSearch.getNearest(x1, y1)).toEqual({
+      distance: 3.4328575271647703,
+      point: { x: 31.039123535156246, y: -22.99632330686715 },
+    });
   });
 
   it('should return {"distance": 384.72145047148274, "point": {"x": 31.039123535156246, "y": -22.99632330686715}} from x = 31.3714599609375 and y = -26.436146919246', () => {
-    expect(geoSearch.getNearest(x2, y2)).toEqual({ "distance": 384.72145047148274, "point": { "x": 31.039123535156246, "y": -22.99632330686715 } });
+    expect(geoSearch.getNearest(x2, y2)).toEqual({
+      distance: 384.72145047148274,
+      point: { x: 31.039123535156246, y: -22.99632330686715 },
+    });
   });
 });
 
 describe('Create Fast Search Dataset', () => {
   const features = [
     {
-      "type": "Feature", "properties": {},
-      "geometry": {
-        "type": "Polygon", "coordinates": [
-          [[31.003417968749996, -22.874909909420122],
-          [31.0089111328125, -22.965980167474097],
-          [31.039123535156246, -22.99632330686715],
-          [31.069335937499996, -22.986209684312335],
-          [31.07208251953125, -22.895153032556724],
-          [31.019897460937504, -22.879970973215112],
-          [31.003417968749996, -22.874909909420122]
-          ]]
-      }
-    }];
+      type: 'Feature',
+      properties: {},
+      geometry: {
+        type: 'Polygon',
+        coordinates: [
+          [
+            [31.003417968749996, -22.874909909420122],
+            [31.0089111328125, -22.965980167474097],
+            [31.039123535156246, -22.99632330686715],
+            [31.069335937499996, -22.986209684312335],
+            [31.07208251953125, -22.895153032556724],
+            [31.019897460937504, -22.879970973215112],
+            [31.003417968749996, -22.874909909420122],
+          ],
+        ],
+      },
+    },
+  ];
 
   it('should succeed to be true', () => {
-
     let succeed = true;
     try {
-      let returnObj = geo.createFastSearchDataset(features);
+      geo.createFastSearchDataset(features);
     } catch (error) {
       succeed = false;
     }

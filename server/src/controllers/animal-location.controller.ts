@@ -24,5 +24,4 @@ export class AnimalController {
   getIndividualAnimalLocationData(@Query('animalID') animalID: string): Promise<JSON> {
     return this.animalLocationService.getIndividualAnimalLocationTableData(animalID);
   }
-
 }
