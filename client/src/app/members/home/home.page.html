@@ -1,15 +1,20 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>
-      Shortest Path
-    </ion-title>
-  </ion-toolbar>
-</ion-header>
-
 <ion-content>
   <div class="map"
     leaflet #leaflet
     (leafletMapReady)="mapReady($event)"
     [leafletOptions]="mapOptions"
   ></div>
+  <ion-fab slot="fixed" vertical="bottom" horizontal="start">
+    <ion-fab-button size="small">
+      <ion-icon name="ios-send"></ion-icon>
+    </ion-fab-button>
+    <ion-fab-button size="small">
+      <ion-icon name="ios-pin"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+    <ion-fab-button>
+      <ion-icon name="md-compass"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
 </ion-content>

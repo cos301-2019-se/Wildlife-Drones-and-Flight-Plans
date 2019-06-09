@@ -1,5 +1,21 @@
 .map {
-    width: 100%;
-    height: 100%;
-    background: pink;
-  }
+  width: 100%;
+  height: 100%;
+  background: #eee;
+}
+
+::ng-deep .leaflet-control-zoom {
+  margin-bottom: 78px !important;
+  margin-right: 20px !important;
+}
+
+::ng-deep .fab-button-small {
+  margin-top: 16px !important;
+  margin-bottom: 0 !important;
+  width: 50px !important;
+  height: 50px !important;
+}
+
+::ng-deep .fab-vertical-bottom {
+  bottom: 24px;
+}
