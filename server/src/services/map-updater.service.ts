@@ -3,11 +3,16 @@ import { Injectable } from '@nestjs/common';
 import { OverpassService } from './overpass.service';
 import { MapPartitionerService } from './map-partitioner.service';
 
+import { DatabaseService } from './db.service';
+import { ReserveConfiguration } from '../entity/reserve-configuration.entity'
+
+
 @Injectable()
 export class MapUpdaterService {
   constructor(
     private overpass: OverpassService,
     private mapPartitioner: MapPartitionerService,
+    private databaseService: DatabaseService,
   ) {}
 
   /**
@@ -20,6 +25,12 @@ export class MapUpdaterService {
     const grid = await this.mapPartitioner.partitionMap(reserve, features, 1);
 
     console.log('grid', grid);
+
+    const dbConn = await this.databaseService.getConnection();
+    const reserveConfigCon = await dbConn.getRepository(ReserveConfiguration);
+
+    let reserveConfig: ReserveConfiguration = {reserveName: name, cellSize: 1};
+    await reserveConfigCon.save(reserveConfig);
 
     return {
       ...features,
