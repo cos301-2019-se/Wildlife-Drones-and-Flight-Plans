@@ -1,73 +1,85 @@
-import { Component, ViewChild } from '@angular/core';
-import { MapOptions, tileLayer, geoJSON, Map } from 'leaflet';
-import { LeafletDirective } from '@asymmetrik/ngx-leaflet';
+import { Component, ViewChild, ElementRef, OnInit } from '@angular/core';
+
+import * as ol from 'ol';
+import * as proj4 from 'proj4';
+import { fromLonLat } from 'ol/proj';
+import Map from 'ol/Map';
+import View from 'ol/View';
+import TileLayer from 'ol/layer/Tile';
+import XYZ from 'ol/source/XYZ';
+import GeoJSON from 'ol/format/GeoJSON';
+import { Vector as VectorLayer } from 'ol/layer';
+import { ZoomSlider } from 'ol/control';
+
 import { MapService } from '../../services/map/map.service';
 import { AuthenticationService } from '../../services/authentication.service';
+import VectorSource from 'ol/source/Vector';
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.page.html',
   styleUrls: ['./home.page.scss'],
 })
-export class HomePage {
+export class HomePage implements OnInit {
+  @ViewChild('map') mapElement: ElementRef;
   private map: Map;
-  @ViewChild('leaflet') leaflet: LeafletDirective;
 
   constructor(
     private mapService: MapService,
     private authService: AuthenticationService,
   ) {}
 
-  mapOptions: MapOptions = {
-    zoomSnap: 0.3,
-    zoomAnimation: true,
-    fadeAnimation: true,
-    worldCopyJump: true,
-    layers: [
-      tileLayer('http://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
-        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-        maxZoom: 18,
-        attribution: 'Google Earth',
-        detectRetina: true,
+  async ngOnInit() {
+    const mapEl = this.mapElement.nativeElement;
+    this.map = new Map({
+      target: mapEl,
+      loadTilesWhileInteracting: true,
+      loadTilesWhileAnimating: true,
+      layers: [
+        new TileLayer({
+          preload: Infinity,
+          source: new XYZ({
+            url: 'https://mt{0-3}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
+          })
+        })
+      ],
+      view: new View({
+        center: fromLonLat(this.mapService.getCenter().reverse()),
+        zoom: 13,
       })
-    ],
-    zoom: 13,
-    center: this.mapService.getCenter()
-  };
+    });
 
-  async mapReady(map: Map) {
-    this.map = map;
-
-    this.map.zoomControl.setPosition('bottomright');
-
-    setTimeout(() => {
-      this.map.invalidateSize();
-    }, 500);
+    this.map.addControl(new ZoomSlider());
 
     const mapData = await this.mapService.getMap();
-    if (!mapData.reserve) {
-      return;
-    }
 
-    console.log(mapData);
+    console.log('mapData', mapData);
 
-    // render reserve
-    geoJSON(mapData.reserve as any, {
-      style: feature => {
-        return {
-          color: 'red',
-          weight: 1,
-          fillColor: 'transparent'
-        };
-      }
-    }).addTo(map);
+    const reserve = new GeoJSON().readFeature(mapData.reserve, {
+      featureProjection: 'EPSG:3857',
+    });
+
+    this.map.addLayer(new VectorLayer({
+      source: new VectorSource({
+        features: [reserve],
+      }),
+    }));
   }
 
-  setMarkerAddingState() {
+  // async mapReady(map: Map) {
+  //   this.map = map;
 
-  }
+  //   this.map.zoomControl.setPosition('bottomright');
 
+  //   setTimeout(() => {
+  //     this.map.invalidateSize();
+  //   }, 500);
+
+  //   const mapData = await this.mapService.getMap();
+  //   if (!mapData.reserve) {
+  //     return;
+  //   }
+
+  //   console.log(mapData);
+  // }
 }
-
-
-interface MapState {}
