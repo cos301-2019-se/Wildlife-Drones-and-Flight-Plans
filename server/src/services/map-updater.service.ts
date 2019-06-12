@@ -3,11 +3,15 @@ import { Injectable } from '@nestjs/common';
 import { OverpassService } from './overpass.service';
 import { MapPartitionerService } from './map-partitioner.service';
 
+import { DatabaseService } from './db.service';
+import { MapData } from '../entity/map-data.entity'
+
 @Injectable()
 export class MapUpdaterService {
   constructor(
     private overpass: OverpassService,
     private mapPartitioner: MapPartitionerService,
+    private databaseService: DatabaseService,
   ) {}
 
   /**
@@ -40,6 +44,18 @@ export class MapUpdaterService {
     // tslint:disable-next-line:no-console
     console.log('reserves', reserves.features.length);
 
+    const conn = await this.databaseService.getConnection();
+    const mapDataCon = await conn.getRepository(MapData);
+
+    let mapData: MapData;
+
+
+    //save to table
+    mapData = {feature: 'reserve', properties: JSON.stringify(reserves.features)};
+    await mapDataCon.save(mapData);
+
+    //console.log(reserves.features);
+
     const dams = await this.overpass
       .query(`area["name"="${name}"]->.boundaryarea;
       (
@@ -58,6 +74,11 @@ export class MapUpdaterService {
     // tslint:disable-next-line:no-console
     console.log('dams', dams.features.length);
 
+    // //save to table
+    mapData = {feature: 'dams', properties: JSON.stringify(dams.features)};
+    await mapDataCon.save(mapData);
+
+
     const rivers = await this.overpass
       .query(`area["name"="${name}"]->.boundaryarea;
     (
@@ -70,6 +91,10 @@ export class MapUpdaterService {
     // tslint:disable-next-line:no-console
     console.log('rivers', rivers.features.length);
 
+    //save to table
+    mapData = {feature: 'rivers', properties: JSON.stringify(rivers.features)};
+    await mapDataCon.save(mapData);
+
     const intermittentWater = await this.overpass
       .query(`area["name"="${name}"]->.boundaryarea;
       (
@@ -81,6 +106,10 @@ export class MapUpdaterService {
     // tslint:disable-next-line:no-console
     console.log('intermittent', intermittentWater.features.length);
 
+    //save to table
+    mapData = {feature: 'intermittent Water', properties: JSON.stringify(intermittentWater.features)};
+    await mapDataCon.save(mapData);
+
     const roads = await this.overpass
       .query(`area["name"="${name}"]->.boundaryarea;
     (
@@ -91,6 +120,10 @@ export class MapUpdaterService {
     // tslint:disable-next-line:no-console
     console.log('roads', roads.features.length);
 
+    //save to table
+    mapData = {feature: 'roads', properties: JSON.stringify(roads.features)};
+    await mapDataCon.save(mapData);
+
     const residential = await this.overpass
       .query(`area["name"="${name}"]->.boundaryarea;
       (
@@ -98,6 +131,10 @@ export class MapUpdaterService {
         nwr(area.boundaryarea)[barrier=fence];
       );
       out geom;`);
+
+      //save to table
+    mapData = {feature: 'residential', properties: JSON.stringify(residential.features)};
+    await mapDataCon.save(mapData);
 
     // tslint:disable-next-line:no-console
     console.log('residential', residential.features.length);
