@@ -4,9 +4,40 @@
   background: #eee;
 }
 
-::ng-deep .leaflet-control-zoom {
-  margin-bottom: 78px !important;
-  margin-right: 20px !important;
+.add-marker-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  pointer-events: none;
+  .add-marker-icon,
+  .add-marker-icon-shadow {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) translateY(-18px);
+    font-size: 48px;
+  }
+  .add-marker-icon {
+    color: #f00;
+  }
+  .add-marker-icon-shadow {
+    color: #000;
+    filter: blur(3px);
+    opacity: 0.7;
+    transform: translate(-50%, -50%) translateX(7px) translateY(-14px) skewX(-10deg) rotate(20deg) scale(0.8);
+  }
+}
+
+::ng-deep .confirmation-buttons {
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  margin-left: unset !important;
+  margin-inline-start: unset !important;
+  ::ng-deep .confirmation-button {
+    display: inline-block;
+  }
 }
 
 ::ng-deep .fab-button-small {

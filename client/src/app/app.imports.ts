@@ -5,9 +5,11 @@ import { IonicStorageModule, Storage } from '@ionic/storage';
 import { LeafletModule } from '@asymmetrik/ngx-leaflet';
 import { LeafletDrawModule } from '@asymmetrik/ngx-leaflet-draw';
 import { HttpClientModule } from '@angular/common/http';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 export const imports = [
   BrowserModule,
+  BrowserAnimationsModule,
   IonicModule.forRoot(),
   AppRoutingModule,
   HttpClientModule,
