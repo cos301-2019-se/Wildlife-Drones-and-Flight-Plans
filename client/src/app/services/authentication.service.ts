@@ -60,6 +60,24 @@ export class AuthenticationService {
     return await this.http.get(`${this.url}/${endpointName}?${paramsString}`, httpOptions).toPromise();
   }
 
+  /** 
+   * Validates the received password against the minimum password requirements.
+   * Sends a boolean value as a response.
+   * Matches a string of 8 or more characters.
+   * That contains at least one digit.
+   * At least one lowercase character. 
+   * At least one uppercase character.
+   * And can contain some special characters.
+   * @param password The user's password 
+  */
+
+  passRequirements(password) {
+    var re = /(?=^.{8,}$)(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\s)[0-9a-zA-Z!@#$%^&*()]*$/;
+    // Test returns true of false
+    console.log(re.test(password))
+    return re.test(password);
+  }
+
   /**
    * Validate user email and password, then store saved token
    * to storage.
@@ -67,33 +85,41 @@ export class AuthenticationService {
    * @param password The user's password
    */
   async login(email: string, password: string) {
-    // need to get custom token
-    // Save email
-    let res: any;
-    try {
-      res = await this.post('login', {
-        email,
-        password,
-      });
-    } catch (err) {
-      console.error(err);
-      throw err;
+
+    var reqTest = this.passRequirements(password);
+    console.log("Password requirements test result : " + reqTest);
+    if (reqTest == false) {
+      return false;
     }
+    else {
+      // need to get custom token
+      // Save email
+      let res: any;
+      try {
+        res = await this.post('login', {
+          email,
+          password,
+        });
+      } catch (err) {
+        console.error(err);
+        throw err;
+      }
 
-    if (!res || !res.accessToken || res.accessToken === '') {
-      console.log('User does not exist');
-      this.authenticationState.next(false);
-      return;
+      if (!res || !res.accessToken || res.accessToken === '') {
+        console.log('User does not exist');
+        this.authenticationState.next(false);
+        return;
+      }
+
+      const token = res.accessToken;
+
+      await this.storage.set(TOKEN_KEY, token);
+      await this.storage.set(EMAIL_KEY, email);
+
+      this.authenticationState.next(true);
+
+      console.log('Token received from server side ', token);
     }
-
-    const token = res.accessToken;
-
-    await this.storage.set(TOKEN_KEY, token);
-    await this.storage.set(EMAIL_KEY, email);
-
-    this.authenticationState.next(true);
-
-    console.log('Token received from server side ', token);
   }
 
   /**
