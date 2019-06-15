@@ -16,6 +16,11 @@ import { ModelTraining } from './services/model-training.service';
 import { AnimalInterestPointService } from './services/animal-interest-point.service';
 import { CsvReader } from './services/csv-reader.service';
 import { SRTMService } from './services/srtm.service';
+import { PoachingIncidentTypeService } from "./services/poaching-incident-type.service";
+import { PoachingIncidentTypeController } from "./controllers/poaching-incident-type.controller";
+import { PoachingIncidentService } from "./services/poaching-incident.service";
+import { PoachingIncidentController } from "./controllers/poaching-incident.controller";
+
 
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
@@ -38,6 +43,8 @@ import { JwtStrategy } from './auth/jwt.strategy';
     AnimalController,
     AnimalInterestPointController,
     ModelPrediction,
+    PoachingIncidentController,
+    PoachingIncidentTypeController,
   ],
   providers: [
     MapUpdaterService,
@@ -54,6 +61,8 @@ import { JwtStrategy } from './auth/jwt.strategy';
     ModelTraining,
     AuthService,
     JwtStrategy,
+    PoachingIncidentService,
+    PoachingIncidentTypeService,
   ],
   exports: [PassportModule, AuthService],
 })
