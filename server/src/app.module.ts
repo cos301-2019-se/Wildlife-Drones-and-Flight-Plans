@@ -16,6 +16,8 @@ import { ModelTraining } from './services/model-training.service';
 import { AnimalInterestPointService } from './services/animal-interest-point.service';
 import { CsvReader } from './services/csv-reader.service';
 import { SRTMService } from './services/srtm.service';
+import { RangerService } from "./services/ranger.service";
+import { RangerController } from "./controllers/ranger.controller";
 
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
@@ -38,6 +40,7 @@ import { JwtStrategy } from './auth/jwt.strategy';
     AnimalController,
     AnimalInterestPointController,
     ModelPrediction,
+    RangerController,
   ],
   providers: [
     MapUpdaterService,
@@ -54,6 +57,7 @@ import { JwtStrategy } from './auth/jwt.strategy';
     ModelTraining,
     AuthService,
     JwtStrategy,
+    RangerService,
   ],
   exports: [PassportModule, AuthService],
 })
