@@ -7,6 +7,7 @@ import { AnimalLocationService } from '../services/animal-location.service';
 export class ModelTraining {
   constructor(private readonly animalLocationService: AnimalLocationService) {}
 
+  // Model Name is refering to the species
   async trainModel(modelName): Promise<void> {
     const model = new RegressionModel();
     model.enableLogs(true);
@@ -39,23 +40,16 @@ export class ModelTraining {
     model.saveModel(modelName);
   }
 
-  async predict(modelName): Promise<JSON> {
+  // Get a prediction from the model specified
+  async predict(modelName, predictioninput): Promise<JSON> {
     const tempModel = new RegressionModel();
     const model = tempModel.loadModel(modelName);
     if (model == null) {
       return null;
     }
-    const data = await this.animalLocationService.getIndividualAnimalLocationTableData(
-      'AM105',
-    );
-    const jsonData: any[] = JSON.parse(JSON.stringify(data));
+    const jsonData: any[] = JSON.parse(JSON.stringify(predictioninput));
 
-    const numPoints = 200;
-    const randomOffset = Math.floor(
-      Math.random() * (jsonData.length - numPoints - 1),
-    );
     const subset = jsonData
-      .slice(randomOffset, randomOffset + numPoints)
       .map(animal => [
         parseFloat(animal.latitude),
         parseFloat(animal.longitude),
@@ -70,11 +64,9 @@ export class ModelTraining {
         parseFloat(animal.altitude),
       ]);
 
-    const predictions = subset.map(location => model.predict(location));
-
+    const predictions = model.predict(subset);
     return JSON.parse(
       JSON.stringify({
-        points: subset.map(el => [el[0], el[1]]),
         predictions,
       }),
     );
