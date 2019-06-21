@@ -187,15 +187,15 @@ export class AnimalLocationService {
           month: rowDate.getMonth() + 1,
           time: rowDate.getHours() * 60 + rowDate.getMinutes(),
           id: idCopy,
-          distanceToDams: 1,//featureSearchers.dams.getNearest(lng, lat).distance,
-          distanceToRivers: 1,// featureSearchers.rivers.getNearest(lng, lat).distance,
-          distanceToRoads: 1,//featureSearchers.roads.getNearest(lng, lat).distance,
-          distanceToResidences: 1,//featureSearchers.residential.getNearest(lng, lat)
-            //.distance,
-          distanceToIntermittentWater: 1,//featureSearchers.intermittentWater.getNearest(
-           // lng,
-         //   lat,
-         // ).distance,
+          distanceToDams: featureSearchers.dams.getNearest(lng, lat).distance,
+          distanceToRivers: featureSearchers.rivers.getNearest(lng, lat).distance,
+          distanceToRoads: featureSearchers.roads.getNearest(lng, lat).distance,
+          distanceToResidences: featureSearchers.residential.getNearest(lng, lat)
+            .distance,
+          distanceToIntermittentWater: featureSearchers.intermittentWater.getNearest(
+           lng,
+           lat,
+         ).distance,
           altitude: altitudeInfo.averageAltitude,
           slopiness: altitudeInfo.variance,
           species : species,
