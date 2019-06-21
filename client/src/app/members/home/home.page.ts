@@ -1,22 +1,30 @@
 import { Component, ViewChild, ElementRef, OnInit } from '@angular/core';
 
-import { fromLonLat, transformExtent } from 'ol/proj';
+import { fromLonLat, transformExtent, toLonLat } from 'ol/proj';
 import Map from 'ol/Map';
 import View from 'ol/View';
-import TileLayer from 'ol/layer/Tile';
 import XYZ from 'ol/source/XYZ';
 import GeoJSON from 'ol/format/GeoJSON';
-import { Vector as VectorLayer } from 'ol/layer';
+import { Vector as VectorLayer, Tile as TileLayer } from 'ol/layer';
 import { ZoomSlider } from 'ol/control';
-import bbox from '@turf/bbox';
-
-import { MapService } from '../../services/map/map.service';
-import { AuthenticationService } from '../../services/authentication.service';
 import VectorSource from 'ol/source/Vector';
 import Stroke from 'ol/style/Stroke';
 import Style from 'ol/style/Style';
 
-import { trigger, style, animate, transition, group, query, animateChild } from '@angular/animations';
+import bbox from '@turf/bbox';
+import contains from '@turf/boolean-contains';
+import { point } from '@turf/helpers';
+import flatten from '@turf/flatten';
+import mask from '@turf/mask';
+
+import { MapService } from '../../services/map/map.service';
+import { AuthenticationService } from '../../services/authentication.service';
+
+import { trigger, style, animate, transition, group } from '@angular/animations';
+import { GeoJsonVectorTileSource } from '../../services/map/geojsonvt';
+import VectorTileLayer from 'ol/layer/VectorTile';
+import GeometryType from 'ol/geom/GeometryType';
+import Fill from 'ol/style/Fill';
 
 interface MapState {
   confirmations?: {
@@ -74,11 +82,35 @@ interface MapState {
         ]),
       ]),
     ]),
+    trigger('tooltip-animation', [
+      transition(':enter', [
+        style({
+          opacity: 0,
+          transform: 'translateY(-50px)',
+        }),
+        group([
+          animate('600ms ease-in', style({
+            opacity: 1,
+            transform: 'translateY(0)',
+          })),
+        ])
+      ]),
+      transition(':leave', [
+        group([
+          animate('600ms ease-out', style({
+            opacity: 0,
+            transform: 'translateY(-50px)',
+          })),
+        ])
+      ]),
+    ])
   ],
 })
 export class HomePage implements OnInit {
   @ViewChild('map') mapElement: ElementRef;
   private map: Map;
+
+  public withinReserve = true;
 
   states: {[stateName: string]: MapState} = {
     default: {},
@@ -101,6 +133,10 @@ export class HomePage implements OnInit {
     private authService: AuthenticationService,
   ) {}
 
+  ngOnDestroy() {
+
+  }
+
   async ngOnInit() {
     const mapEl = this.mapElement.nativeElement;
 
@@ -119,20 +155,62 @@ export class HomePage implements OnInit {
     });
 
     const mapData = await this.mapService.getMap();
+    console.log(mapData);
+
+    const MAX_ZOOM = 18;
+    const MIN_ZOOM = 11;
 
     this.map.setView(new View({
       center: fromLonLat(this.mapService.getCenter().reverse()),
+      enableRotation: false,
       zoom: 13,
-      minZoom: 11,
-      maxZoom: 18,
+      minZoom: MIN_ZOOM,
+      maxZoom: MAX_ZOOM,
       extent: transformExtent(bbox(mapData.reserve), 'EPSG:4326', 'EPSG:3857'), // minx miny maxx maxy
+    }));
+
+    // create chorograph of dams
+    const max = mapData.grid.reduce((m, cell) => m = cell.properties.distances.dams > m ? cell.properties.distances.dams : m, -Infinity);
+    mapData.grid.forEach(cell => cell.properties.distances.dams = Math.pow(1 - cell.properties.distances.dams / max, 2));
+
+    this.map.addLayer(new VectorLayer({
+      source: new VectorSource({
+        features: new GeoJSON().readFeatures({
+          type: 'FeatureCollection',
+          features: mapData.grid
+        }, {
+          featureProjection: 'EPSG:3857',
+        }),
+      }),
+      // source: GeoJsonVectorTileSource({
+      //   type: 'FeatureCollection',
+      //   features: mapData.grid,
+      // }, {
+      //   minZoom: MIN_ZOOM,
+      //   maxZoom: MAX_ZOOM,
+      // }),
+      updateWhileAnimating: false,
+      updateWhileInteracting: false,
+      // preload: Infinity,
+      renderMode: 'image',
+      style: cell => {
+        return new Style({
+          stroke: new Stroke({
+            color: 'white'
+          }),
+          fill: new Fill({
+            color: [255, 0, 0, cell.getProperties().distances.dams * 0.8]
+          }),
+        });
+      },
     }));
 
     this.map.addControl(new ZoomSlider());
 
     console.log('mapData', mapData);
 
-    const reserve = new GeoJSON().readFeature(mapData.reserve, {
+    // add the reserve's inverse mask to reduce visibility of outside of reserve
+    const reserve = new GeoJSON().readFeature(mask(mapData.reserve), {
       featureProjection: 'EPSG:3857',
     });
 
@@ -140,13 +218,23 @@ export class HomePage implements OnInit {
       source: new VectorSource({
         features: [reserve],
       }),
+      updateWhileAnimating: true,
+      updateWhileInteracting: true,
       style: new Style({
-        stroke: new Stroke({
-          color: 'blue',
-          width: 3,
+        fill: new Fill({
+          color: [255, 255, 255, 0.6],
         }),
-        fill: null,
       }),
     }));
+
+    // check whether the centre of the map is within map bounds whenever it changes
+    const flattenedReserve = flatten(mapData.reserve);
+    this.map.on('rendercomplete', () => {
+      const center = toLonLat(this.map.getView().getCenter());
+
+      this.withinReserve = flattenedReserve.features.some(
+        geom => contains(geom, point(center))
+      );
+    });
   }
 }

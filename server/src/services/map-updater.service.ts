@@ -17,9 +17,7 @@ export class MapUpdaterService {
   async updateMap(name: string) {
     const { reserve, features } = await this.getMapFeatures(name);
 
-    const grid = await this.mapPartitioner.partitionMap(reserve, features, 1);
-
-    console.log('grid', grid);
+    const grid = await this.mapPartitioner.partitionMap(reserve, features, 0.4);
 
     return {
       ...features,

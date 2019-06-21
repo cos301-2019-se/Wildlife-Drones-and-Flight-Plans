@@ -10,7 +10,10 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 export const imports = [
   BrowserModule,
   BrowserAnimationsModule,
-  IonicModule.forRoot(),
+  IonicModule.forRoot({
+    hardwareBackButton: false,
+    mode: 'md',
+  }),
   AppRoutingModule,
   HttpClientModule,
   LeafletModule.forRoot(),

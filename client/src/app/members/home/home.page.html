@@ -1,28 +1,40 @@
 <ion-content>
   <div class="map" #map></div>
 
+  <div class="overlay-tooltip"
+    *ngIf="state != states.default"
+    @tooltip-animation
+  >
+    <ion-icon name="information-circle-outline"></ion-icon>
+    <p *ngIf="state == states.addMarker">
+      Pan the map to move the marker
+    </p>
+  </div>
+
   <div class="add-marker-overlay"
     *ngIf="state == states.addMarker"
     @place-marker-animation
   >
     <ion-icon name="ios-pin" class="add-marker-icon-shadow"></ion-icon>
-    <ion-icon name="ios-pin" class="add-marker-icon"></ion-icon>
+    <ion-icon name="ios-pin" class="add-marker-icon" [class.disabled]="!withinReserve"></ion-icon>
   </div>
 
   <div class="generate-flight-overlay" *ngIf="state == states.viewRoute"></div>
 
+  <!-- fab bottom left buttons -->
   <ion-fab slot="fixed" vertical="bottom" horizontal="start">
     <ion-fab-button size="small" *ngIf="state == states.default" @button-animation>
       <ion-icon name="ios-send"></ion-icon>
     </ion-fab-button>
     <ion-fab-button size="small" color="danger"
-      *ngIf="state == states.default"
+      *ngIf="state === states.default"
       (click)="state = states.addMarker" @button-animation
     >
       <ion-icon name="ios-pin"></ion-icon>
     </ion-fab-button>
   </ion-fab>
   
+  <!-- fab confirmation buttons -->
   <ion-fab slot="fixed" vertical="bottom" horizontal="center"
   class="confirmation-buttons"
     *ngIf="state.confirmations"
@@ -34,11 +46,13 @@
     </ion-fab-button>
     <ion-fab-button class="confirmation-button" size="small" color="success"
       (click)="state.confirmations.done()" @button-animation
+      [disabled]="state === states.addMarker && !withinReserve"
     >
         <ion-icon name="checkmark"></ion-icon>
       </ion-fab-button>
   </ion-fab>
   
+  <!-- fab location button -->
   <ion-fab slot="fixed" vertical="bottom" horizontal="end">
     <ion-fab-button @button-animation>
       <ion-icon name="md-compass"></ion-icon>
