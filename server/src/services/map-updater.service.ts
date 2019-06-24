@@ -4,7 +4,7 @@ import { OverpassService } from './overpass.service';
 import { MapPartitionerService } from './map-partitioner.service';
 
 import { DatabaseService } from './db.service';
-import { ReserveConfiguration } from '../entity/reserve-configuration.entity'
+import { ReserveConfiguration } from '../entity/reserve-configuration.entity';
 
 
 @Injectable()
@@ -29,7 +29,7 @@ export class MapUpdaterService {
     const dbConn = await this.databaseService.getConnection();
     const reserveConfigCon = await dbConn.getRepository(ReserveConfiguration);
 
-    let reserveConfig: ReserveConfiguration = {reserveName: name, cellSize: 1};
+    let reserveConfig: ReserveConfiguration = {reserveName: name, cellSize: '1'};
     await reserveConfigCon.save(reserveConfig);
 
     return {

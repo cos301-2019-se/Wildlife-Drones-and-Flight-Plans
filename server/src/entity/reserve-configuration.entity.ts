@@ -1,11 +1,11 @@
-import { Entity, PrimaryColumn ,Column } from 'typeorm';
+import { Entity, PrimaryColumn, Column } from 'typeorm';
 
 @Entity()
 export class ReserveConfiguration {
   @PrimaryColumn('text')
   reserveName: string;
 
-  @Column("int")
-  cellSize: number;
+  @Column('text')
+  cellSize: string;
 
 }
