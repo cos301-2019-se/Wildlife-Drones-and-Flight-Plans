@@ -7,5 +7,4 @@ export class ModelData {
 
   @Column('blob')
   properties: string;
-
 }
