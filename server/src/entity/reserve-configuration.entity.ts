@@ -7,5 +7,4 @@ export class ReserveConfiguration {
 
   @Column('text')
   cellSize: string;
-
 }
