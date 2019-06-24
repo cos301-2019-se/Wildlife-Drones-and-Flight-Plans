@@ -3,7 +3,7 @@ import { createConnection, Connection } from 'typeorm';
 import { User } from '../entity/user.entity';
 import { AnimalLocation } from '../entity/animal-location.entity';
 import { AnimalInterestPoint } from '../entity/animal-interest-point.entity';
-import { Ranger } from "../entity/ranger.entity";
+import { Ranger } from '../entity/ranger.entity';
 
 @Injectable()
 export class DatabaseService {
