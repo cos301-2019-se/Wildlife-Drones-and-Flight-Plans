@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
-import { PoachingIncidentType } from "./poaching-incident-type.entity";
+import { PoachingIncidentType } from './poaching-incident-type.entity';
 
 @Entity()
 export class PoachingIncident {
