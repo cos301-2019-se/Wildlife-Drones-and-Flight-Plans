@@ -11,7 +11,7 @@ export class MapUpdaterService {
   constructor(
     private overpass: OverpassService,
     private mapPartitioner: MapPartitionerService,
-    private databaseService : DatabaseService,
+    private databaseService: DatabaseService,
   ) {}
 
   /**
@@ -43,7 +43,7 @@ export class MapUpdaterService {
     `);
     // tslint:disable-next-line:no-console
     console.log('reserves', reserves.features.length);
-    
+
     //map service instance
     let mapData = new MapDataService(this.databaseService);
 
@@ -69,8 +69,7 @@ export class MapUpdaterService {
     console.log('dams', dams.features.length);
 
     // //save to table
-   await mapData.addMapData('dams', dams.features);
-
+    await mapData.addMapData('dams', dams.features);
 
     const rivers = await this.overpass
       .query(`area["name"="${name}"]->.boundaryarea;
@@ -122,7 +121,7 @@ export class MapUpdaterService {
       );
       out geom;`);
 
-      //save to table
+    //save to table
     await mapData.addMapData('residential', residential.features);
 
     // tslint:disable-next-line:no-console

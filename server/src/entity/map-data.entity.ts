@@ -7,5 +7,4 @@ export class MapData {
 
   @Column('blob')
   properties: string;
-
 }
