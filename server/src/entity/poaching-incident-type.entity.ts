@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  JoinColumn,
+} from 'typeorm';
 import { PoachingIncident } from './poaching-incident.entity';
 
 @Entity()
@@ -9,7 +15,10 @@ export class PoachingIncidentType {
   @Column()
   type: string;
 
-  @OneToMany(type => PoachingIncident, poachingIncident => poachingIncident.type)
+  @OneToMany(
+    type => PoachingIncident,
+    poachingIncident => poachingIncident.type,
+  )
   @JoinColumn()
   poachingIncidents: PoachingIncident[];
 }

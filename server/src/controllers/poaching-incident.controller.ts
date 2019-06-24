@@ -5,10 +5,14 @@ import { PoachingIncidentService } from '../services/poaching-incident.service';
 export class PoachingIncidentController {
   constructor(
     private readonly poachingIncidentService: PoachingIncidentService,
-  ) { }
+  ) {}
 
   @Get('addPoachingIncident')
-  async addPoachingIncident(@Query('long') long: number, @Query('lat') lat: number, @Query('ptype') pType: string): Promise<boolean> {
+  async addPoachingIncident(
+    @Query('long') long: number,
+    @Query('lat') lat: number,
+    @Query('ptype') pType: string,
+  ): Promise<boolean> {
     return this.poachingIncidentService.addPoachingIncident(long, lat, pType);
   }
 }

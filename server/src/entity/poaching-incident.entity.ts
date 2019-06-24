@@ -8,13 +8,13 @@ export class PoachingIncident {
 
   @Column()
   timestamp: Date;
- 
+
   @Column()
   longitude: number;
 
   @Column()
   latitude: number;
-  
-  @ManyToOne(type => PoachingIncidentType, poachingType => poachingType.id )
+
+  @ManyToOne(type => PoachingIncidentType, poachingType => poachingType.id)
   type: PoachingIncidentType;
 }
