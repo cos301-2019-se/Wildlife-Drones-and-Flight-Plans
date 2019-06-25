@@ -16,8 +16,8 @@ import { ModelTraining } from './services/model-training.service';
 import { AnimalInterestPointService } from './services/animal-interest-point.service';
 import { CsvReader } from './services/csv-reader.service';
 import { SRTMService } from './services/srtm.service';
-import { SpeciesController } from "./controllers/animal-species.controller";
-import { SpeciesService } from "./services/species.service";
+import { SpeciesController } from './controllers/animal-species.controller';
+import { SpeciesService } from './services/species.service';
 
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';

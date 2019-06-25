@@ -6,7 +6,7 @@ export class SpeciesController {
   constructor(private readonly speciesService: SpeciesService) {}
 
   @Get('addSpeciesData')
-  addSpecies(@Query('speciesType') speciesType : string ): Promise<boolean> {
+  addSpecies(@Query('speciesType') speciesType: string): Promise<boolean> {
     return this.speciesService.addSpecies(speciesType);
   }
 }

@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
-import { Species } from "./animal-species.entity";
+import { Species } from './animal-species.entity';
 
 @Entity()
 export class AnimalLocation {
@@ -7,10 +7,10 @@ export class AnimalLocation {
   id?: number;
 
   @Column()
-  animalId: string;  
+  animalId: string;
 
   @ManyToOne(type => Species, species => species.id)
-  species : Species;
+  species: Species;
 
   @Column()
   timestamp: Date;

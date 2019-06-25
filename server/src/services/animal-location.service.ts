@@ -7,7 +7,7 @@ import { GeoService, GeoSearchSet } from './geo.service';
 import { SRTMService } from './srtm.service';
 import bbox from '@turf/bbox';
 import { lengthToDegrees } from '@turf/helpers';
-import { Species } from "../entity/animal-species.entity";
+import { Species } from '../entity/animal-species.entity';
 
 const LOCATION_BIAS = lengthToDegrees(300, 'meters');
 
@@ -21,43 +21,46 @@ export class AnimalLocationService {
     private readonly altitude: SRTMService,
   ) {}
 
-  async addAnimalLocationData(animalId : string, date : Date, long: number, lat : number, animalSpecies : string): Promise<boolean> {
+  async addAnimalLocationData(
+    animalId: string,
+    date: Date,
+    long: number,
+    lat: number,
+    animalSpecies: string,
+  ): Promise<boolean> {
     const con = await this.databaseService.getConnection();
     let animalLocations = new AnimalLocation();
 
-      try {
-        const animalSpeciseType = await JSON.parse(
-          await JSON.stringify(await con.getRepository(Species).find({ species: animalSpecies })),          
-        );
-        
-        animalLocations.species = await animalSpeciseType[0]['id'];
-        animalLocations.animalId = animalId;
-        animalLocations.timestamp = date;
-        animalLocations.month = date[1];
-        animalLocations.time = date[3];
-        animalLocations.longitude = long;
-        animalLocations.latitude = lat;
-        animalLocations.temperature = 0;
-        animalLocations.habitat = '';
-        animalLocations.distanceToRivers = 0;
-        animalLocations.distanceToDams = 0;
-        animalLocations.distanceToIntermittentWater = 0;
-        animalLocations.distanceToResidences = 0;
-        animalLocations.distanceToRoads = 0;
-        animalLocations.altitude = 0;
-        animalLocations.slopiness = 0;
-        const addedPoachingIncident = await con.getRepository(AnimalLocation).save(animalLocations);
-        
-        console.log(
-          'Saved a new animal loction with id: ' + animalLocations.id,
-        );
-  
-        return addedPoachingIncident != null;              
-      } catch (error) {
-        console.log("animal location was not saved");
-          return false;
-      }
-        
+    try {
+      const animalSpeciseType =  await con.getRepository(Species).findOne({ species: animalSpecies });
+
+      animalLocations.species = await animalSpeciseType;
+      animalLocations.animalId = animalId;
+      animalLocations.timestamp = date;
+      animalLocations.month = date[1];
+      animalLocations.time = date[3];
+      animalLocations.longitude = long;
+      animalLocations.latitude = lat;
+      animalLocations.temperature = 0;
+      animalLocations.habitat = '';
+      animalLocations.distanceToRivers = 0;
+      animalLocations.distanceToDams = 0;
+      animalLocations.distanceToIntermittentWater = 0;
+      animalLocations.distanceToResidences = 0;
+      animalLocations.distanceToRoads = 0;
+      animalLocations.altitude = 0;
+      animalLocations.slopiness = 0;
+      const addedPoachingIncident = await con
+        .getRepository(AnimalLocation)
+        .save(animalLocations);
+
+      console.log('Saved a new animal loction with id: ' + animalLocations.id);
+
+      return addedPoachingIncident != null;
+    } catch (error) {
+      console.log('animal location was not saved');
+      return false;
+    }
 
     // if (addAnimal != null) {
     //     return true;
@@ -138,7 +141,7 @@ export class AnimalLocationService {
         return;
       }
 
-     // row = JSON.stringify(row)
+      // row = JSON.stringify(row)
 
       const lat = parseFloat(row['location-lat']);
       const lng = parseFloat(row['location-long']);
@@ -163,18 +166,16 @@ export class AnimalLocationService {
       //console.log('row species: ' + await row['species'])
 
       let species;
-      let leng = animalSpeciseType.length
+      let leng = animalSpeciseType.length;
 
-      for(let a = 0; a < leng; a++)
-      {
-        if(row['species'] == animalSpeciseType[a]['species'])
-        {
+      for (let a = 0; a < leng; a++) {
+        if (row['species'] == animalSpeciseType[a]['species']) {
           species = animalSpeciseType[a]['id'];
-          a += leng;            
+          a += leng;
         }
-      }  
+      }
 
-      console.log("species: " + species);
+      console.log('species: ' + species);
 
       try {
         const location: AnimalLocation = {
@@ -188,19 +189,22 @@ export class AnimalLocationService {
           time: rowDate.getHours() * 60 + rowDate.getMinutes(),
           id: idCopy,
           distanceToDams: featureSearchers.dams.getNearest(lng, lat).distance,
-          distanceToRivers: featureSearchers.rivers.getNearest(lng, lat).distance,
-          distanceToRoads: featureSearchers.roads.getNearest(lng, lat).distance,
-          distanceToResidences: featureSearchers.residential.getNearest(lng, lat)
+          distanceToRivers: featureSearchers.rivers.getNearest(lng, lat)
             .distance,
+          distanceToRoads: featureSearchers.roads.getNearest(lng, lat).distance,
+          distanceToResidences: featureSearchers.residential.getNearest(
+            lng,
+            lat,
+          ).distance,
           distanceToIntermittentWater: featureSearchers.intermittentWater.getNearest(
-           lng,
-           lat,
-         ).distance,
+            lng,
+            lat,
+          ).distance,
           altitude: altitudeInfo.averageAltitude,
           slopiness: altitudeInfo.variance,
-          species : species,
+          species: species,
         };
-  
+
         buffer.push(location);
         if (buffer.length === MAX_BUFFER_SIZE) {
           insertRow();
@@ -208,7 +212,6 @@ export class AnimalLocationService {
       } catch (error) {
         console.log(error);
       }
-      
     });
   }
 
@@ -233,17 +236,21 @@ export class AnimalLocationService {
     const con = await this.databaseService.getConnection();
 
     const animalSpeciseType = await JSON.parse(
-      JSON.stringify(await con.getRepository(Species).find({species : animalSpecies })),
+      JSON.stringify(
+        await con.getRepository(Species).find({ species: animalSpecies }),
+      ),
     );
 
     try {
       return JSON.parse(
         JSON.stringify(
-          await con.getRepository(AnimalLocation).find({ species: animalSpeciseType[0]['id'] }),
+          await con
+            .getRepository(AnimalLocation)
+            .find({ species: animalSpeciseType[0]['id'] }),
         ),
       );
     } catch (error) {
       return JSON.parse('false');
-    }    
+    }
   }
 }
