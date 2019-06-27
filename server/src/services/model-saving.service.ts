@@ -24,4 +24,19 @@ export class ModelSaving {
       return false;
     }
   }
+
+  async getModel(name: string): Promise<JSON> {
+    const con = await this.databaseService.getConnection();
+
+    //will add model if it does not exist and will update it if it does
+    try {
+      const model = con.getRepository(ModelData).findOne({ name: name });
+      // tslint:disable-next-line:no-console
+      console.log('Model data retirved: ' + model.name);
+      return JSON.parse(model);
+    } catch (error) {
+      console.log('Model data not sent');
+      return JSON.parse('[]');
+    }
+  }
 }
