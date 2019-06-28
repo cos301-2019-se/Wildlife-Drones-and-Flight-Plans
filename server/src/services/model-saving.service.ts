@@ -30,10 +30,10 @@ export class ModelSaving {
 
     //will add model if it does not exist and will update it if it does
     try {
-      const model = con.getRepository(ModelData).findOne({ name: name });
+      const model = await con.getRepository(ModelData).findOne({ name: name });
       // tslint:disable-next-line:no-console
       console.log('Model data retirved: ' + model.name);
-      return JSON.parse(model);
+      return  JSON.parse(JSON.stringify(model));
     } catch (error) {
       console.log('Model data not sent');
       return JSON.parse('[]');
