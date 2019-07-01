@@ -45,11 +45,11 @@ export class ModelPrediction {
         "slopiness": 5.169230769
       }
      ];
-    return this.modelTraining.predict('elephant_training_model',json);
+    return this.modelTraining.predict('Elephant',json);
   }
 
-  @Get('trainModel')
+  @Get('trainElephantModel')
   trainElephantModel(): Promise<void> {
-    return this.modelTraining.trainModel('elephant_training_model');
+    return this.modelTraining.trainModel('Elephant');
   }
 }

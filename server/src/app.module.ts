@@ -23,7 +23,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './auth/auth.service';
 import { JwtStrategy } from './auth/jwt.strategy';
-
+import {ModelSaving} from './services/model-saving.service';
 @Module({
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt' }),
@@ -59,6 +59,7 @@ import { JwtStrategy } from './auth/jwt.strategy';
     AuthService,
     JwtStrategy,
     SpeciesService,
+    ModelSaving,
   ],
   exports: [PassportModule, AuthService],
 })

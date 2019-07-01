@@ -1,18 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { RegressionModel } from './regression-model.service';
 import { AnimalLocationService } from '../services/animal-location.service';
-
+import { ModelSaving } from './model-saving.service';
 // This class trains the models from database data
 @Injectable()
 export class ModelTraining {
-  constructor(private readonly animalLocationService: AnimalLocationService) {}
+  constructor(private readonly animalLocationService: AnimalLocationService, private readonly modelSaving: ModelSaving) {}
 
   // Model Name is refering to the species
   async trainModel(modelName): Promise<void> {
     const model = new RegressionModel();
     model.enableLogs(true);
     // AnimalLocationService
-    const data = await this.animalLocationService.getAllAnimalsLocationTableData();
+    const data = await this.animalLocationService.getSpeciesLocationTableData(modelName);
     const jsonData = JSON.parse(JSON.stringify(data));
 
     const inputData = jsonData.map(animal => [
@@ -35,15 +35,14 @@ export class ModelTraining {
       parseFloat(animal.longitude),
     ]);
     outputData.shift();
-
     model.trainModel(inputData, outputData);
-    model.saveModel(modelName);
+    await model.saveModel(modelName,this.modelSaving);
   }
 
   // Get a prediction from the model specified
   async predict(modelName, predictioninput): Promise<JSON> {
     const tempModel = new RegressionModel();
-    const model = tempModel.loadModel(modelName);
+    const model = await tempModel.loadModel(modelName,this.modelSaving);
     if (model == null) {
       return null;
     }

@@ -13,7 +13,7 @@ export class SpeciesService {
     species.species = speciesType;
     // tslint:disable-next-line:no-console
     const addedSpecies = await con.getRepository(Species).save(species);
-    console.log('Saved a new animal specie with id: ' + species.id);
+    console.log('Saved a new animal species with id: ' + species.id);
     return addedSpecies != null;
   }
 }
