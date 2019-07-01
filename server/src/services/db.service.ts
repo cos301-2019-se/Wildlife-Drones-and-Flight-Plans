@@ -4,6 +4,7 @@ import { User } from '../entity/user.entity';
 import { AnimalLocation } from '../entity/animal-location.entity';
 import { AnimalInterestPoint } from '../entity/animal-interest-point.entity';
 import { ModelData } from "../entity/model.entity";
+import { Species } from '../entity/animal-species.entity';
 
 @Injectable()
 export class DatabaseService {
@@ -30,7 +31,7 @@ export class DatabaseService {
       this.connection = await createConnection({
         type: 'sqlite',
         database: 'database.sqlite',
-        entities: [User, AnimalLocation, AnimalInterestPoint,ModelData],
+        entities: [User, AnimalLocation, AnimalInterestPoint,ModelData, Species],
         synchronize: true,
         logging: false,
       });

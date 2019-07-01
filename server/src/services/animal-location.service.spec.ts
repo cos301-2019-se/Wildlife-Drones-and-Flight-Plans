@@ -9,6 +9,7 @@ import { MapPartitionerService } from '../services/map-partitioner.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AnimalController } from '../controllers/animal-location.controller';
 import { AnimalLocation } from '../entity/animal-location.entity';
+import { Species } from '../entity/animal-species.entity';
 
 let controller;
 
@@ -36,6 +37,10 @@ beforeAll(async () => {
 
   const date = new Date();
 
+  const animalSpeciseType = await con
+        .getRepository(Species)
+        .findOne({ species: 'Elephant' });
+
   const location1: AnimalLocation = {
     animalId: 'AM105',
     latitude: 21.548752,
@@ -52,6 +57,7 @@ beforeAll(async () => {
     distanceToIntermittentWater: 999999,
     altitude: 999999,
     slopiness: 999999,
+    species: animalSpeciseType,
   };
 
   const location2: AnimalLocation = {
@@ -70,6 +76,7 @@ beforeAll(async () => {
     distanceToIntermittentWater: 999999,
     altitude: 999999,
     slopiness: 999999,
+    species: animalSpeciseType,
   };
 
   const location3: AnimalLocation = {
@@ -88,6 +95,7 @@ beforeAll(async () => {
     distanceToIntermittentWater: 999999,
     altitude: 999999,
     slopiness: 999999,
+    species: animalSpeciseType,
   };
 
   const location4: AnimalLocation = {
@@ -106,6 +114,7 @@ beforeAll(async () => {
     distanceToIntermittentWater: 999999,
     altitude: 999999,
     slopiness: 999999,
+    species: animalSpeciseType,
   };
 
   const location5: AnimalLocation = {
@@ -124,6 +133,7 @@ beforeAll(async () => {
     distanceToIntermittentWater: 999999,
     altitude: 999999,
     slopiness: 999999,
+    species: animalSpeciseType,
   };
 
   await animalCon.save(location1);
