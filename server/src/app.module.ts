@@ -16,7 +16,7 @@ import { ModelTraining } from './services/model-training.service';
 import { AnimalInterestPointService } from './services/animal-interest-point.service';
 import { CsvReader } from './services/csv-reader.service';
 import { SRTMService } from './services/srtm.service';
-
+import {ClassifierTraining} from './services/animal-classifier-training.service';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './auth/auth.service';
@@ -46,6 +46,7 @@ import { JwtStrategy } from './auth/jwt.strategy';
     UserService,
     OverpassService,
     GeoService,
+    ClassifierTraining,
     MapPartitionerService,
     AnimalLocationService,
     AnimalInterestPointService,
