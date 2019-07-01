@@ -3,6 +3,8 @@ import { createConnection, Connection } from 'typeorm';
 import { User } from '../entity/user.entity';
 import { AnimalLocation } from '../entity/animal-location.entity';
 import { AnimalInterestPoint } from '../entity/animal-interest-point.entity';
+import { Drone } from '../entity/drone.entity'
+import { DroneRoute } from '../entity/drone-route.entity';
 
 @Injectable()
 export class DatabaseService {
@@ -29,7 +31,7 @@ export class DatabaseService {
       this.connection = await createConnection({
         type: 'sqlite',
         database: 'database.sqlite',
-        entities: [User, AnimalLocation, AnimalInterestPoint],
+        entities: [User, AnimalLocation, AnimalInterestPoint, Drone, DroneRoute],
         synchronize: true,
         logging: false,
       });
