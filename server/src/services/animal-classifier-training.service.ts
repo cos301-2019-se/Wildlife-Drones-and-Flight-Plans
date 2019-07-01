@@ -14,9 +14,9 @@ export class ClassifierTraining {
 
     //  Trains the model
     // Fetch data from database then train on that data
-    async trainModel() {
+    async trainModel(speciesName) {
         //  fetch data
-        const data = await this.animalLocationService.getAllAnimalsLocationTableData();
+        const data = await this.animalLocationService.getSpeciesLocationTableData(speciesName);
 
         const jsonData = JSON.parse(JSON.stringify(data));
         const teachingData = [];
@@ -38,8 +38,7 @@ export class ClassifierTraining {
         this.classifier = new Classifier(teachingData);
     }
 
-    getClassification(data)
-    {
+    getClassification(data) {
         return this.classifier.getDistance(data);
     }
 }

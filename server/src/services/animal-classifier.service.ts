@@ -77,13 +77,13 @@ export class Classifier {
         }
 
         const keys = Object.keys(points[0]);
-        console.log('keys', keys);
-        console.time('standardizers');
+       // console.log('keys', keys);
+        //console.time('standardizers');
         const keyStandardizers = keys.reduce((ob, key) => {
             ob[key] = new Standardizer(points.map(point => point[key]));
             return ob;
         }, {});
-        console.timeEnd('standardizers');
+       // console.timeEnd('standardizers');
 
         this.kd = new kdTree(points, (a, b) => {
             return Math.sqrt(Object.keys(a).reduce((sum, key) => {
