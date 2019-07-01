@@ -15,7 +15,7 @@ export class ClassifierTraining {
     //  Trains the model
     // Fetch data from database then train on that data
     async trainModel(speciesName) {
-        //  fetch data
+        //  fetch data by species name
         const data = await this.animalLocationService.getSpeciesLocationTableData(speciesName);
 
         const jsonData = JSON.parse(JSON.stringify(data));
