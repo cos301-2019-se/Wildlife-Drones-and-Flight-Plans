@@ -8,7 +8,7 @@ export class PoachingIncidentTypeController {
   ) {}
 
   @Get('addPoachingIncidentType')
-  async addPoachingIncidentType(
+  addPoachingIncidentType(
     @Query('poachingType') poachingType: string,
   ): Promise<boolean> {
     return this.poachingIncidentTypeService.addPoachingIncidentType(

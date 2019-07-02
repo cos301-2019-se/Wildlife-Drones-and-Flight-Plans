@@ -8,7 +8,7 @@ export class PoachingIncidentController {
   ) {}
 
   @Get('addPoachingIncident')
-  async addPoachingIncident(
+  addPoachingIncident(
     @Query('long') long: number,
     @Query('lat') lat: number,
     @Query('ptype') pType: string,
