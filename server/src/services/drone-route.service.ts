@@ -8,7 +8,7 @@ import { Drone } from '../entity/drone.entity';
 export class DroneRouteService {
   constructor(private readonly databaseService: DatabaseService) {}
 
-  //add drone route to Drone route table in database.
+  // add drone route to Drone route table in database
   async addDroneRoute(id: number, points: string): Promise<boolean> {
     const con = await this.databaseService.getConnection();
     const droneRoute = new DroneRoute();
@@ -17,7 +17,7 @@ export class DroneRouteService {
       .getRepository(Drone)
       .findOne({ id: id });
 
-    if ((await droneIdfromDroneTable) == undefined) {
+    if ((droneIdfromDroneTable) == undefined) {
       console.log('Drone ' + id + ' was not found');
       return false;
     }
@@ -25,7 +25,7 @@ export class DroneRouteService {
     try {
       droneRoute.drone = droneIdfromDroneTable;
       droneRoute.points = points;
-      droneRoute.percentComplete = '0';
+      droneRoute.percentComplete = 0;
       droneRoute.timestamp = new Date();
       droneRoute.active = true;
       // tslint:disable-next-line:no-console
@@ -44,12 +44,12 @@ export class DroneRouteService {
   async updateDroneRoute(
     id: number,
     points: string,
-    percent: string,
+    percent: number,
   ): Promise<boolean> {
     const con = await this.databaseService.getConnection();
     const droneRoute = await con.getRepository(DroneRoute).findOne({ id: id });
 
-    if ((await droneRoute) == undefined) {
+    if ((droneRoute) == undefined) {
       console.log('Drone route' + id + ' was not found');
       return false;
     }

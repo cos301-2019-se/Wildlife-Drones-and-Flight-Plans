@@ -10,10 +10,10 @@ export class DroneService {
   //add drone to Drone table in database.
   async addDrone(
     name: string,
-    avgSpeed: string,
-    avgFlightTime: string,
-    speed: string,
-    flightTime: string,
+    avgSpeed: number,
+    avgFlightTime: number,
+    speed: number,
+    flightTime: number,
     long: number,
     lat: number,
   ): Promise<boolean> {
@@ -42,10 +42,10 @@ export class DroneService {
   async updateInfo(
     id: number,
     name: string,
-    avgSpeed: string,
-    avgFlightTime: string,
-    speed: string,
-    flightTime: string,
+    avgSpeed: number,
+    avgFlightTime: number,
+    speed: number,
+    flightTime: number,
     long: number,
     lat: number,
   ): Promise<boolean> {

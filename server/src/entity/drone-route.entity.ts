@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, Double } from 'typeorm';
 import { Drone } from './drone.entity';
 
 @Entity()
@@ -12,8 +12,8 @@ export class DroneRoute {
   @Column('text')
   points: string;
 
-  @Column('text')
-  percentComplete: string;
+  @Column()
+  percentComplete: number;
 
   @Column()
   timestamp: Date;

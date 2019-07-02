@@ -19,7 +19,7 @@ export class DroneRouteController {
   async updateDroneRoute(
     @Query('routeId') id: number,
     @Query('points') points: string,
-    @Query('percent') percent: string,
+    @Query('percent') percent: number,
   ): Promise<boolean> {
     return this.droneRouteService.updateDroneRoute(id, points, percent);
   }

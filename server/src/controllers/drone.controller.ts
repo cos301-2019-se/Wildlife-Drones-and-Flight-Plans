@@ -9,10 +9,10 @@ export class DroneController {
   @Get('addDrone')
   async addDrone(
     @Query('name') name: string,
-    @Query('avgSpeed') avgSpeed: string,
-    @Query('avgFlightTime') avgFlightTime: string,
-    @Query('speed') speed: string,
-    @Query('flightTime') flightTime: string,
+    @Query('avgSpeed') avgSpeed: number,
+    @Query('avgFlightTime') avgFlightTime: number,
+    @Query('speed') speed: number,
+    @Query('flightTime') flightTime: number,
     @Query('long') long: number,
     @Query('lat') lat: number,
   ): Promise<boolean> {
@@ -32,10 +32,10 @@ export class DroneController {
   async updateDrone(
     @Query('id') id: number,
     @Query('name') name: string,
-    @Query('avgSpeed') avgSpeed: string,
-    @Query('avgFlightSpeed') avgFlightSpeed: string,
-    @Query('speed') speed: string,
-    @Query('flightTime') flightTime: string,
+    @Query('avgSpeed') avgSpeed: number,
+    @Query('avgFlightSpeed') avgFlightSpeed: number,
+    @Query('speed') speed: number,
+    @Query('flightTime') flightTime: number,
     @Query('long') long: number,
     @Query('lat') lat: number,
   ): Promise<boolean> {

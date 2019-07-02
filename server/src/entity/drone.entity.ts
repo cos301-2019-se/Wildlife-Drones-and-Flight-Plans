@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, JoinColumn, Double } from 'typeorm';
 import { DroneRoute } from './drone-route.entity';
 
 @Entity()
@@ -9,17 +9,17 @@ export class Drone {
   @Column('text')
   name: string;
 
-  @Column('text')
-  avgSpeed: string;
+  @Column()
+  avgSpeed: number;
 
-  @Column('text')
-  avgFlightTime: string;
+  @Column()
+  avgFlightTime: number;
 
-  @Column('text')
-  speed: string;
+  @Column()
+  speed: number;
 
-  @Column('text')
-  flightTime: string;
+  @Column()
+  flightTime: number;
 
   @Column()
   longitude: number;
