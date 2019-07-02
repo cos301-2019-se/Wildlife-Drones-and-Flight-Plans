@@ -5,6 +5,7 @@ import { MapPartitionerService } from './map-partitioner.service';
 
 import { DatabaseService } from './db.service';
 import { MapDataService } from '../services/map-data.service';
+import { ReserveConfiguration } from '../entity/reserve-configuration.entity';
 
 @Injectable()
 export class MapUpdaterService {
@@ -24,6 +25,12 @@ export class MapUpdaterService {
     const grid = await this.mapPartitioner.partitionMap(reserve, features, 1);
 
     console.log('grid', grid);
+
+    const dbConn = await this.databaseService.getConnection();
+    const reserveConfigCon = await dbConn.getRepository(ReserveConfiguration);
+
+    let reserveConfig: ReserveConfiguration = {reserveName: name, cellSize: '1'};
+    await reserveConfigCon.save(reserveConfig);
 
     return {
       ...features,
