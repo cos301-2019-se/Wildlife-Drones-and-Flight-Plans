@@ -6,7 +6,7 @@ export class RangerController {
   constructor(private readonly rangerServie: RangerService) {}
 
   @Get('addRanger')
-  async addRanger(
+  addRanger(
     @Query('long') long: number,
     @Query('lat') lat: number,
     @Query('rangerID') rangerID: number,
@@ -15,7 +15,7 @@ export class RangerController {
   }
 
   @Get('updateRangerLocation')
-  async updateRangerLocation(
+  updateRangerLocation(
     @Query('long') long: number,
     @Query('lat') lat: number,
     @Query('rangerID') rangerID: number,
