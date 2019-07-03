@@ -7,16 +7,23 @@ import { PoachingIncidentType } from '../entity/poaching-incident-type.entity';
 export class PoachingIncidentService {
   constructor(private readonly databaseService: DatabaseService) { }
 
-  async addPoachingIncident(long: number, lat: number, pType: string): Promise<boolean> {
+  async addPoachingIncident(lon: number, lat: number, pType: string, description: string): Promise<boolean> {
     const con = await this.databaseService.getConnection();
     const poachingIncident = new PoachingIncident();
 
     try {    
     const poachingIncidentType =  await con.getRepository(PoachingIncidentType).findOne({ type: pType });
+    console.log("return type for incoreect input test "+ poachingIncidentType)
 
+    if(poachingIncidentType == undefined) {
+      console.log("The type of incident does not exist.")
+      return false;
+    }
+    else {
     poachingIncident.timestamp = new Date();
-    poachingIncident.longitude = long;
+    poachingIncident.longitude = lon;
     poachingIncident.latitude = lat;
+    poachingIncident.description = description
     poachingIncident.type = await poachingIncidentType;
     // tslint:disable-next-line:no-console
     const addedPoachingIncident = await con.getRepository(PoachingIncident).save(poachingIncident);
@@ -25,10 +32,11 @@ export class PoachingIncidentService {
     );
 
       return addedPoachingIncident != null;
-
+    }
     } catch (error) {    
       console.log('The type of incident does not exist.');
       return false;
     }
+  
   }
 }

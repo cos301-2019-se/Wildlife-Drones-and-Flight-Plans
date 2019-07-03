@@ -15,6 +15,9 @@ export class PoachingIncident {
   @Column()
   latitude: number;
 
+  @Column()
+  description: string;
+
   @ManyToOne(type => PoachingIncidentType, poachingType => poachingType.id)
   type: PoachingIncidentType;
 }
