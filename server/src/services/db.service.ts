@@ -5,7 +5,6 @@ import { AnimalLocation } from '../entity/animal-location.entity';
 import { AnimalInterestPoint } from '../entity/animal-interest-point.entity';
 import { MapData } from '../entity/map-data.entity'
 import { ReserveConfiguration } from '../entity/reserve-configuration.entity';
-import { MapData } from '../entity/map-data.entity';
 
 @Injectable()
 export class DatabaseService {
