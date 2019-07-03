@@ -22,6 +22,10 @@ import { PoachingIncidentTypeService } from './services/poaching-incident-type.s
 import { PoachingIncidentTypeController } from './controllers/poaching-incident-type.controller';
 import { PoachingIncidentService } from './services/poaching-incident.service';
 import { PoachingIncidentController } from './controllers/poaching-incident.controller';
+import { DroneService } from './services/drone.service';
+import { DroneController } from './controllers/drone.controller';
+import { DroneRouteService } from './services/drone-route.service';
+import { DroneRouteController } from './controllers/drone-route.controller';
 
 import { SpeciesController } from './controllers/animal-species.controller';
 import { SpeciesService } from './services/species.service';
@@ -51,6 +55,8 @@ import { JwtStrategy } from './auth/jwt.strategy';
     PoachingIncidentController,
     PoachingIncidentTypeController,
     SpeciesController,
+    DroneController,
+    DroneRouteController,
   ],
   providers: [
     MapUpdaterService,
@@ -72,6 +78,8 @@ import { JwtStrategy } from './auth/jwt.strategy';
     PoachingIncidentService,
     PoachingIncidentTypeService,
     SpeciesService,
+    DroneService,
+    DroneRouteService,
   ],
   exports: [PassportModule, AuthService],
 })

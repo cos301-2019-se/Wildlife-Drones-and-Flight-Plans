@@ -10,6 +10,8 @@ import { MapData } from '../entity/map-data.entity';
 import { ReserveConfiguration } from '../entity/reserve-configuration.entity';
 import { ModelData } from '../entity/model.entity';
 import { Species } from '../entity/animal-species.entity';
+import { Drone } from '../entity/drone.entity'
+import { DroneRoute } from '../entity/drone-route.entity';
 
 @Injectable()
 export class DatabaseService {
@@ -47,6 +49,8 @@ export class DatabaseService {
           Ranger,
           ModelData,
           Species,
+          Drone,
+          DroneRoute
         ],
         synchronize: true,
         logging: false,
