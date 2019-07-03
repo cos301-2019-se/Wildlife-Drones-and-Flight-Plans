@@ -18,6 +18,10 @@ import { CsvReader } from './services/csv-reader.service';
 import { SRTMService } from './services/srtm.service';
 import { RangerService } from './services/ranger.service';
 import { RangerController } from './controllers/ranger.controller';
+import { PoachingIncidentTypeService } from './services/poaching-incident-type.service';
+import { PoachingIncidentTypeController } from './controllers/poaching-incident-type.controller';
+import { PoachingIncidentService } from './services/poaching-incident.service';
+import { PoachingIncidentController } from './controllers/poaching-incident.controller';
 
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
@@ -41,6 +45,8 @@ import { JwtStrategy } from './auth/jwt.strategy';
     AnimalInterestPointController,
     ModelPrediction,
     RangerController,
+    PoachingIncidentController,
+    PoachingIncidentTypeController,
   ],
   providers: [
     MapUpdaterService,
@@ -58,6 +64,8 @@ import { JwtStrategy } from './auth/jwt.strategy';
     AuthService,
     JwtStrategy,
     RangerService,
+    PoachingIncidentService,
+    PoachingIncidentTypeService,
   ],
   exports: [PassportModule, AuthService],
 })

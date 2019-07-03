@@ -3,11 +3,15 @@ import { Injectable } from '@nestjs/common';
 import { OverpassService } from './overpass.service';
 import { MapPartitionerService } from './map-partitioner.service';
 
+import { DatabaseService } from './db.service';
+import { MapDataService } from '../services/map-data.service';
+import { ReserveConfiguration } from '../entity/reserve-configuration.entity';
 @Injectable()
 export class MapUpdaterService {
   constructor(
     private overpass: OverpassService,
     private mapPartitioner: MapPartitionerService,
+    private databaseService: DatabaseService,
   ) {}
 
   /**
@@ -20,6 +24,12 @@ export class MapUpdaterService {
     const grid = await this.mapPartitioner.partitionMap(reserve, features, 1);
 
     console.log('grid', grid);
+
+    const dbConn = await this.databaseService.getConnection();
+    const reserveConfigCon = await dbConn.getRepository(ReserveConfiguration);
+
+    let reserveConfig: ReserveConfiguration = {reserveName: name, cellSize: '1'};
+    await reserveConfigCon.save(reserveConfig);
 
     return {
       ...features,
@@ -40,6 +50,12 @@ export class MapUpdaterService {
     // tslint:disable-next-line:no-console
     console.log('reserves', reserves.features.length);
 
+    //map service instance
+    let mapData = new MapDataService(this.databaseService);
+
+    //save to table
+    await mapData.addMapData('reserve', reserves.features);
+
     const dams = await this.overpass
       .query(`area["name"="${name}"]->.boundaryarea;
       (
@@ -58,6 +74,9 @@ export class MapUpdaterService {
     // tslint:disable-next-line:no-console
     console.log('dams', dams.features.length);
 
+    // //save to table
+    await mapData.addMapData('dams', dams.features);
+
     const rivers = await this.overpass
       .query(`area["name"="${name}"]->.boundaryarea;
     (
@@ -70,6 +89,9 @@ export class MapUpdaterService {
     // tslint:disable-next-line:no-console
     console.log('rivers', rivers.features.length);
 
+    //save to table
+    await mapData.addMapData('rivers', rivers.features);
+
     const intermittentWater = await this.overpass
       .query(`area["name"="${name}"]->.boundaryarea;
       (
@@ -81,6 +103,9 @@ export class MapUpdaterService {
     // tslint:disable-next-line:no-console
     console.log('intermittent', intermittentWater.features.length);
 
+    //save to table
+    await mapData.addMapData('intermittent', intermittentWater.features);
+
     const roads = await this.overpass
       .query(`area["name"="${name}"]->.boundaryarea;
     (
@@ -91,6 +116,9 @@ export class MapUpdaterService {
     // tslint:disable-next-line:no-console
     console.log('roads', roads.features.length);
 
+    //save to table
+    await mapData.addMapData('roads', roads.features);
+
     const residential = await this.overpass
       .query(`area["name"="${name}"]->.boundaryarea;
       (
@@ -98,6 +126,9 @@ export class MapUpdaterService {
         nwr(area.boundaryarea)[barrier=fence];
       );
       out geom;`);
+
+    //save to table
+    await mapData.addMapData('residential', residential.features);
 
     // tslint:disable-next-line:no-console
     console.log('residential', residential.features.length);

@@ -4,6 +4,10 @@ import { User } from '../entity/user.entity';
 import { AnimalLocation } from '../entity/animal-location.entity';
 import { AnimalInterestPoint } from '../entity/animal-interest-point.entity';
 import { Ranger } from '../entity/ranger.entity';
+import { PoachingIncident } from "../entity/poaching-incident.entity";
+import { PoachingIncidentType } from "../entity/poaching-incident-type.entity";
+import { MapData } from '../entity/map-data.entity'
+import { ReserveConfiguration } from '../entity/reserve-configuration.entity';
 
 @Injectable()
 export class DatabaseService {
@@ -30,7 +34,7 @@ export class DatabaseService {
       this.connection = await createConnection({
         type: 'sqlite',
         database: 'database.sqlite',
-        entities: [User, AnimalLocation, AnimalInterestPoint, Ranger],
+        entities: [User, AnimalLocation, AnimalInterestPoint, MapData, ReserveConfiguration, PoachingIncident, PoachingIncidentType, Ranger],
         synchronize: true,
         logging: false,
       });
