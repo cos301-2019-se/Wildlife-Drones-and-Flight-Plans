@@ -23,6 +23,9 @@ import { PoachingIncidentTypeController } from './controllers/poaching-incident-
 import { PoachingIncidentService } from './services/poaching-incident.service';
 import { PoachingIncidentController } from './controllers/poaching-incident.controller';
 
+import { SpeciesController } from './controllers/animal-species.controller';
+import { SpeciesService } from './services/species.service';
+import { ClassifierTraining } from './services/animal-classifier-training.service';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './auth/auth.service';
@@ -47,6 +50,7 @@ import { JwtStrategy } from './auth/jwt.strategy';
     RangerController,
     PoachingIncidentController,
     PoachingIncidentTypeController,
+    SpeciesController,
   ],
   providers: [
     MapUpdaterService,
@@ -55,6 +59,7 @@ import { JwtStrategy } from './auth/jwt.strategy';
     UserService,
     OverpassService,
     GeoService,
+    ClassifierTraining,
     MapPartitionerService,
     AnimalLocationService,
     AnimalInterestPointService,
@@ -66,6 +71,7 @@ import { JwtStrategy } from './auth/jwt.strategy';
     RangerService,
     PoachingIncidentService,
     PoachingIncidentTypeService,
+    SpeciesService,
   ],
   exports: [PassportModule, AuthService],
 })
