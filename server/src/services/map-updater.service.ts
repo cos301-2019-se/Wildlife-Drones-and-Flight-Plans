@@ -4,6 +4,7 @@ import { OverpassService } from './overpass.service';
 import { MapPartitionerService } from './map-partitioner.service';
 
 import { DatabaseService } from './db.service';
+import { MapDataService } from '../services/map-data.service';
 import { ReserveConfiguration } from '../entity/reserve-configuration.entity';
 import { MapDataService } from '../services/map-data.service';
 
