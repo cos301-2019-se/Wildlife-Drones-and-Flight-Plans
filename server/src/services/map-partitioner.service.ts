@@ -3,12 +3,14 @@ import { GeoService, GeoSearchSet } from '../services/geo.service';
 import center from '@turf/center';
 import bbox from '@turf/bbox';
 import { SRTMService } from './srtm.service';
+import { MapCellDataService } from './map-cell-data.service';
 
 @Injectable()
 export class MapPartitionerService {
   constructor(
     private geoService: GeoService,
     private altitudeService: SRTMService,
+    private mapdata: MapCellDataService,
   ) {}
 
   /**
@@ -56,18 +58,19 @@ export class MapPartitionerService {
       cell.properties.altitude = averageAltitude;
       cell.properties.slopiness = variance;
 
-      Object.keys(mapFeatures).forEach(featureType => {
+      Object.keys(mapFeatures).forEach(async featureType => {
         const featureList = mapFeatures[featureType];
 
         const nearest = searchDatasets[featureType].getNearest(
           cellCenter.geometry.coordinates[0],
           cellCenter.geometry.coordinates[1],
-        );
-        cell.properties.distances[featureType] = nearest.distance;
+        );       
+        cell.properties.distances[featureType] = nearest.distance;     
       });
+      await this.mapdata.addCellData(cellCenter.geometry.coordinates[0],cellCenter.geometry.coordinates[1], cell.properties.distances);    
     }
     console.timeEnd('distances');
-
+    
     return grid;
   }
 }
