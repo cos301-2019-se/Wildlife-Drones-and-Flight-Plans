@@ -7,7 +7,7 @@ import { ModelSaving } from './model-saving.service';
 export class ModelTraining {
   constructor(private readonly animalLocationService: AnimalLocationService, private readonly modelSaving: ModelSaving) {}
 
-  // Model Name is refering to the species
+  // Model Name is referring to the species
   async trainModel(modelName): Promise<void> {
     const model = new RegressionModel();
     model.enableLogs(true);
@@ -36,17 +36,17 @@ export class ModelTraining {
     ]);
     outputData.shift();
     model.trainModel(inputData, outputData);
-    await model.saveModel(modelName,this.modelSaving);
+    await model.saveModel(modelName, this.modelSaving);
   }
 
   // Get a prediction from the model specified
-  async predict(modelName, predictioninput): Promise<JSON> {
+  async predict(modelName, predictionInput): Promise<JSON> {
     const tempModel = new RegressionModel();
-    const model = await tempModel.loadModel(modelName,this.modelSaving);
+    const model = await tempModel.loadModel(modelName, this.modelSaving);
     if (model == null) {
       return null;
     }
-    const jsonData: any[] = JSON.parse(JSON.stringify(predictioninput));
+    const jsonData: any[] = JSON.parse(JSON.stringify(predictionInput));
 
     const subset = jsonData
       .map(animal => [

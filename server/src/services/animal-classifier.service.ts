@@ -2,7 +2,7 @@ const { kdTree } = require('../libraries/kd-tree');
 
 /**
  * Standardizes elements of an array after being added
- * without having to do n interations
+ * without having to do n iterations
  */
 class Standardizer {
     private n: any;
@@ -23,8 +23,8 @@ class Standardizer {
     /**
      * Standardize a value that we assume to be in the array
      * before adding the new value.
-     * @param {*} existingValue 
-     * @param {*} valueAdded 
+     * @param {*} existingValue
+     * @param {*} valueAdded
      */
     standardizeExistingAdded(existingValue, valueAdded) {
         const parameters = this._getParameters(valueAdded);
@@ -34,7 +34,7 @@ class Standardizer {
     /**
      * Returns the standardized value of a value not already
      * in the array.
-     * @param {*} value 
+     * @param {*} value
      */
     standardizeNew(value) {
         const parameters = this._getParameters(value);
@@ -46,7 +46,7 @@ class Standardizer {
      * Imagines we added the value to the list of numbers
      * and then calculate the mean and standard deviation
      * for that virtual list.
-     * @param {*} value 
+     * @param {*} value
      */
     _getParameters(value) {
         const sumOfSquared = this.sumOfSquared + value * value;
@@ -78,7 +78,7 @@ export class Classifier {
 
         const keys = Object.keys(points[0]);
        // console.log('keys', keys);
-        //console.time('standardizers');
+        // console.time('standardizers');
         const keyStandardizers = keys.reduce((ob, key) => {
             ob[key] = new Standardizer(points.map(point => point[key]));
             return ob;
@@ -99,7 +99,7 @@ export class Classifier {
     //  We use this to determine probability of cell containing animal based on external factors
     public getDistance(ob, n = 10) {
         const nearest = this.kd.nearest(ob, n);
-        //console.log(nearest);
+        // console.log(nearest);
         return nearest.reduce((sum, pair) => sum + pair[1], 0) / n;
     }
 }

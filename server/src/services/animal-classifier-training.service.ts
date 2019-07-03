@@ -31,14 +31,40 @@ export class ClassifierTraining {
                 distanceToResidences: parseFloat(animal.distanceToResidences),
                 distanceToIntermittentWater: parseFloat(animal.distanceToIntermittentWater),
                 altitude: parseFloat(animal.altitude),
-                slopiness: parseFloat(animal.slopiness)
+                slopiness: parseFloat(animal.slopiness),
             });
         });
-        //  Populate classifer with teaching data
+        //  Populate classifier with teaching data
         this.classifier = new Classifier(teachingData);
+        console.log('Done Training');
     }
 
     getClassification(data) {
-        return this.classifier.getDistance(data);
+        const jsonData = JSON.parse(JSON.stringify(data));
+        const teachingData = [];
+        jsonData.forEach(animal => {
+            teachingData.push({
+                month: parseInt(animal.month),
+                time: parseInt(animal.time),
+                temperature: parseInt(animal.temperature),
+                distanceToRivers: parseFloat(animal.distanceToRivers),
+                distanceToDams: parseFloat(animal.distanceToDams),
+                distanceToRoads: parseFloat(animal.distanceToRoads),
+                distanceToResidences: parseFloat(animal.distanceToResidences),
+                distanceToIntermittentWater: parseFloat(animal.distanceToIntermittentWater),
+                altitude: parseFloat(animal.altitude),
+                slopiness: parseFloat(animal.slopiness)
+            });
+        });
+        const dataArray = [];
+        teachingData.forEach(teaching => {
+           dataArray.push( this.classifier.getDistance(teaching));
+        });
+        return JSON.parse(
+          JSON.stringify({
+              dataArray,
+          }),
+        );
+
     }
 }
