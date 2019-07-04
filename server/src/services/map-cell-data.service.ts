@@ -12,6 +12,8 @@ export class MapCellDataService {
     cellMidLongitude: number,
     cellMidLatitude: number,
     cellData: JSON,
+    cellAltitude: number,
+    cellSlopiness: number,
   ): Promise<boolean> {
     const con = await this.databaseService.getConnection();
     const mapCellData = new MapCellData();
@@ -38,6 +40,8 @@ export class MapCellDataService {
       mapCellData.distanceToIntermittentWater = parseFloat(
         cellData['intermittentWater'],
       );
+      mapCellData.altitude = cellAltitude;
+      mapCellData.slopiness = cellSlopiness;
       // tslint:disable-next-line:no-console
       const addedMapCellData = await con
         .getRepository(MapCellData)
@@ -48,6 +52,24 @@ export class MapCellDataService {
       console.log(error);
       console.log('Cell data was not saved');
       return false;
+    }
+  }
+
+  async getCellsData(): Promise<JSON> {
+    const con = await this.databaseService.getConnection();
+
+    try {
+      let cellsData = await con.getRepository(MapCellData).find();
+
+      // tslint:disable-next-line:no-console
+
+      console.log('Cells data retrieved');
+      //console.log(cellsData);
+      return JSON.parse(JSON.stringify(cellsData));
+    } catch (error) {
+      console.log(error);
+      console.log('Cells data not retrieved');
+      return JSON.parse('false');
     }
   }
 }

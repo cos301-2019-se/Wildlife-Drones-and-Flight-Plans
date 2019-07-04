@@ -32,15 +32,57 @@ export class AnimalCellWeightService {
       animalCellWeight.species = speciesIdExist;
       animalCellWeight.weight = weight;
       // tslint:disable-next-line:no-console
-      const addedanimalCellWeight = await con
+      const addedAnimalCellWeight = await con
         .getRepository(AnimalCellWeight)
         .save(animalCellWeight);
-      console.log('Saved a cell data with id: ' + animalCellWeight.id);
-      return addedanimalCellWeight != null;
+      console.log('Saved animal cell weight with id: ' + animalCellWeight.id);
+      return addedAnimalCellWeight != null;
     } catch (error) {
       console.log(error);
       console.log('Animal cell weight was not saved');
       return false;
     }
+  }
+
+  async addAnimalCellsWeight(data: JSON): Promise<boolean> {
+    const con = await this.databaseService.getConnection();
+    
+    const animalCellWeight = new AnimalCellWeight();
+
+    JSON.parse(JSON.stringify(data)).forEach(async cellData => {
+
+        
+        const mapCellIdExist = await con
+      .getRepository(MapCellData)
+      .findOne({ id: cellData.cellId });
+    
+      const speciesIdExist = await con
+      .getRepository(Species)
+      .findOne({ id: cellData.speciesId });
+
+      if (mapCellIdExist == undefined || speciesIdExist == undefined) {
+        console.log('animal species or map cell does not exist');
+        return false;
+      }
+
+      try {
+        animalCellWeight.cell = mapCellIdExist;
+        animalCellWeight.species = speciesIdExist;
+        animalCellWeight.weight = cellData.weight;
+        // tslint:disable-next-line:no-console
+        const addedAnimalCellWeight = await con
+          .getRepository(AnimalCellWeight)
+          .save(animalCellWeight);
+        console.log('Saved animal cell weight with id: ' + animalCellWeight.id);
+        return addedAnimalCellWeight != null;
+      } catch (error) {
+        console.log(error);
+        console.log('Animal cell weight was not saved');
+        return false;
+      }
+        
+    });
+        
+    return false;    
   }
 }

@@ -14,6 +14,7 @@ import { Drone } from '../entity/drone.entity'
 import { DroneRoute } from '../entity/drone-route.entity';
 import { MapCellData } from '../entity/map-cell-data.entity';
 import { AnimalCellWeight } from '../entity/animal-cell-weight.entity';
+import { PoachingCellWeight } from '../entity/poaching-cell-weight.entity';
 
 @Injectable()
 export class DatabaseService {
@@ -55,6 +56,7 @@ export class DatabaseService {
           DroneRoute,
           MapCellData,
           AnimalCellWeight,
+          PoachingCellWeight,
         ],
         synchronize: true,
         logging: false,

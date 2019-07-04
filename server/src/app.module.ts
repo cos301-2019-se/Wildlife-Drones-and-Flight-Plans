@@ -28,6 +28,7 @@ import { DroneRouteService } from './services/drone-route.service';
 import { DroneRouteController } from './controllers/drone-route.controller';
 import { MapCellDataService } from './services/map-cell-data.service';
 import { AnimalCellWeightService } from './services/animal-cell-weight.service';
+import { PoachingCellWeightService } from './services/poaching-cell-weight.service';
 
 import { SpeciesController } from './controllers/animal-species.controller';
 import { SpeciesService } from './services/species.service';
@@ -84,6 +85,7 @@ import { JwtStrategy } from './auth/jwt.strategy';
     DroneRouteService,
     MapCellDataService,
     AnimalCellWeightService,
+    PoachingCellWeightService,
   ],
   exports: [PassportModule, AuthService],
 })

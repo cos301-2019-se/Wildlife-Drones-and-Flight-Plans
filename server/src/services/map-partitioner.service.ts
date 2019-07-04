@@ -64,10 +64,16 @@ export class MapPartitionerService {
         const nearest = searchDatasets[featureType].getNearest(
           cellCenter.geometry.coordinates[0],
           cellCenter.geometry.coordinates[1],
-        );       
-        cell.properties.distances[featureType] = nearest.distance;     
+        );
+        cell.properties.distances[featureType] = nearest.distance;
       });
-      await this.mapdata.addCellData(cellCenter.geometry.coordinates[0],cellCenter.geometry.coordinates[1], cell.properties.distances);    
+      await this.mapdata.addCellData(
+        cellCenter.geometry.coordinates[0],
+        cellCenter.geometry.coordinates[1],
+        cell.properties.distances,
+        cell.properties.altitude,
+        cell.properties.slopiness,
+      );
     }
     console.timeEnd('distances');
     
