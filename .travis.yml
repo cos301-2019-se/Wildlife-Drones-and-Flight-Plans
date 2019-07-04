@@ -16,7 +16,13 @@ before_script:
   - npm install -g ionic cordova
   - npm install
   
-  
-
-script:
-  - npm test
+jobs:
+  include:
+    - stage: Unit-Testing
+      name: Server-Side-Unit-Test
+      language: node_js
+      script: npm run unit
+    - stage: Integration-Testing
+      name: Server-Side-Integration-Test
+      language: node_js
+      script: npm run integration

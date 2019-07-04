@@ -13,12 +13,16 @@
     "prestart:prod": "rimraf dist && npm run build",
     "start:prod": "node dist/main.js",
     "lint": "tslint -p tsconfig.json -c tslint.json",
-    "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+
+    "test": "jest",    
+    "unit":"jest --testPathPattern=.uspec.ts$",
+    "integration":"jest --testPathPattern=.ispec.ts$"
   },
+
   "dependencies": {
     "@mapbox/geojson-extent": "^0.3.2",
     "@nestjs/common": "^6.0.0",
@@ -86,12 +90,14 @@
     "tslint": "5.12.1",
     "typescript": "^3.2.4"
   },
+
   "jest": {
     "moduleFileExtensions": [
       "js",
       "json",
       "ts"
     ],
+
     "rootDir": "src",
     "testRegex": ".spec.ts$",
     "transform": {
