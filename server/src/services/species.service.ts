@@ -16,4 +16,22 @@ export class SpeciesService {
     console.log('Saved a new animal species with id: ' + species.id);
     return addedSpecies != null;
   }
+
+  async getSpeciesID(speciesType: string): Promise<number> {
+    const con = await this.databaseService.getConnection();
+    
+    let specie = await con.getRepository(Species).findOne({species: speciesType});
+
+    let id = specie.id;
+    
+    // tslint:disable-next-line:no-console
+    if(id == undefined)
+    {
+      console.log('Species: '+ speciesType +' does not exits in the database.');
+      return -1;
+    }
+   
+    console.log('Animal id retrived: ' + id);
+    return id;
+  }
 }

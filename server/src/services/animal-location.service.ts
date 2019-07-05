@@ -36,7 +36,7 @@ export class AnimalLocationService {
         .getRepository(Species)
         .findOne({ species: animalSpecies });
 
-      animalLocations.species = await animalSpeciseType;
+      animalLocations.species = animalSpeciseType;
       animalLocations.animalId = animalId;
       animalLocations.timestamp = date;
       animalLocations.month = date[1];
