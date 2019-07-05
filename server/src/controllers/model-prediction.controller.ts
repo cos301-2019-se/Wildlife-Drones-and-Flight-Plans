@@ -58,48 +58,4 @@ export class ModelPrediction {
   trainClassificationModel(): Promise<void> {
     return this.classifier.trainModel('Elephant');
   }
-
-  @Get('getPredictionClassifierData')
-  getPredictionClassifierData(): Promise<JSON> {
-    const json = [
-      {
-        id: 239334,
-        animalId: 'AM93',
-        timestamp: '30:00.0',
-        month: 8,
-        time: 600,
-        longitude: 31.72069,
-        latitude: -24.20746,
-        temperature: 37,
-        habitat: 'S.birrea/Acacia nirescens open tree savannah',
-        distanceToRivers: 4.338163962,
-        distanceToDams: 5.525853271,
-        distanceToRoads: 1.029328875,
-        distanceToResidences: 1.31417815,
-        distanceToIntermittentWater: 1.004249513,
-        altitude: 274.85,
-        slopiness: 63.56666667
-      },
-      {
-        id: 68025,
-        animalId: 'AM110',
-        timestamp: '30:00.0',
-        month: 8,
-        time: 600,
-        longitude: 31.71376,
-        latitude: -24.38848,
-        temperature: 12,
-        habitat: 'Combretum spp/T. sericea woodland',
-        distanceToRivers: 14.338163962,
-        distanceToDams: 15.525853271,
-        distanceToRoads: 17.029328875,
-        distanceToResidences: 11.31417815,
-        distanceToIntermittentWater: 9.987989121,
-        altitude: 674.85,
-        slopiness:	120.56666667
-      }
-    ];
-    return this.classifier.getClassification(json);
-  }
-
 }

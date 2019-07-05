@@ -17,10 +17,10 @@ export class MapCellData {
   lastVisited: Date;
 
   @Column()
-  distantceToRivers: number;
+  distanceToRivers: number;
 
   @Column()
-  distantceToDams: number;
+  distanceToDams: number;
 
   @Column()
   distanceToRoads: number;

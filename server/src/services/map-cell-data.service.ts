@@ -33,8 +33,8 @@ export class MapCellDataService {
       mapCellData.cellMidLatitude = cellMidLatitude;
       mapCellData.cellMidLongitude = cellMidLongitude;
       mapCellData.lastVisited = new Date();
-      mapCellData.distantceToRivers = parseFloat(cellData['rivers']);
-      mapCellData.distantceToDams = parseFloat(cellData['dams']);
+      mapCellData.distanceToRivers = parseFloat(cellData['rivers']);
+      mapCellData.distanceToDams = parseFloat(cellData['dams']);
       mapCellData.distanceToRoads = parseFloat(cellData['roads']);
       mapCellData.distanceToResidences = parseFloat(cellData['residential']);
       mapCellData.distanceToIntermittentWater = parseFloat(
