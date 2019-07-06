@@ -24,7 +24,7 @@ export class AnimalLocationService {
   async addAnimalLocationData(
     animalId: string,
     date: Date,
-    long: number,
+    lon: number,
     lat: number,
     animalSpecies: string,
   ): Promise<boolean> {
@@ -35,13 +35,15 @@ export class AnimalLocationService {
       const animalSpeciseType = await con
         .getRepository(Species)
         .findOne({ species: animalSpecies });
-
+      //date = new Date();
       animalLocations.species = animalSpeciseType;
       animalLocations.animalId = animalId;
-      animalLocations.timestamp = date;
       animalLocations.month = date[1];
       animalLocations.time = date[3];
-      animalLocations.longitude = long;
+      date = new Date();
+      animalLocations.timestamp = date;
+
+      animalLocations.longitude = lon;
       animalLocations.latitude = lat;
       animalLocations.temperature = 0;
       animalLocations.habitat = '';

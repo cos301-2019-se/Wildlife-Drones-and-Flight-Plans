@@ -1,27 +1,37 @@
-import { Controller, Get, Post, Query } from '@nestjs/common';
+import { Controller, Get, Post, Query, Body } from '@nestjs/common';
 import { AnimalLocationService } from '../services/animal-location.service';
 
 @Controller()
 export class AnimalController {
   constructor(private readonly animalLocationService: AnimalLocationService) {}
 
-  @Get('addAnimalLocationData')
-  addAnimalLocationData(
-    @Query('animalId') animalId: string,
-    @Query('date') date: Date,
-    @Query('long') long: number,
-    @Query('lat') lat: number,
-    @Query('animalSpecies') animalSpecies: string,
-  ): Promise<boolean> {
-    return this.animalLocationService.addAnimalLocationData(
-      animalId,
-      date,
-      long,
-      lat,
-      animalSpecies,
-    );
-  }
-
+  // @Get('addAnimalLocationData')
+  // addAnimalLocationData(
+  //   @Query('animalId') animalId: string,
+  //   @Query('date') date: Date,
+  //   @Query('long') long: number,
+  //   @Query('lat') lat: number,
+  //   @Query('animalSpecies') animalSpecies: string,
+  // ): Promise<boolean> {
+  //   return this.animalLocationService.addAnimalLocationData(
+  //     animalId,
+  //     date,
+  //     long,
+  //     lat,
+  //     animalSpecies,
+  //   );
+  // }
+  @Post('addAnimalLocationData')
+  async addAnimalLocationData(@Body() body): Promise<boolean> {
+       return await this.animalLocationService.addAnimalLocationData(
+        body.animalId,
+        body.date,
+        body.lon,
+        body.lat,
+        body.animalSpecies,
+      );
+    }
+  
   @Get('addAnimalLocationDataCSV')
   addAnimalLocationDataCSV(@Query('filename') filename: string): void {
     this.animalLocationService.addAnimalLocationDataCSV(filename);
