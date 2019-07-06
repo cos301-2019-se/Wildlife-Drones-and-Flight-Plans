@@ -32,31 +32,54 @@ export class AnimalController {
       );
     }
   
-  @Get('addAnimalLocationDataCSV')
-  addAnimalLocationDataCSV(@Query('filename') filename: string): void {
-    this.animalLocationService.addAnimalLocationDataCSV(filename);
+  // @Get('addAnimalLocationDataCSV')
+  // addAnimalLocationDataCSV(@Query('filename') filename: string): void {
+  //   this.animalLocationService.addAnimalLocationDataCSV(filename);
+  // }
+
+  @Post('addAnimalLocationDataCSV')
+  async addAnimalLocationDataCSV (@Body() body) :Promise<void> {
+    return await this.animalLocationService.addAnimalLocationDataCSV(body.filename);
   }
 
-  @Get('getAllAnimalLocationTableData')
-  getAllAnimalsLocationData(): Promise<JSON> {
-    return this.animalLocationService.getAllAnimalsLocationTableData();
+
+  // @Get('getAllAnimalLocationTableData')
+  // getAllAnimalsLocationData(): Promise<JSON> {
+  //   return this.animalLocationService.getAllAnimalsLocationTableData();
+  // }
+  @Post('getAllAnimalLocationTableData')
+  async getAllAnimalsLocationData(): Promise<JSON> {
+    return await this.animalLocationService.getAllAnimalsLocationTableData();
   }
 
-  @Get('getIndividualAnimalLocationTableData')
-  getIndividualAnimalLocationData(
-    @Query('animalID') animalID: string,
-  ): Promise<JSON> {
-    return this.animalLocationService.getIndividualAnimalLocationTableData(
-      animalID,
-    );
+  // @Get('getIndividualAnimalLocationTableData')
+  // getIndividualAnimalLocationData(
+  //   @Query('animalID') animalID: string,
+  // ): Promise<JSON> {
+  //   return this.animalLocationService.getIndividualAnimalLocationTableData(
+  //     animalID,
+  //   );
+  // }
+
+  @Post('getIndividualAnimalLocationTableData')
+  async getIndividualAnimalLocationData(@Body() body): Promise<JSON> {
+    return await this.animalLocationService.getIndividualAnimalLocationTableData(
+        body.animalId,
+         );
   }
 
-  @Get('getSpeciesLocationTableData')
-  getSpeciesLocationTableData(
-    @Query('animalSpecies') animalSpecies: string,
-  ): Promise<JSON> {
-    return this.animalLocationService.getSpeciesLocationTableData(
-      animalSpecies,
-    );
+  // @Get('getSpeciesLocationTableData')
+  // getSpeciesLocationTableData(
+  //   @Query('animalSpecies') animalSpecies: string,
+  // ): Promise<JSON> {
+  //   return this.animalLocationService.getSpeciesLocationTableData(
+  //     animalSpecies,
+  //   );
+  // }
+  @Post('getSpeciesLocationTableData')
+  async getSpeciesLocationTableData(@Body() body): Promise<JSON> {
+    return await this.animalLocationService.getSpeciesLocationTableData(
+      body.animalSpecies,
+      );
   }
 }
