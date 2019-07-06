@@ -54,7 +54,7 @@
   
   <!-- fab location button -->
   <ion-fab slot="fixed" vertical="bottom" horizontal="end">
-    <ion-fab-button @button-animation>
+    <ion-fab-button @button-animation (click)="goToGeolocation()">
       <ion-icon name="md-compass"></ion-icon>
     </ion-fab-button>
   </ion-fab>

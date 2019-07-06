@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef, OnInit } from '@angular/core';
+import { Component, ViewChild, ElementRef, OnInit, OnDestroy } from '@angular/core';
 
 import { fromLonLat, transformExtent, toLonLat } from 'ol/proj';
 import Map from 'ol/Map';
@@ -8,8 +8,6 @@ import GeoJSON from 'ol/format/GeoJSON';
 import { Vector as VectorLayer, Tile as TileLayer } from 'ol/layer';
 import { ZoomSlider } from 'ol/control';
 import VectorSource from 'ol/source/Vector';
-import Stroke from 'ol/style/Stroke';
-import Style from 'ol/style/Style';
 
 import bbox from '@turf/bbox';
 import contains from '@turf/boolean-contains';
@@ -24,7 +22,15 @@ import { trigger, style, animate, transition, group } from '@angular/animations'
 import { GeoJsonVectorTileSource } from '../../services/map/geojsonvt';
 import VectorTileLayer from 'ol/layer/VectorTile';
 import GeometryType from 'ol/geom/GeometryType';
-import Fill from 'ol/style/Fill';
+
+import { GeolocationService } from '../../services/geolocation.service';
+import { Subscription } from 'rxjs';
+import { Fill, Stroke, Style } from 'ol/style';
+import { Feature } from 'ol';
+import Circle from 'ol/geom/Circle';
+import { METERS_PER_UNIT } from 'ol/proj/Units';
+import CircleStyle from 'ol/style/Circle';
+import Point from 'ol/geom/Point';
 
 interface MapState {
   confirmations?: {
@@ -106,9 +112,13 @@ interface MapState {
     ])
   ],
 })
-export class HomePage implements OnInit {
+export class HomePage implements OnInit, OnDestroy {
   @ViewChild('map') mapElement: ElementRef;
   private map: Map;
+
+  private geolocationSubscription: Subscription;
+  public coordinates: Coordinates;
+  public followingGeolocation = true;
 
   public withinReserve = true;
 
@@ -131,10 +141,13 @@ export class HomePage implements OnInit {
   constructor(
     private mapService: MapService,
     private authService: AuthenticationService,
+    private geolocationService: GeolocationService
   ) {}
 
   ngOnDestroy() {
-
+    if (this.geolocationSubscription) {
+      this.geolocationSubscription.unsubscribe();
+    }
   }
 
   async ngOnInit() {
@@ -182,13 +195,6 @@ export class HomePage implements OnInit {
           featureProjection: 'EPSG:3857',
         }),
       }),
-      // source: GeoJsonVectorTileSource({
-      //   type: 'FeatureCollection',
-      //   features: mapData.grid,
-      // }, {
-      //   minZoom: MIN_ZOOM,
-      //   maxZoom: MAX_ZOOM,
-      // }),
       updateWhileAnimating: false,
       updateWhileInteracting: false,
       // preload: Infinity,
@@ -235,6 +241,83 @@ export class HomePage implements OnInit {
       this.withinReserve = flattenedReserve.features.some(
         geom => contains(geom, point(center))
       );
+    });
+
+    this.geolocationListen();
+  }
+
+  /**
+   * Listens to the geolocation provider and alters the map
+   * on update: draws the geolocation and accuracy, and moves
+   * the map if following geolocation
+   */
+  geolocationListen() {
+    console.log('listening to geolocation');
+    const accuracyFeature = new Feature();
+    accuracyFeature.setStyle(new Style({
+      fill: new Fill({
+        color: [255, 255, 255, 0.2],
+      }),
+      stroke: new Stroke({
+        color: [255, 255, 255, 1],
+      }),
+    }));
+
+    const positionFeature = new Feature();
+    positionFeature.setStyle(new Style({
+      image: new CircleStyle({
+        radius: 6,
+        fill: new Fill({
+          color: '#39c',
+        }),
+        stroke: new Stroke({
+          color: '#fff',
+          width: 2,
+        }),
+      }),
+    }));
+
+    const geoVectorSource = new VectorSource();
+    geoVectorSource.addFeature(accuracyFeature);
+    geoVectorSource.addFeature(positionFeature);
+
+    this.map.addLayer(new VectorLayer({
+      source: geoVectorSource,
+      updateWhileAnimating: true,
+      updateWhileInteracting: true,
+    }));
+
+    this.geolocationSubscription = this.geolocationService.subscribe((coords) => {
+      console.log('got geolocation', coords);
+      this.coordinates = coords;
+      const point = fromLonLat([coords.longitude, coords.latitude]);
+
+      accuracyFeature.setGeometry(
+        new Circle(point, METERS_PER_UNIT.m * coords.accuracy)
+      );
+
+      positionFeature.setGeometry(coords ? new Point(point) : null);
+
+      if (this.followingGeolocation) {
+        this.goToGeolocation();
+      }
+    });
+
+    this.map.on('pointerdrag', () => {
+      this.followingGeolocation = false;
+    });
+  }
+
+  /**
+   * Animates to the latest polled geolocation
+   * Sets following geolocation to true
+   */
+  goToGeolocation() {
+    this.followingGeolocation = true;
+    const view = this.map.getView();
+    view.animate({
+      center: fromLonLat([this.coordinates.longitude, this.coordinates.latitude]),
+      duration: 1000,
     });
   }
 }
