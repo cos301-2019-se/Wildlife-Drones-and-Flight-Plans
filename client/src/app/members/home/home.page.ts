@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef, OnInit, OnDestroy } from '@angular/core';
+import { Component, ViewChild, ElementRef, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 
 import { fromLonLat, transformExtent, toLonLat } from 'ol/proj';
 import Map from 'ol/Map';
@@ -18,11 +18,6 @@ import mask from '@turf/mask';
 import { MapService } from '../../services/map/map.service';
 import { AuthenticationService } from '../../services/authentication.service';
 
-import { trigger, style, animate, transition, group } from '@angular/animations';
-import { GeoJsonVectorTileSource } from '../../services/map/geojsonvt';
-import VectorTileLayer from 'ol/layer/VectorTile';
-import GeometryType from 'ol/geom/GeometryType';
-
 import { GeolocationService } from '../../services/geolocation.service';
 import { Subscription } from 'rxjs';
 import { Fill, Stroke, Style } from 'ol/style';
@@ -31,86 +26,31 @@ import Circle from 'ol/geom/Circle';
 import { METERS_PER_UNIT } from 'ol/proj/Units';
 import CircleStyle from 'ol/style/Circle';
 import Point from 'ol/geom/Point';
+import { animations } from './home.page.animations';
+import { DroneRouteService } from '../../services/drone-route.service';
+import LineString from 'ol/geom/LineString';
+import { modulo } from 'ol/math';
 
 interface MapState {
+  setup?: () => Promise<any>;
+  destruct?: () => Promise<any>;
   confirmations?: {
-    cancel: () => void;
+    add?: () => void;
+    cancel?: () => void;
     done: () => void;
   };
+  tooltip?: string;
+  data?: {
+    [s: string]: any;
+  };
+  [s: string]: any;
 }
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.page.html',
   styleUrls: ['./home.page.scss'],
-  animations: [
-    trigger('button-animation', [
-      transition(':enter', [
-        style({
-          opacity: 0,
-          transform: 'scale(0.5)',
-        }),
-        group([
-          animate('200ms ease-out', style({
-            opacity: 1,
-            transform: 'scale(1)',
-          }))
-        ]),
-      ]),
-      transition(':leave', [
-        group([
-          animate('200ms ease-out', style({
-            opacity: 0,
-            transform: 'scale(0.5)',
-          })),
-        ]),
-      ]),
-    ]),
-    trigger('place-marker-animation', [
-      transition(':enter', [
-        style({
-          opacity: 0,
-          transform: 'translateY(-140px)',
-        }),
-        group([
-          animate('300ms ease-in', style({
-            opacity: 1,
-            transform: 'translateY(0)',
-          })),
-        ]),
-      ]),
-      transition(':leave', [
-        group([
-          animate('300ms ease-in', style({
-            opacity: 0,
-            transform: 'scale(0)',
-          })),
-        ]),
-      ]),
-    ]),
-    trigger('tooltip-animation', [
-      transition(':enter', [
-        style({
-          opacity: 0,
-          transform: 'translateY(-50px)',
-        }),
-        group([
-          animate('600ms ease-in', style({
-            opacity: 1,
-            transform: 'translateY(0)',
-          })),
-        ])
-      ]),
-      transition(':leave', [
-        group([
-          animate('600ms ease-out', style({
-            opacity: 0,
-            transform: 'translateY(-50px)',
-          })),
-        ])
-      ]),
-    ])
-  ],
+  animations,
 })
 export class HomePage implements OnInit, OnDestroy {
   @ViewChild('map') mapElement: ElementRef;
@@ -122,35 +62,201 @@ export class HomePage implements OnInit, OnDestroy {
 
   public withinReserve = true;
 
-  states: {[stateName: string]: MapState} = {
+  readonly states = {
+    // Default state
     default: {},
+    // Add marker state
     addMarker: {
+      tooltip: 'Pan the map to move the marker',
       confirmations: {
-        cancel: () => this.state = this.states.default,
+        cancel: () => this.setState(this.states.default),
         done: () => {
-          // add the marker to the map
-          this.state = this.states.default;
+          // TODO: add the marker to the map via the server
+          this.setState(this.states.default);
         }
       },
     },
-    viewRoute: {},
+    // Set up route state
+    setUpRoute: {
+      setup: async () => {
+        await new Promise(resolve => {
+          // TODO: Fetch actual drones' data from server
+          setTimeout(() => {
+            this.states.setUpRoute.data.drones = [
+              {
+                id: 0,
+                name: 'The first drone',
+                flightTime: 110,
+                speed: 45,
+              },
+              {
+                id: 1,
+                name: 'The second drone',
+                flightTime: 130,
+                speed: 25,
+              },
+            ];
+            // set the first drone in the list as the active drone
+            this.states.setUpRoute.data.selectedDrone = this.states.setUpRoute.data.drones[0];
+            console.log(this.states.setUpRoute);
+            resolve();
+          }, 50);
+        });
+      },
+      tooltip: 'Configure drone flight options',
+      confirmations: {
+        cancel: () => this.setState(this.states.default),
+        done: () => {
+          // TODO: Get the flight route
+          this.setState(this.states.viewRoute);
+        },
+        add: () => {
+          // TODO: Add a new drone to the list
+          this.states.setUpRoute.data.drones.unshift({
+            id: 9,
+            name: '',
+            flightTime: 120,
+            speed: 40,
+          });
+          this.states.setUpRoute.data.selectedDrone = this.states.setUpRoute.data.drones[0];
+        },
+      },
+      data: {
+        selectedDrone: null,
+        drones: [],
+      },
+    },
+    // View route state
+    viewRoute: {
+      setup: async () => {
+        console.log('view route setup');
+        const startingCoords = this.coordinates;
+        const drone = this.states.setUpRoute.data.selectedDrone;
+
+        const route = await this.droneRouteService.generateRoute(drone.id, startingCoords);
+
+        console.log('route', route);
+
+        // line style
+        const lineStyle = new Style({
+          stroke: new Stroke({
+            color: '#39c',
+            width: 5,
+          }),
+        });
+        // an path inner style
+        const dashStyle = new Style({
+          stroke: new Stroke({
+            color: '#fff',
+            width: 5,
+            lineDash: [4, 10],
+          }),
+        });
+
+        const vector = new VectorSource({
+          features: [
+            new Feature(new LineString(route).transform('EPSG:4326', 'EPSG:3857')),
+          ],
+        });
+
+        this.states.viewRoute.data.routeLayer = new VectorLayer({
+          source: vector,
+          style: [
+            lineStyle,
+            dashStyle,
+          ],
+        });
+
+        const stroke = dashStyle.getStroke();
+        const dash = stroke.getLineDash();
+        let length = dash.reduce((a, b) => a + b, 0);
+        length = dash.length % 2 === 1 ? length * 2 : length;
+
+        const update = () => {
+          const offset = stroke.getLineDashOffset() || 0;
+          stroke.setLineDashOffset(modulo(offset + 0.25, length));
+          vector.refresh();
+
+          if (this.states.viewRoute.data.antPathUpdate) {
+            requestAnimationFrame(update);
+          }
+        };
+
+        update();
+
+        this.map.addLayer(this.states.viewRoute.data.routeLayer);
+      },
+      tooltip: 'Viewing route',
+      confirmations: {
+        done: async () => {
+          // TODO: tell the server that the drone is no longer en route
+          this.setState(this.states.default);
+        },
+      },
+      data: {
+        routeLayer: null,
+        antPathUpdate: true,
+      },
+      destruct: async () => {
+        // remove the map layer from the map
+        this.states.viewRoute.data.antPathUpdate = false;
+        this.map.removeLayer(this.states.viewRoute.data.routeLayer);
+        // encourage garbage collection on the layer data
+        this.states.viewRoute.data.routeLayer = null;
+        // track to the current user's location
+        this.goToGeolocation();
+      },
+    },
   };
 
-  state = this.states.default;
+  state: MapState = this.states.default;
 
   constructor(
     private mapService: MapService,
     private authService: AuthenticationService,
-    private geolocationService: GeolocationService
+    private geolocationService: GeolocationService,
+    private cdr: ChangeDetectorRef,
+    private droneRouteService: DroneRouteService
   ) {}
 
-  ngOnDestroy() {
+  async ngOnDestroy() {
     if (this.geolocationSubscription) {
       this.geolocationSubscription.unsubscribe();
     }
+
+    if (!!this.state.destruct) {
+      await this.state.destruct();
+    }
   }
 
-  async ngOnInit() {
+  ngOnInit() {
+    this.initialiseMap();
+  }
+
+  /**
+   * Sets the map state to a new state.
+   * Performs necessary functions to prepare state.
+   * @param state The new state
+   */
+  async setState(state: MapState) {
+    console.log('setting state to', state);
+    // destruct the current state
+    if (!!this.state.destruct) {
+      console.log('destructing state');
+      await this.state.destruct();
+    }
+
+    // set up the new state
+    if (!!state.setup) {
+      console.log('setting up state');
+      await state.setup();
+    }
+
+    // finally set the state as the new state once set up
+    this.state = state;
+  }
+
+  async initialiseMap() {
     const mapEl = this.mapElement.nativeElement;
 
     this.map = new Map({
@@ -168,7 +274,6 @@ export class HomePage implements OnInit, OnDestroy {
     });
 
     const mapData = await this.mapService.getMap();
-    console.log(mapData);
 
     const MAX_ZOOM = 18;
     const MIN_ZOOM = 11;
@@ -182,38 +287,8 @@ export class HomePage implements OnInit, OnDestroy {
       extent: transformExtent(bbox(mapData.reserve), 'EPSG:4326', 'EPSG:3857'), // minx miny maxx maxy
     }));
 
-    // create chorograph of dams
-    const max = mapData.grid.reduce((m, cell) => m = cell.properties.distances.dams > m ? cell.properties.distances.dams : m, -Infinity);
-    mapData.grid.forEach(cell => cell.properties.distances.dams = Math.pow(1 - cell.properties.distances.dams / max, 2));
-
-    this.map.addLayer(new VectorLayer({
-      source: new VectorSource({
-        features: new GeoJSON().readFeatures({
-          type: 'FeatureCollection',
-          features: mapData.grid
-        }, {
-          featureProjection: 'EPSG:3857',
-        }),
-      }),
-      updateWhileAnimating: false,
-      updateWhileInteracting: false,
-      // preload: Infinity,
-      renderMode: 'image',
-      style: cell => {
-        return new Style({
-          stroke: new Stroke({
-            color: 'white'
-          }),
-          fill: new Fill({
-            color: [255, 0, 0, cell.getProperties().distances.dams * 0.8]
-          }),
-        });
-      },
-    }));
-
     this.map.addControl(new ZoomSlider());
 
-    console.log('mapData', mapData);
 
     // add the reserve's inverse mask to reduce visibility of outside of reserve
     const reserve = new GeoJSON().readFeature(mask(mapData.reserve), {
@@ -252,14 +327,10 @@ export class HomePage implements OnInit, OnDestroy {
    * the map if following geolocation
    */
   geolocationListen() {
-    console.log('listening to geolocation');
     const accuracyFeature = new Feature();
     accuracyFeature.setStyle(new Style({
       fill: new Fill({
-        color: [255, 255, 255, 0.2],
-      }),
-      stroke: new Stroke({
-        color: [255, 255, 255, 1],
+        color: [51, 153, 204, 0.2],
       }),
     }));
 
@@ -288,15 +359,14 @@ export class HomePage implements OnInit, OnDestroy {
     }));
 
     this.geolocationSubscription = this.geolocationService.subscribe((coords) => {
-      console.log('got geolocation', coords);
       this.coordinates = coords;
-      const point = fromLonLat([coords.longitude, coords.latitude]);
+      const coord = fromLonLat([coords.longitude, coords.latitude]);
 
       accuracyFeature.setGeometry(
-        new Circle(point, METERS_PER_UNIT.m * coords.accuracy)
+        new Circle(coord, METERS_PER_UNIT.m * coords.accuracy)
       );
 
-      positionFeature.setGeometry(coords ? new Point(point) : null);
+      positionFeature.setGeometry(coords ? new Point(coord) : null);
 
       if (this.followingGeolocation) {
         this.goToGeolocation();
@@ -319,5 +389,9 @@ export class HomePage implements OnInit, OnDestroy {
       center: fromLonLat([this.coordinates.longitude, this.coordinates.latitude]),
       duration: 1000,
     });
+  }
+
+  refresh() {
+    this.cdr.detectChanges();
   }
 }

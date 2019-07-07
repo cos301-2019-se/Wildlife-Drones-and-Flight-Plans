@@ -6,15 +6,14 @@ import { MapService } from './services/map/map.service';
 import { AuthenticationService } from './services/authentication.service';
 import { GeolocationService, GeolocationMockService } from './services/geolocation.service';
 import { environment } from '../environments/environment';
+import { DroneRouteService, DroneRouteMockService } from './services/drone-route.service';
 
 export const providers = [
   StatusBar,
   SplashScreen,
   MapService,
   AuthenticationService,
-  {
-    provide: GeolocationService,
-    useClass: environment.production ? GeolocationService : GeolocationMockService,
-  },
+  { provide: GeolocationService, useClass: environment.production ? GeolocationService : GeolocationMockService },
+  { provide: DroneRouteService, useClass: environment.production ? DroneRouteService : DroneRouteMockService },
   { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }
 ];

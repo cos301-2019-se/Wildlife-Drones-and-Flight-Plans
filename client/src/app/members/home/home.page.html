@@ -1,16 +1,17 @@
 <ion-content>
   <div class="map" #map></div>
 
+  <!-- overlay tooltip -->
   <div class="overlay-tooltip"
-    *ngIf="state != states.default"
+    *ngIf="state.tooltip"
     @tooltip-animation
   >
     <ion-icon name="information-circle-outline"></ion-icon>
-    <p *ngIf="state == states.addMarker">
-      Pan the map to move the marker
-    </p>
+    <p>{{ state.tooltip }}</p>
   </div>
+  <!-- end of overlay tooltip -->
 
+  <!-- add marker overlay -->
   <div class="add-marker-overlay"
     *ngIf="state == states.addMarker"
     @place-marker-animation
@@ -18,17 +19,48 @@
     <ion-icon name="ios-pin" class="add-marker-icon-shadow"></ion-icon>
     <ion-icon name="ios-pin" class="add-marker-icon" [class.disabled]="!withinReserve"></ion-icon>
   </div>
+  <!-- end of add marker overlay -->
 
-  <div class="generate-flight-overlay" *ngIf="state == states.viewRoute"></div>
+  <!-- set up flight overlay -->
+  <div class="set-up-flight-overlay" *ngIf="state == states.setUpRoute" @form-animation>
+    <ion-item>
+      <ion-label position="stacked">Drone name</ion-label>
+      <ion-select [(ngModel)]="states.setUpRoute.data.selectedDrone" interface="popover">
+        <ion-select-option *ngFor="let drone of states.setUpRoute.data.drones" [value]="drone">{{ drone.name }}</ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">Drone name</ion-label>
+      <ion-input type="text" [(ngModel)]="states.setUpRoute.data.selectedDrone.name" (ionChange)="refresh()"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">Average flight time (minutes)</ion-label>
+      <ion-input type="number" min="5" step="5" [(ngModel)]="states.setUpRoute.data.selectedDrone.flightTime"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">Average speed (km/h)</ion-label>
+      <ion-input type="number" min="5" step="5" [(ngModel)]="states.setUpRoute.data.selectedDrone.speed"></ion-input>
+    </ion-item>
+  </div>
+  <!-- end of set up flight overlay -->
 
   <!-- fab bottom left buttons -->
   <ion-fab slot="fixed" vertical="bottom" horizontal="start">
-    <ion-fab-button size="small" *ngIf="state == states.default" @button-animation>
+    <!-- set up route fab -->
+    <ion-fab-button size="small" @button-animation color="dark"
+      *ngIf="state == states.default"
+      (click)="setState(states.setUpRoute)"
+    >
       <ion-icon name="ios-send"></ion-icon>
     </ion-fab-button>
-    <ion-fab-button size="small" color="danger"
+    
+    <!-- add marker fab -->
+    <ion-fab-button size="small" color="dark"
       *ngIf="state === states.default"
-      (click)="state = states.addMarker" @button-animation
+      (click)="setState(states.addMarker)" @button-animation
     >
       <ion-icon name="ios-pin"></ion-icon>
     </ion-fab-button>
@@ -39,22 +71,32 @@
   class="confirmation-buttons"
     *ngIf="state.confirmations"
   >
-    <ion-fab-button class="confirmation-button" size="small" color="danger"
+    <!-- cancel button -->
+    <ion-fab-button class="confirmation-button" size="small" color="dark"
+    *ngIf="state.confirmations.cancel"
       (click)="state.confirmations.cancel()" @button-animation
     >
       <ion-icon name="close"></ion-icon>
     </ion-fab-button>
-    <ion-fab-button class="confirmation-button" size="small" color="success"
+    <!-- add button -->
+    <ion-fab-button class="confirmation-button confirmation-button-middle" size="small" color="dark"
+      *ngIf="state.confirmations.add"
+      (click)="state.confirmations.add()" @add-button-animation
+    >
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+    <!-- done button -->
+    <ion-fab-button class="confirmation-button" size="small" color="dark"
       (click)="state.confirmations.done()" @button-animation
       [disabled]="state === states.addMarker && !withinReserve"
     >
-        <ion-icon name="checkmark"></ion-icon>
-      </ion-fab-button>
+      <ion-icon name="checkmark"></ion-icon>
+    </ion-fab-button>
   </ion-fab>
   
   <!-- fab location button -->
   <ion-fab slot="fixed" vertical="bottom" horizontal="end">
-    <ion-fab-button @button-animation (click)="goToGeolocation()">
+    <ion-fab-button @button-animation (click)="goToGeolocation()" color="dark">
       <ion-icon name="md-compass"></ion-icon>
     </ion-fab-button>
   </ion-fab>

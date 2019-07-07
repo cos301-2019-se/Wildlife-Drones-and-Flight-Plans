@@ -4,6 +4,12 @@
   background: #eee;
 }
 
+$tooltip-height: 48px;
+$tooltip-margin: 10px;
+
+/*
+  Add marker overlay
+*/
 .add-marker-overlay {
   position: absolute;
   top: 0;
@@ -34,10 +40,30 @@
   }
 }
 
+/*
+  Flight overlay 
+*/
+.set-up-flight-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  background: #fff;
+  border-radius: 10px;
+  padding: 20px 30px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  transform: translate(-50%, -50%);
+}
+
+/*
+  Tooltip
+*/
 .overlay-tooltip {
   position: absolute;
-  top: 10px;
-  left: 10px;
+  top: $tooltip-margin;
+  width: calc(100% - 2 * #{$tooltip-margin});
+  height: $tooltip-height;
+  max-width: 500px;
+  left: 50%;
   right: 10px;
   padding: 0 10px;
   border-radius: 10px;
@@ -46,6 +72,7 @@
   font-size: 14px;
   display: flex;
   align-items: center;
+  transform: translateX(-50%);
 
   ion-icon {
     display: inline-block;
@@ -56,6 +83,7 @@
 }
 
 ::ng-deep .confirmation-buttons {
+  align-content: space-around;
   left: 50% !important;
   transform: translateX(-50%) translateY(4px) !important;
   margin-left: unset !important;
@@ -64,6 +92,15 @@
     display: inline-block;
     margin-left: 16px !important;
     margin-right: 16px !important;
+    transition: all 0.3s ease-in-out;
+  }
+  ::ng-deep .confirmation-button-middle {
+    position: absolute;
+    left: 50%;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    margin-top: 0 !important;
+    transform: translate(-50%, -75%);
   }
 }
 
