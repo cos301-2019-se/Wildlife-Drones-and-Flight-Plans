@@ -23,24 +23,24 @@
 
   <!-- set up flight overlay -->
   <div class="set-up-flight-overlay" *ngIf="state == states.setUpRoute" @form-animation>
-    <ion-item>
+    <ion-item no-padding>
       <ion-label position="stacked">Drone name</ion-label>
       <ion-select [(ngModel)]="states.setUpRoute.data.selectedDrone" interface="popover">
         <ion-select-option *ngFor="let drone of states.setUpRoute.data.drones" [value]="drone">{{ drone.name }}</ion-select-option>
       </ion-select>
     </ion-item>
 
-    <ion-item>
+    <ion-item no-padding>
       <ion-label position="stacked">Drone name</ion-label>
       <ion-input type="text" [(ngModel)]="states.setUpRoute.data.selectedDrone.name" (ionChange)="refresh()"></ion-input>
     </ion-item>
 
-    <ion-item>
+    <ion-item no-padding>
       <ion-label position="stacked">Average flight time (minutes)</ion-label>
       <ion-input type="number" min="5" step="5" [(ngModel)]="states.setUpRoute.data.selectedDrone.flightTime"></ion-input>
     </ion-item>
 
-    <ion-item>
+    <ion-item no-padding>
       <ion-label position="stacked">Average speed (km/h)</ion-label>
       <ion-input type="number" min="5" step="5" [(ngModel)]="states.setUpRoute.data.selectedDrone.speed"></ion-input>
     </ion-item>
@@ -78,6 +78,7 @@
     >
       <ion-icon name="close"></ion-icon>
     </ion-fab-button>
+
     <!-- add button -->
     <ion-fab-button class="confirmation-button confirmation-button-middle" size="small" color="dark"
       *ngIf="state.confirmations.add"
@@ -85,6 +86,7 @@
     >
       <ion-icon name="add"></ion-icon>
     </ion-fab-button>
+
     <!-- done button -->
     <ion-fab-button class="confirmation-button" size="small" color="dark"
       (click)="state.confirmations.done()" @button-animation
@@ -96,8 +98,10 @@
   
   <!-- fab location button -->
   <ion-fab slot="fixed" vertical="bottom" horizontal="end">
-    <ion-fab-button @button-animation (click)="goToGeolocation()" color="dark">
-      <ion-icon name="md-compass"></ion-icon>
+    <ion-fab-button @button-animation (click)="goToGeolocation()" color="dark"
+      [class.active]="isFollowingGeolocation"
+    >
+      <ion-icon name="md-locate"></ion-icon>
     </ion-fab-button>
   </ion-fab>
 </ion-content>

@@ -1,24 +1,19 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { LatLngExpression } from 'leaflet';
-import { Storage } from '@ionic/storage';
 import { AuthenticationService } from '../authentication.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MapService {
-  private map;
-  private center: LatLngExpression = [-25.8974, 28.2906];
-
   constructor(
     private authService: AuthenticationService,
-    private storage: Storage,
   ) { }
 
-  public getCenter(): LatLngExpression {
-    return this.center;
+  public async getMap() {
+    // TODO: Get the map from the database rather than updating
+    return await this.authService.post(`map/update`, {
+      name: 'Rietvlei Nature Reserve',
+    });
   }
 
   public async findReserves(top, left, bottom, right) {
@@ -29,23 +24,16 @@ export class MapService {
       right,
     });
 
-
-    this.center = [(top + bottom) / 2, (left + right) / 2];
-    console.log(await this.storage.get('accessToken'));
-
     return res as any;
   }
 
+  /**
+   * Tell the server to update the map for the given reserve name
+   * @param name The name of the reserve (unique name from OSM)
+   */
   public async updateMap(name: string) {
-    const map = await this.authService.post(`map/update`, {
+    await this.authService.post(`map/update`, {
       name
     });
-
-    this.map = map;
-    return map;
-  }
-
-  public async getMap() {
-    return this.map;
   }
 }

@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, ViewChild, ElementRef, OnInit, OnDestroy, ChangeDetectorRef, AfterViewInit } from '@angular/core';
 
 import { fromLonLat, transformExtent, toLonLat } from 'ol/proj';
 import Map from 'ol/Map';
@@ -6,7 +6,6 @@ import View from 'ol/View';
 import XYZ from 'ol/source/XYZ';
 import GeoJSON from 'ol/format/GeoJSON';
 import { Vector as VectorLayer, Tile as TileLayer } from 'ol/layer';
-import { ZoomSlider } from 'ol/control';
 import VectorSource from 'ol/source/Vector';
 
 import bbox from '@turf/bbox';
@@ -16,7 +15,6 @@ import flatten from '@turf/flatten';
 import mask from '@turf/mask';
 
 import { MapService } from '../../services/map/map.service';
-import { AuthenticationService } from '../../services/authentication.service';
 
 import { GeolocationService } from '../../services/geolocation.service';
 import { Subscription } from 'rxjs';
@@ -30,10 +28,11 @@ import { animations } from './home.page.animations';
 import { DroneRouteService } from '../../services/drone-route.service';
 import LineString from 'ol/geom/LineString';
 import { modulo } from 'ol/math';
+import center from '@turf/center';
 
 interface MapState {
-  setup?: () => Promise<any>;
-  destruct?: () => Promise<any>;
+  setup?: (self: MapState) => Promise<any>;
+  destruct?: (self: MapState) => Promise<any>;
   confirmations?: {
     add?: () => void;
     cancel?: () => void;
@@ -52,13 +51,13 @@ interface MapState {
   styleUrls: ['./home.page.scss'],
   animations,
 })
-export class HomePage implements OnInit, OnDestroy {
+export class HomePage implements AfterViewInit, OnDestroy {
   @ViewChild('map') mapElement: ElementRef;
   private map: Map;
 
   private geolocationSubscription: Subscription;
   public coordinates: Coordinates;
-  public followingGeolocation = true;
+  public isFollowingGeolocation = false;
 
   public withinReserve = true;
 
@@ -128,8 +127,8 @@ export class HomePage implements OnInit, OnDestroy {
     },
     // View route state
     viewRoute: {
-      setup: async () => {
-        console.log('view route setup');
+      setup: async (self) => {
+        self.data.antPathUpdate = true;
         const startingCoords = this.coordinates;
         const drone = this.states.setUpRoute.data.selectedDrone;
 
@@ -159,7 +158,7 @@ export class HomePage implements OnInit, OnDestroy {
           ],
         });
 
-        this.states.viewRoute.data.routeLayer = new VectorLayer({
+        self.data.routeLayer = new VectorLayer({
           source: vector,
           style: [
             lineStyle,
@@ -177,14 +176,14 @@ export class HomePage implements OnInit, OnDestroy {
           stroke.setLineDashOffset(modulo(offset + 0.25, length));
           vector.refresh();
 
-          if (this.states.viewRoute.data.antPathUpdate) {
+          if (self.data.antPathUpdate) {
             requestAnimationFrame(update);
           }
         };
 
         update();
 
-        this.map.addLayer(this.states.viewRoute.data.routeLayer);
+        this.map.addLayer(self.data.routeLayer);
       },
       tooltip: 'Viewing route',
       confirmations: {
@@ -213,7 +212,6 @@ export class HomePage implements OnInit, OnDestroy {
 
   constructor(
     private mapService: MapService,
-    private authService: AuthenticationService,
     private geolocationService: GeolocationService,
     private cdr: ChangeDetectorRef,
     private droneRouteService: DroneRouteService
@@ -225,11 +223,11 @@ export class HomePage implements OnInit, OnDestroy {
     }
 
     if (!!this.state.destruct) {
-      await this.state.destruct();
+      await this.state.destruct(this.state);
     }
   }
 
-  ngOnInit() {
+  ngAfterViewInit() {
     this.initialiseMap();
   }
 
@@ -243,13 +241,13 @@ export class HomePage implements OnInit, OnDestroy {
     // destruct the current state
     if (!!this.state.destruct) {
       console.log('destructing state');
-      await this.state.destruct();
+      await this.state.destruct(this.state);
     }
 
     // set up the new state
     if (!!state.setup) {
       console.log('setting up state');
-      await state.setup();
+      await state.setup(state);
     }
 
     // finally set the state as the new state once set up
@@ -257,6 +255,7 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   async initialiseMap() {
+    await new Promise(resolve => setTimeout(resolve, 0));
     const mapEl = this.mapElement.nativeElement;
 
     this.map = new Map({
@@ -270,28 +269,74 @@ export class HomePage implements OnInit, OnDestroy {
             url: 'https://mt{0-3}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
           })
         })
-      ]
+      ],
+      view: new View({
+        center: fromLonLat([22.9375, -30.5595]), // south africa
+        zoom: 4,
+        enableRotation: false,
+        maxZoom: 4,
+        minZoom: 4,
+      }),
     });
 
-    const mapData = await this.mapService.getMap();
+    this.geolocationListen();
 
+    // get the reserve data
+    const mapData: any = await this.mapService.getMap();
+    const reserveShape = mapData.reserve;
+
+    // draw the reserve
+    this.drawReserve(mapData.reserve);
+
+    // animate zoom to the reserve
     const MAX_ZOOM = 18;
     const MIN_ZOOM = 11;
 
-    this.map.setView(new View({
-      center: fromLonLat(this.mapService.getCenter().reverse()),
-      enableRotation: false,
+    const view = this.map.getView();
+    view.setMaxZoom(MAX_ZOOM);
+
+    // set centre coordinates if geolocation hasn't been found yet
+    if (!this.coordinates) {
+      const reserveCenter = center(reserveShape).geometry.coordinates;
+
+      this.coordinates = {
+        longitude: reserveCenter[0],
+        latitude: reserveCenter[1],
+        accuracy: 10000,
+        altitude: undefined,
+        altitudeAccuracy: undefined,
+        heading: undefined,
+        speed: undefined,
+      };
+    }
+
+    const coordsCenter = fromLonLat([this.coordinates.longitude, this.coordinates.latitude]);
+
+    view.animate({
+      center: coordsCenter,
       zoom: 13,
-      minZoom: MIN_ZOOM,
-      maxZoom: MAX_ZOOM,
-      extent: transformExtent(bbox(mapData.reserve), 'EPSG:4326', 'EPSG:3857'), // minx miny maxx maxy
-    }));
+      duration: 1000,
+    }, () => {
+      this.map.setView(new View({
+        center: coordsCenter,
+        enableRotation: false,
+        zoom: 13,
+        minZoom: MIN_ZOOM,
+        maxZoom: MAX_ZOOM,
+        extent: transformExtent(bbox(reserveShape), 'EPSG:4326', 'EPSG:3857'),
+      }));
 
-    this.map.addControl(new ZoomSlider());
+      this.isFollowingGeolocation = true;
+    });
+  }
 
-
+  /**
+   * Draws an inverted polygon to grey out areas outside the reserve
+   * @param reserveShape 
+   */
+  private drawReserve(reserveShape) {
     // add the reserve's inverse mask to reduce visibility of outside of reserve
-    const reserve = new GeoJSON().readFeature(mask(mapData.reserve), {
+    const reserve = new GeoJSON().readFeature(mask(reserveShape), {
       featureProjection: 'EPSG:3857',
     });
 
@@ -305,11 +350,15 @@ export class HomePage implements OnInit, OnDestroy {
         fill: new Fill({
           color: [255, 255, 255, 0.6],
         }),
+        stroke: new Stroke({
+          color: '#fff',
+          width: 2,
+        })
       }),
     }));
 
     // check whether the centre of the map is within map bounds whenever it changes
-    const flattenedReserve = flatten(mapData.reserve);
+    const flattenedReserve = flatten(reserveShape);
     this.map.on('rendercomplete', () => {
       const center = toLonLat(this.map.getView().getCenter());
 
@@ -317,8 +366,6 @@ export class HomePage implements OnInit, OnDestroy {
         geom => contains(geom, point(center))
       );
     });
-
-    this.geolocationListen();
   }
 
   /**
@@ -368,13 +415,13 @@ export class HomePage implements OnInit, OnDestroy {
 
       positionFeature.setGeometry(coords ? new Point(coord) : null);
 
-      if (this.followingGeolocation) {
+      if (this.isFollowingGeolocation) {
         this.goToGeolocation();
       }
     });
 
     this.map.on('pointerdrag', () => {
-      this.followingGeolocation = false;
+      this.isFollowingGeolocation = false;
     });
   }
 
@@ -383,7 +430,12 @@ export class HomePage implements OnInit, OnDestroy {
    * Sets following geolocation to true
    */
   goToGeolocation() {
-    this.followingGeolocation = true;
+    this.isFollowingGeolocation = true;
+    if (!this.coordinates) {
+      // coordinates not found, will update location once found
+      return;
+    }
+
     const view = this.map.getView();
     view.animate({
       center: fromLonLat([this.coordinates.longitude, this.coordinates.latitude]),
