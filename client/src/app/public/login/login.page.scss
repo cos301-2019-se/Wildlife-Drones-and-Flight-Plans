@@ -1,16 +1,13 @@
-ion-item{
-    --background: #3880ff;
-    --color: #777;
+h1 {
+  font-weight: 700;
+  font-size: 36px;
+  margin-bottom: 0;
 }
 
-ion-button{
-    --background: #062f77;
+ion-item {
+  --highlight-background: var(--ion-color-primary);
 }
 
-ion-item ion-label{
-    color: white;
-}
-
-ion-input{
-    color: white;
+ion-button {
+  
 }
