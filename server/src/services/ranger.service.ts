@@ -10,7 +10,7 @@ export class RangerService {
   constructor(private readonly databaseService: DatabaseService) {}
 
   async addRanger(
-    long: number,
+    lon: number,
     lat: number,
     rangerID: number,
   ): Promise<boolean> {
@@ -24,7 +24,7 @@ export class RangerService {
 
       if (rangerUser != undefined) {
         ranger.time = new Date();
-        ranger.longitude = long;
+        ranger.longitude = lon;
         ranger.latitude = lat;
         ranger.ranger = rangerUser;
         // tslint:disable-next-line:no-console
@@ -37,15 +37,16 @@ export class RangerService {
         );
         return addedRanger != null;
       }
+      console.log("dit wrk nie");
       return false;
     } catch (error) {
-      console.log('ranger not found');
+      console.log(error);
       return false;
     }
   }
 
   async updateRangerLocation(
-    long: number,
+    lon: number,
     lat: number,
     rangerID: number,
   ): Promise<boolean> {
@@ -60,7 +61,7 @@ export class RangerService {
         .findOne({ ranger: rangerUser });
 
       updateRanger.time = new Date();
-      updateRanger.longitude = long;
+      updateRanger.longitude = lon;
       updateRanger.latitude = lat;
 
       // tslint:disable-next-line:no-console
