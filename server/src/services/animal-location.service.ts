@@ -164,9 +164,9 @@ export class AnimalLocationService {
 
       const rowDate = new Date(row.timestamp);
 
-      //console.log('row: ' + JSON.stringify(row) );
+      // console.log('row: ' + JSON.stringify(row) );
 
-      //console.log('row species: ' + await row['species'])
+      // console.log('row species: ' + await row['species'])
 
       let species;
       let leng = animalSpeciseType.length;

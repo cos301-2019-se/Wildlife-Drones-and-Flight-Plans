@@ -13,7 +13,7 @@ import { AnimalCellWeightService } from '../services/animal-cell-weight.service'
 export class ClassifierTraining {
     private classifier: any;
     constructor(private readonly animalLocationService: AnimalLocationService, private readonly mapCell: MapCellDataService
-        , private readonly species: SpeciesService, private readonly animalCell: AnimalCellWeightService) {
+        ,       private readonly species: SpeciesService, private readonly animalCell: AnimalCellWeightService) {
     }
 
     //  Trains the model
@@ -24,12 +24,12 @@ export class ClassifierTraining {
 
         const jsonData = JSON.parse(JSON.stringify(data));
         const teachingData = [];
-        //sort all data to teach classifier
+        // sort all data to teach classifier
         jsonData.forEach(animal => {
             teachingData.push({
                 month: parseInt(animal.month),
                 time: parseInt(animal.time),
-                //temperature: parseInt(animal.temperature),
+                // temperature: parseInt(animal.temperature),
                 distanceToRivers: parseFloat(animal.distanceToRivers),
                 distanceToDams: parseFloat(animal.distanceToDams),
                 distanceToRoads: parseFloat(animal.distanceToRoads),
@@ -41,23 +41,23 @@ export class ClassifierTraining {
         });
         //  Populate classifier with teaching data
         this.classifier = new Classifier(teachingData);
-        console.log('Done Training CLassifier');
-        //  Once classifier is done being tought we need to fetch all map cell data midpoints from the database.
+        console.log('Done Training Classifier');
+        //  Once classifier is done being taught we need to fetch all map cell data midpoints from the database.
         const result = await this.mapCell.getCellsData();
         const cellData = JSON.parse(JSON.stringify(result));
         const midPointClassification = [];
         const midPointCellID = [];
         const date = new Date();
         const month = date.getMonth() + 1;
-        const currenthours = date.getHours();
+        const currentHours = date.getHours();
         const currentMinutes = date.getMinutes();
-        const time = (currenthours * 60) + currentMinutes;
+        const time = (currentHours * 60) + currentMinutes;
         cellData.forEach(cell => {
             midPointClassification.push(
                 {
                     month: month,
                     time: time,
-                    //temperature: parseInt(animal.temperature),
+                    // temperature: parseInt(animal.temperature),
                     distanceToRivers: parseFloat(cell.distanceToRivers),
                     distanceToDams: parseFloat(cell.distanceToDams),
                     distanceToRoads: parseFloat(cell.distanceToRoads),
@@ -73,32 +73,39 @@ export class ClassifierTraining {
         const classifications = this.getClassification(midPointClassification, midPointCellID);
         const speciesID = await this.species.getSpeciesID(speciesName);
         // Find min and max values
-        var max = -Infinity;
-        var min = Infinity;
+        let max = -Infinity;
+        const min = 0;
         const weightedData = classifications.dataArray;
         weightedData.forEach(element => {
             if (element.weight > max) {
                 max = element.weight;
             }
-            if (element.weight < min) {
-                min = element.weight;
-            }
         });
+        let newMax = -Infinity;
         // We need to normalise all the data so we can have percentages
         weightedData.forEach(element => {
             element.weight = this.normalize(min, max, element.weight);
+            if (element.weight > newMax) {
+                newMax = element.weight;
+            }
             element.speciesId = speciesID;
+        });
+        // tslint:disable-next-line:prefer-const
+        const toAdd = 1 - newMax;
+        weightedData.forEach(element => {
+            element.weight = element.weight + toAdd;
         });
         // add all weight to database
         const added = await this.animalCell.addAnimalCellsWeight(weightedData);
+        return ;
     }
     private normalize(min, max, data) {
-        const delta = max - min;
-        const val = (data - min) / delta;
-        return 1 - val;
+        // const delta = max - min;
+        // const val = (data - min) / delta;
+        return max - data;
     }
 
-    //Need to call this method to get a classification
+    // Need to call this method to get a classification
     private getClassification(data, dataID) {
         const dataArray = [];
         data.forEach((training, index) => {
