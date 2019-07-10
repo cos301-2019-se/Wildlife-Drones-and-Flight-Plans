@@ -48,9 +48,12 @@ export class AnimalController {
   //   return this.animalLocationService.getAllAnimalsLocationTableData();
   // }
   @Post('getAllAnimalLocationTableData')
-  async getAllAnimalsLocationData(): Promise<JSON> {
-    return await this.animalLocationService.getAllAnimalsLocationTableData();
+  async getAllAnimalLocationTableData() : Promise<boolean> {
+    return await this.getAllAnimalLocationTableData();
   }
+  // async getAllAnimalsLocationData(): Promise<JSON> {
+  //   return await this.animalLocationService.getAllAnimalsLocationTableData();
+  // }
 
   // @Get('getIndividualAnimalLocationTableData')
   // getIndividualAnimalLocationData(
@@ -62,7 +65,7 @@ export class AnimalController {
   // }
 
   @Post('getIndividualAnimalLocationTableData')
-  async getIndividualAnimalLocationData(@Body() body): Promise<JSON> {
+  async getIndividualAnimalLocationData(@Body() body ) : Promise<JSON> {
     return await this.animalLocationService.getIndividualAnimalLocationTableData(
         body.animalId,
          );
