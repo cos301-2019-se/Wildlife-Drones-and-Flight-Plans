@@ -54,6 +54,7 @@ export class AnimalLocationService {
       animalLocations.distanceToRoads = 0;
       animalLocations.altitude = 0;
       animalLocations.slopiness = 0;
+      animalLocations.active = true;
       const addedAnimalLocation = await con
         .getRepository(AnimalLocation)
         .save(animalLocations);
@@ -208,6 +209,7 @@ export class AnimalLocationService {
           altitude: altitudeInfo.averageAltitude,
           slopiness: altitudeInfo.variance,
           species: species,
+          active: true,
         };
 
         buffer.push(location);
@@ -256,6 +258,23 @@ export class AnimalLocationService {
       );
     } catch (error) {
       return JSON.parse('false');
+    }
+  }
+
+  async deactivateAnimal(animalId): Promise<Boolean> {
+    const con = await this.databaseService.getConnection();
+
+    const animal = await con.getRepository(AnimalLocation).findOne({ id: animalId });
+
+    try {
+      animal.active = false;
+
+      const addedAnimal = await con
+        .getRepository(AnimalLocation)
+        .save(animal);
+      return true;
+    } catch (error) {
+      return false;
     }
   }
 }

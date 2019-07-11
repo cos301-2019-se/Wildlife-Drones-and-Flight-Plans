@@ -3,7 +3,7 @@ import { RangerService } from '../services/ranger.service';
 
 @Controller()
 export class RangerController {
-  constructor(private readonly rangerServie: RangerService) {}
+  constructor(private readonly rangerService: RangerService) {}
 
   // @Get('addRanger')
   // addRanger(
@@ -16,7 +16,7 @@ export class RangerController {
 
   @Post('addRanger')
   async addRanger(@Body() body) : Promise<boolean> {
-    return await this.rangerServie.addRanger(body.lon,body.lat,body.rangerID);
+    return await this.rangerService.addRanger(body.lon,body.lat,body.rangerID);
   }
 
   // @Get('updateRangerLocation')
@@ -30,7 +30,7 @@ export class RangerController {
 
   @Post('updateRangerLocation') 
   async updateRangerLocation(@Body() body ) : Promise<boolean> {
-    return await this.rangerServie.addRanger(body.lon,body.lat,body.rangerID);
+    return await this.rangerService.addRanger(body.lon,body.lat,body.rangerID);
   }
 
 }

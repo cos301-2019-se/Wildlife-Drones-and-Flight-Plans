@@ -53,4 +53,7 @@ export class AnimalLocation {
 
   @Column()
   slopiness: number;
+
+  @Column()
+  active: boolean;
 }
