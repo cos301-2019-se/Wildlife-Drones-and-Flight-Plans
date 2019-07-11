@@ -6,6 +6,8 @@ import { SRTMService } from './srtm.service';
 import { OverpassService } from './overpass.service';
 import { MapPartitionerService } from './map-partitioner.service';
 import { Test, TestingModule } from '@nestjs/testing';
+import { DatabaseService } from './db.service';
+import { MapCellDataService } from './map-cell-data.service';
 
 jest.setTimeout(30000);
 let controller;
@@ -20,6 +22,8 @@ beforeAll(async () => {
       OverpassService,
       MapPartitionerService,
       ShortestPathService,
+      DatabaseService,
+      MapCellDataService,
     ],
   }).compile();
   controller = await module.get(ShortestPathService);

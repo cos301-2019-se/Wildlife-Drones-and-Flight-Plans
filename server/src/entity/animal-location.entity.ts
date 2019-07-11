@@ -54,6 +54,6 @@ export class AnimalLocation {
   @Column()
   slopiness: number;
 
-  @Column()
+  @Column({ nullable: true })
   active: boolean;
 }
