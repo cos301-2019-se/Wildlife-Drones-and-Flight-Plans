@@ -18,6 +18,15 @@ export class PoachingIncident {
   @Column()
   description: string;
 
+  @Column()
+  month: number;
+
+  @Column()
+  time: number;
+
+  @Column()
+  CoordinateData: string;
+
   @ManyToOne(type => PoachingIncidentType, poachingType => poachingType.id)
   type: PoachingIncidentType;
 }

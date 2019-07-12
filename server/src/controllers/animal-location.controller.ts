@@ -29,6 +29,8 @@ export class AnimalController {
         body.lon,
         body.lat,
         body.animalSpecies,
+        body.temp,
+        body.habitat,
       );
     }
   
