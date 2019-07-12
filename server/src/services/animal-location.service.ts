@@ -8,6 +8,7 @@ import { SRTMService } from './srtm.service';
 import bbox from '@turf/bbox';
 import { lengthToDegrees } from '@turf/helpers';
 import { Species } from '../entity/animal-species.entity';
+import { ReserveConfiguration } from '../entity/reserve-configuration.entity';
 
 const LOCATION_BIAS = lengthToDegrees(300, 'meters');
 
@@ -27,56 +28,126 @@ export class AnimalLocationService {
     lon: number,
     lat: number,
     animalSpecies: string,
+    temp: number,
+    habitat: string,
   ): Promise<boolean> {
     const con = await this.databaseService.getConnection();
-    let animalLocations = new AnimalLocation();
+    // let animalLocations = new AnimalLocation();
 
-    try {
-      const animalSpeciseType = await con
-        .getRepository(Species)
-        .findOne({ species: animalSpecies });
-      //date = new Date();
-      animalLocations.species = animalSpeciseType;
-      animalLocations.animalId = animalId;
-      animalLocations.month = date[1];
-      animalLocations.time = date[3];
-      date = new Date();
-      animalLocations.timestamp = date;
+    const animalSpeciseType = await con
+      .getRepository(Species)
+      .findOne({ species: animalSpecies });
 
-      animalLocations.longitude = lon;
-      animalLocations.latitude = lat;
-      animalLocations.temperature = 0;
-      animalLocations.habitat = '';
-      animalLocations.distanceToRivers = 0;
-      animalLocations.distanceToDams = 0;
-      animalLocations.distanceToIntermittentWater = 0;
-      animalLocations.distanceToResidences = 0;
-      animalLocations.distanceToRoads = 0;
-      animalLocations.altitude = 0;
-      animalLocations.slopiness = 0;
-      animalLocations.active = true;
-      const addedAnimalLocation = await con
-        .getRepository(AnimalLocation)
-        .save(animalLocations);
-
-      console.log('Saved a new animal loction with id: ' + animalLocations.id);
-
-      return addedAnimalLocation != null;
-    } catch (error) {
-      console.log(error);
-      console.log('animal location was not saved');
+    if (animalSpeciseType == undefined) {
+      console.log('Species not found');
       return false;
-    }
+    } else {
+      console.time('get map data');
 
-    // if (addAnimal != null) {
-    //     return true;
-    // }
-    // else {
+      const reserve = await con.getRepository(ReserveConfiguration).findOne({});
 
-    //     return false;
-    // }
+      const mapData = await this.mapUpdater.getMapFeatures(reserve.reserveName); // TODO: make dynamic based on database reserve selection
 
-    //return false;
+      const bounds = bbox(mapData.reserve);
+      console.time('feature searchers');
+      const featureSearchers: { [s: string]: GeoSearchSet } = Object.keys(
+        mapData.features,
+      ).reduce((searchers, featureName) => {
+        searchers[featureName] = this.geo.createFastSearchDataset(
+          mapData.features[featureName],
+        );
+        return searchers;
+      }, {});
+      console.timeEnd('feature searchers');
+
+      console.timeEnd('get map data');
+
+      const latitude = parseFloat(lat.toString());
+      const longitude = parseFloat(lon.toString());
+      const locationBounds = [
+        longitude - LOCATION_BIAS, // left
+        latitude - LOCATION_BIAS, // bottom
+        longitude + LOCATION_BIAS, // right
+        latitude + LOCATION_BIAS, // top
+      ];
+
+      const altitudeInfo = await this.altitude.getAltitude(
+        locationBounds,
+        bounds,
+      );
+
+      const entryDate = new Date(date);
+
+      let damDis = featureSearchers.dams.getNearest(lon, lat).distance;
+      let riverDis = featureSearchers.rivers.getNearest(lon, lat)
+      .distance
+      let roadsDis = featureSearchers.roads.getNearest(lon, lat).distance;
+      let residentialDis = featureSearchers.residential.getNearest(
+        lon,
+        lat,
+      ).distance;
+      let intermittentWaterDis = featureSearchers.intermittentWater.getNearest(
+        lon,
+        lat,
+      ).distance;
+      let streamsDis = featureSearchers.dams.getNearest(lon, lat).distance;
+
+      if (damDis == null) {
+        damDis = -100;
+      }
+      if (riverDis == null) {
+        riverDis = -100;
+      }
+      if (roadsDis == null) {
+        roadsDis = -100;
+      }
+      if (residentialDis == null) {
+        residentialDis = -100;
+      }
+      if (intermittentWaterDis == null) {
+        intermittentWaterDis = -100;
+      }
+      if (streamsDis == null) {
+        streamsDis = -100;
+      }
+
+      try {
+        const animalLocations: AnimalLocation = {
+          animalId: animalId,
+          latitude: lat,
+          longitude: lon,
+          timestamp: entryDate,
+          temperature: temp,
+          habitat: habitat,
+          month: entryDate.getMonth() + 1,
+          time: entryDate.getHours() * 60 + entryDate.getMinutes(),
+          distanceToDams: damDis,
+          distanceToRivers: riverDis,
+          distanceToRoads: roadsDis,
+          distanceToResidences: residentialDis,
+          distanceToIntermittentWater: intermittentWaterDis,
+          altitude: altitudeInfo.averageAltitude,
+          slopiness: altitudeInfo.variance,
+          species: animalSpeciseType,
+          distanceStreams: streamsDis,
+          active: true,
+        };
+
+        const addedAnimalLocation = await con
+          .getRepository(AnimalLocation)
+          .save(animalLocations);
+
+        console.log(
+          'Saved a new animal loction with id: ' + animalLocations.id,
+        );
+
+        return addedAnimalLocation != null;
+      } catch (error) {
+        console.log(error);
+        console.log('animal location was not saved');
+        return false;
+      }
+    }   
   }
 
   async addAnimalLocationDataCSV(filename): Promise<void> {
@@ -87,7 +158,7 @@ export class AnimalLocationService {
     const conn = await this.databaseService.getConnection();
     const animalLocations = conn.getRepository(AnimalLocation);
 
-    const animalSpeciseType = await JSON.parse(
+    const animalSpeciesType = await JSON.parse(
       JSON.stringify(await conn.getRepository(Species).find()),
     );
 
@@ -95,9 +166,10 @@ export class AnimalLocationService {
     //console.log("type 0 id: " + JSON.stringify(animalSpeciseType[0]['id']));
 
     console.time('get map data');
-    const mapData = await this.mapUpdater.getMapFeatures(
-      'Kruger National Park',
-    ); // TODO: make dynamic based on database reserve selection
+
+    const reserve = await conn.getRepository(ReserveConfiguration).findOne({});
+
+    const mapData = await this.mapUpdater.getMapFeatures(reserve.reserveName); // TODO: make dynamic based on database reserve selection
 
     const bounds = bbox(mapData.reserve);
     console.time('feature searchers');
@@ -172,16 +244,49 @@ export class AnimalLocationService {
       //console.log('row species: ' + await row['species'])
 
       let species;
-      let leng = animalSpeciseType.length;
+      let leng = animalSpeciesType.length;
 
       for (let a = 0; a < leng; a++) {
-        if (row['species'] == animalSpeciseType[a]['species']) {
-          species = animalSpeciseType[a]['id'];
+        if (row['species'] == animalSpeciesType[a]['species']) {
+          species = animalSpeciesType[a]['id'];
           a += leng;
         }
       }
 
-      console.log('species: ' + species);
+      let damDis = featureSearchers.dams.getNearest(lng, lat).distance;
+      let riverDis = featureSearchers.rivers.getNearest(lng, lat)
+      .distance
+      let roadsDis = featureSearchers.roads.getNearest(lng, lat).distance;
+      let residentialDis = featureSearchers.residential.getNearest(
+        lng,
+        lat,
+      ).distance;
+      let intermittentWaterDis = featureSearchers.intermittentWater.getNearest(
+        lng,
+        lat,
+      ).distance;
+      let streamsDis = featureSearchers.dams.getNearest(lng, lat).distance;
+
+      if (damDis == null) {
+        damDis = -100;
+      }
+      if (riverDis == null) {
+        riverDis = -100;
+      }
+      if (roadsDis == null) {
+        roadsDis = -100;
+      }
+      if (residentialDis == null) {
+        residentialDis = -100;
+      }
+      if (intermittentWaterDis == null) {
+        intermittentWaterDis = -100;
+      }
+      if (streamsDis == null) {
+        streamsDis = -100;
+      }
+
+      //console.log('species: ' + species);
 
       try {
         const location: AnimalLocation = {
@@ -194,21 +299,15 @@ export class AnimalLocationService {
           month: rowDate.getMonth() + 1,
           time: rowDate.getHours() * 60 + rowDate.getMinutes(),
           id: idCopy,
-          distanceToDams: featureSearchers.dams.getNearest(lng, lat).distance,
-          distanceToRivers: featureSearchers.rivers.getNearest(lng, lat)
-            .distance,
-          distanceToRoads: featureSearchers.roads.getNearest(lng, lat).distance,
-          distanceToResidences: featureSearchers.residential.getNearest(
-            lng,
-            lat,
-          ).distance,
-          distanceToIntermittentWater: featureSearchers.intermittentWater.getNearest(
-            lng,
-            lat,
-          ).distance,
+          distanceToDams: damDis,
+          distanceToRivers: riverDis,
+          distanceToRoads: roadsDis,
+          distanceToResidences: residentialDis,
+          distanceToIntermittentWater: intermittentWaterDis,
           altitude: altitudeInfo.averageAltitude,
           slopiness: altitudeInfo.variance,
           species: species,
+          distanceStreams: streamsDis,
           active: true,
         };
 
@@ -264,14 +363,14 @@ export class AnimalLocationService {
   async deactivateAnimal(animalId): Promise<Boolean> {
     const con = await this.databaseService.getConnection();
 
-    const animal = await con.getRepository(AnimalLocation).findOne({ id: animalId });
+    const animal = await con
+      .getRepository(AnimalLocation)
+      .findOne({ id: animalId });
 
     try {
       animal.active = false;
 
-      const addedAnimal = await con
-        .getRepository(AnimalLocation)
-        .save(animal);
+      const addedAnimal = await con.getRepository(AnimalLocation).save(animal);
       return true;
     } catch (error) {
       return false;

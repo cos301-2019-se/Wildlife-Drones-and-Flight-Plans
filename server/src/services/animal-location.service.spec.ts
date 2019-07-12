@@ -63,6 +63,7 @@ beforeAll(async () => {
     altitude: 999999,
     slopiness: 999999,
     species: animalSpeciseType,
+    distanceStreams:999999,
     active: true,
   };
 
@@ -82,6 +83,7 @@ beforeAll(async () => {
     distanceToIntermittentWater: 999999,
     altitude: 999999,
     slopiness: 999999,
+    distanceStreams:999999,
     species: animalSpeciseType,
     active: true,
   };
@@ -102,6 +104,7 @@ beforeAll(async () => {
     distanceToIntermittentWater: 999999,
     altitude: 999999,
     slopiness: 999999,
+    distanceStreams:999999,
     species: animalSpeciseType,
     active: true,
   };
@@ -122,6 +125,7 @@ beforeAll(async () => {
     distanceToIntermittentWater: 999999,
     altitude: 999999,
     slopiness: 999999,
+    distanceStreams:999999,
     species: animalSpeciseType,
     active: true,
   };
@@ -142,6 +146,7 @@ beforeAll(async () => {
     distanceToIntermittentWater: 999999,
     altitude: 999999,
     slopiness: 999999,
+    distanceStreams:999999,
     species: animalSpeciseType,
     active: true,
   };
