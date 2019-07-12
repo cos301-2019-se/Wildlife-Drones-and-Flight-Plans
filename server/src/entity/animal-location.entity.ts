@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { Species } from './animal-species.entity';
 
 @Entity()
 export class AnimalLocation {
@@ -7,6 +8,9 @@ export class AnimalLocation {
 
   @Column()
   animalId: string;
+
+  @ManyToOne(type => Species, species => species.id)
+  species: Species;
 
   @Column()
   timestamp: Date;
@@ -49,4 +53,7 @@ export class AnimalLocation {
 
   @Column()
   slopiness: number;
+
+  @Column({ nullable: true })
+  active: boolean;
 }
