@@ -9,7 +9,6 @@ import { GeoService, GeoSearchSet } from './geo.service';
 import { SRTMService } from './srtm.service';
 import { lengthToDegrees } from '@turf/helpers';
 
-
 const LOCATION_BIAS = lengthToDegrees(300, 'meters');
 @Injectable()
 export class PoachingIncidentService {
@@ -18,7 +17,7 @@ export class PoachingIncidentService {
     private readonly mapUpdater: MapUpdaterService,
     private readonly geo: GeoService,
     private readonly altitude: SRTMService,
-  ) {}  
+  ) {}
 
   async addPoachingIncident(
     lon: number,
@@ -33,9 +32,7 @@ export class PoachingIncidentService {
 
     console.log(reserve.reserveName);
 
-    const mapData = await this.mapUpdater.getMapFeatures(
-      reserve.reserveName,
-    );
+    const mapData = await this.mapUpdater.getMapFeatures(reserve.reserveName);
 
     const bounds = bbox(mapData.reserve);
     console.time('feature searchers');
@@ -78,33 +75,42 @@ export class PoachingIncidentService {
         const date = new Date();
 
         const poachingIncident: PoachingIncident = {
-          timestamp : date,
+          timestamp: date,
           longitude: lon,
-         latitude: lat,
+          latitude: lat,
           description: description,
           type: poachingIncidentType,
           month: date.getMonth() + 1,
           time: date.getHours() * 60 + date.getMinutes(),
-          CoordinateData: "distanceToDams: " + featureSearchers.dams.getNearest(lon, lat).distance 
-          + ", distanceToRivers: " + featureSearchers.rivers.getNearest(lon, lat).distance
-          + ", distanceToStream: " + featureSearchers.streams.getNearest(lon, lat).distance
-          + ", distanceToRoads: " + featureSearchers.roads.getNearest(lon, lat).distance
-          + ", distanceToResidences: " + featureSearchers.residential.getNearest(
-            lon,
-            lat,
-          ).distance
-          + ", distanceToFarm: " + featureSearchers.farms.getNearest(lon, lat).distance
-          + ", distanceToVillage: " + featureSearchers.villages.getNearest(lon, lat).distance
-          + ", distanceToTown: " + featureSearchers.towns.getNearest(lon, lat).distance
-          + ", distanceToSuburb: " + featureSearchers.suburbs.getNearest(lon, lat).distance
-          + ", distanceToIntermittentWater: " +  featureSearchers.intermittentWater.getNearest(
-            lon,
-            lat,
-          ).distance
-          + ", altitude: " + altitudeInfo.averageAltitude
-          + ", slopiness: " + altitudeInfo.variance,
+          CoordinateData: JSON.stringify({
+            distanceToDams: featureSearchers.dams.getNearest(lon, lat).distance,
+            distanceToRivers: featureSearchers.rivers.getNearest(lon, lat)
+              .distance,
+            distanceToStream: featureSearchers.streams.getNearest(lon, lat)
+              .distance,
+            distanceToRoads: featureSearchers.roads.getNearest(lon, lat)
+              .distance,
+            distanceToResidences: featureSearchers.residential.getNearest(
+              lon,
+              lat,
+            ).distance,
+            distanceToFarm: featureSearchers.farms.getNearest(lon, lat)
+              .distance,
+            distanceToVillage: featureSearchers.villages.getNearest(lon, lat)
+              .distance,
+            distanceToTown: featureSearchers.towns.getNearest(lon, lat)
+              .distance,
+            distanceToSuburb: featureSearchers.suburbs.getNearest(lon, lat)
+              .distance,
+            distanceToIntermittentWater: featureSearchers.intermittentWater.getNearest(
+              lon,
+              lat,
+            ).distance,
+            'altitude:': altitudeInfo.averageAltitude,
+            slopiness: altitudeInfo.variance,
+          }),
         };
-       
+
         // tslint:disable-next-line:no-console
         const addedPoachingIncident = await con
           .getRepository(PoachingIncident)

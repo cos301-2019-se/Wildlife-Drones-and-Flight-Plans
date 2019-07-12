@@ -58,7 +58,6 @@ export class AnimalCellWeightService {
       animalCellWeight.time1080Weight = weight1080;
       animalCellWeight.time1200Weight = weight1200;
       animalCellWeight.time1320Weight = weight1320;
-      animalCellWeight.time1440Weight = weight1440;
 
       // tslint:disable-next-line:no-console
       const addedAnimalCellWeight = await con
@@ -107,7 +106,6 @@ export class AnimalCellWeightService {
         animalCellWeight.time1080Weight = cellData.weight1080;
         animalCellWeight.time1200Weight = cellData.weight1200;
         animalCellWeight.time1320Weight = cellData.weight1320;
-        animalCellWeight.time1440Weight = cellData.weight1440;
         // tslint:disable-next-line:no-console
         const addedAnimalCellWeight = await con
           .getRepository(AnimalCellWeight)
