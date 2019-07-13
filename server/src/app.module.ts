@@ -16,7 +16,23 @@ import { ModelTraining } from './services/model-training.service';
 import { AnimalInterestPointService } from './services/animal-interest-point.service';
 import { CsvReader } from './services/csv-reader.service';
 import { SRTMService } from './services/srtm.service';
+import { RangerService } from './services/ranger.service';
+import { RangerController } from './controllers/ranger.controller';
+import { PoachingIncidentTypeService } from './services/poaching-incident-type.service';
+import { PoachingIncidentTypeController } from './controllers/poaching-incident-type.controller';
+import { PoachingIncidentService } from './services/poaching-incident.service';
+import { PoachingIncidentController } from './controllers/poaching-incident.controller';
+import { DroneService } from './services/drone.service';
+import { DroneController } from './controllers/drone.controller';
+import { DroneRouteService } from './services/drone-route.service';
+import { DroneRouteController } from './controllers/drone-route.controller';
+import { MapCellDataService } from './services/map-cell-data.service';
+import { AnimalCellWeightService } from './services/animal-cell-weight.service';
+import { PoachingCellWeightService } from './services/poaching-cell-weight.service';
 
+import { SpeciesController } from './controllers/animal-species.controller';
+import { SpeciesService } from './services/species.service';
+import { ClassifierTraining } from './services/animal-classifier-training.service';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './auth/auth.service';
@@ -38,6 +54,12 @@ import { JwtStrategy } from './auth/jwt.strategy';
     AnimalController,
     AnimalInterestPointController,
     ModelPrediction,
+    RangerController,
+    PoachingIncidentController,
+    PoachingIncidentTypeController,
+    SpeciesController,
+    DroneController,
+    DroneRouteController,
   ],
   providers: [
     MapUpdaterService,
@@ -46,6 +68,7 @@ import { JwtStrategy } from './auth/jwt.strategy';
     UserService,
     OverpassService,
     GeoService,
+    ClassifierTraining,
     MapPartitionerService,
     AnimalLocationService,
     AnimalInterestPointService,
@@ -54,6 +77,15 @@ import { JwtStrategy } from './auth/jwt.strategy';
     ModelTraining,
     AuthService,
     JwtStrategy,
+    RangerService,
+    PoachingIncidentService,
+    PoachingIncidentTypeService,
+    SpeciesService,
+    DroneService,
+    DroneRouteService,
+    MapCellDataService,
+    AnimalCellWeightService,
+    PoachingCellWeightService,
   ],
   exports: [PassportModule, AuthService],
 })
