@@ -1,20 +1,28 @@
 import { Injectable } from '@angular/core';
+import { AuthenticationService } from './authentication.service';
 
 export interface Drone {
   id?: number;
   name: string;
-  flightTime: number;
-  speed: number;
+  avgFlightTime: number;
+  avgSpeed: number;
+  active: boolean;
 }
 
 @Injectable()
 export class DronesService {
+  constructor(
+    private authService: AuthenticationService,
+  ) {}
+
   async getDrones(): Promise<Drone[]> {
-    return [];
+    return await this.authService.post('getDrones', {}) as Drone[];
   }
 
   async updateDrones(drones: Drone[]) {
-    // TODO: Update drone server side
+    await this.authService.post('updateDrones', {
+      drones,
+    });
   }
 }
 
@@ -24,14 +32,16 @@ export class DronesMockService extends DronesService {
     {
       id: 0,
       name: 'The first drone',
-      flightTime: 110,
-      speed: 45,
+      avgFlightTime: 110,
+      avgSpeed: 45,
+      active: true,
     },
     {
       id: 1,
       name: 'The second drone',
-      flightTime: 130,
-      speed: 25,
+      avgFlightTime: 130,
+      avgSpeed: 25,
+      active: true,
     },
   ];
 

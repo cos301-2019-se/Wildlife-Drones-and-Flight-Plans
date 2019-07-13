@@ -18,6 +18,6 @@ export const providers = [
   { provide: GeolocationService, useClass: environment.production ? GeolocationService : GeolocationMockService },
   { provide: DroneRouteService, useClass: environment.production ? DroneRouteService : DroneRouteMockService },
   IncidentsService,
-  { provide: DronesService, useClass: environment.production ? DronesService : DronesMockService },
+  DronesService,
   { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }
 ];

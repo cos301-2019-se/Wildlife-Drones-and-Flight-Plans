@@ -114,7 +114,12 @@ export class HomePage implements AfterViewInit, OnDestroy {
     // Set up route state
     setUpRoute: {
       setup: async (self) => {
-        self.data.drones = await this.dronesService.getDrones();
+        const drones = await this.dronesService.getDrones();
+        if (!drones.length) {
+          await self.confirmations.add();
+        } else {
+          self.data.drones = drones;
+        }
         // set the first drone in the list as the active drone
         self.data.selectedDrone = self.data.drones[0];
       },
@@ -130,8 +135,9 @@ export class HomePage implements AfterViewInit, OnDestroy {
           // TODO: Add a new drone to the list
           const newDrone: Drone = {
             name: 'New Drone',
-            speed: 30,
-            flightTime: 100,
+            avgSpeed: 30,
+            avgFlightTime: 100,
+            active: true,
           };
           this.states.setUpRoute.data.drones.push(newDrone);
           this.states.setUpRoute.data.selectedDrone = newDrone;

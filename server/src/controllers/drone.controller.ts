@@ -1,6 +1,8 @@
-import { Controller, Get, Query, Post, Body } from '@nestjs/common';
+import { Controller, Get, Query, Post, Body, UseGuards } from '@nestjs/common';
 import { DroneService } from '../services/drone.service';
-
+import { Drone } from 'src/entity/drone.entity';
+import { AuthGuard } from '@nestjs/passport';
+@UseGuards(AuthGuard('jwt'))
 @Controller()
 export class DroneController {
   constructor(private readonly droneService: DroneService) {}
@@ -87,5 +89,17 @@ export class DroneController {
   @Post('deactivateDrone')
   async deactivateDrone(@Body() body ) : Promise<boolean>{
     return await this.droneService.deactivateDrone(body.id);
+  }
+
+  @Post('getDrones')
+  async getDrones(): Promise<Drone[]> {
+    return await this.droneService.getDrones();
+  }
+
+  @Post('updateDrones')
+  async updateDrones(@Body() body: {
+    drones: Drone[];
+  }): Promise<boolean> {
+    return await this.droneService.updateDrones(body.drones);
   }
 }
