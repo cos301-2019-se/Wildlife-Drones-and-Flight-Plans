@@ -88,7 +88,7 @@ export class AuthenticationService {
    * @param email The user's email
    * @param password The user's password
    */
-  async login(email: string, password: string) {
+  async login(email: string, password: string): Promise<boolean> {
     // need to get custom token
     // Save email
     let res: any;
@@ -105,7 +105,7 @@ export class AuthenticationService {
     if (!res || !res.accessToken || res.accessToken === '') {
       console.log('User does not exist');
       this.authenticationState.next(false);
-      return;
+      return false;
     }
 
     const token = res.accessToken;
@@ -116,6 +116,7 @@ export class AuthenticationService {
     this.authenticationState.next(true);
 
     console.log('Token received from server side ', token);
+    return true;
   }
 
   /**

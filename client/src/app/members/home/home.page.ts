@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef, OnInit, OnDestroy, ChangeDetectorRef, AfterViewInit } from '@angular/core';
+import { Component, ViewChild, ElementRef, OnInit, OnDestroy, ChangeDetectorRef, AfterViewInit, HostListener } from '@angular/core';
 
 import { fromLonLat, transformExtent, toLonLat } from 'ol/proj';
 import Map from 'ol/Map';
@@ -18,7 +18,7 @@ import { MapService } from '../../services/map/map.service';
 
 import { GeolocationService } from '../../services/geolocation.service';
 import { Subscription } from 'rxjs';
-import { Fill, Stroke, Style } from 'ol/style';
+import { Fill, Stroke, Style, Icon } from 'ol/style';
 import { Feature } from 'ol';
 import Circle from 'ol/geom/Circle';
 import { METERS_PER_UNIT } from 'ol/proj/Units';
@@ -29,6 +29,9 @@ import { DroneRouteService } from '../../services/drone-route.service';
 import LineString from 'ol/geom/LineString';
 import { modulo } from 'ol/math';
 import center from '@turf/center';
+import { IncidentsService } from '../../services/incidents.service';
+import { DronesService } from 'src/app/services/drones.service';
+import { Drone } from '../../services/drones.service';
 
 interface MapState {
   setup?: (self: MapState) => Promise<any>;
@@ -59,6 +62,9 @@ export class HomePage implements AfterViewInit, OnDestroy {
   public coordinates: Coordinates;
   public isFollowingGeolocation = false;
 
+  incidentsLayer = null;
+  private incidentsPoller = null;
+
   public withinReserve = true;
 
   readonly states = {
@@ -66,58 +72,69 @@ export class HomePage implements AfterViewInit, OnDestroy {
     default: {},
     // Add marker state
     addMarker: {
-      tooltip: 'Pan the map to move the marker',
+      tooltip: 'Pan the map to change incident location',
       confirmations: {
         cancel: () => this.setState(this.states.default),
         done: () => {
+          this.states.addMarker.data.markerPosition = toLonLat(this.map.getView().getCenter());
           // TODO: add the marker to the map via the server
+          this.setState(this.states.addMarkerDetails);
+        }
+      },
+      data: {
+        markerPosition: null,
+      },
+    },
+    // Add marker details state (after add marker)
+    addMarkerDetails: {
+      tooltip: 'Set incident information',
+      setup: async self => {
+        self.data.incidentTypes = await this.incidentsService.getIncidentTypes();
+        self.data.typeId = self.data.incidentTypes[0].id;
+      },
+      confirmations: {
+        cancel: () => {
+          this.setState(this.states.addMarker);
+        },
+        done: () => {
+          const { typeId, description } = this.states.addMarkerDetails.data;
+          const [lon, lat] = this.states.addMarker.data.markerPosition;
+          this.incidentsService.addIncident(typeId, description, lon, lat).then(() => {
+            this.getIncidents();
+          });
           this.setState(this.states.default);
         }
+      },
+      data: {
+        incidentTypes: [],
+        typeId: null,
+        description: '',
       },
     },
     // Set up route state
     setUpRoute: {
-      setup: async () => {
-        await new Promise(resolve => {
-          // TODO: Fetch actual drones' data from server
-          setTimeout(() => {
-            this.states.setUpRoute.data.drones = [
-              {
-                id: 0,
-                name: 'The first drone',
-                flightTime: 110,
-                speed: 45,
-              },
-              {
-                id: 1,
-                name: 'The second drone',
-                flightTime: 130,
-                speed: 25,
-              },
-            ];
-            // set the first drone in the list as the active drone
-            this.states.setUpRoute.data.selectedDrone = this.states.setUpRoute.data.drones[0];
-            console.log(this.states.setUpRoute);
-            resolve();
-          }, 50);
-        });
+      setup: async (self) => {
+        self.data.drones = await this.dronesService.getDrones();
+        // set the first drone in the list as the active drone
+        self.data.selectedDrone = self.data.drones[0];
       },
       tooltip: 'Configure drone flight options',
       confirmations: {
         cancel: () => this.setState(this.states.default),
         done: () => {
+          this.dronesService.updateDrones(this.states.setUpRoute.data.drones);
           // TODO: Get the flight route
           this.setState(this.states.viewRoute);
         },
-        add: () => {
+        add: async () => {
           // TODO: Add a new drone to the list
-          this.states.setUpRoute.data.drones.unshift({
-            id: 9,
-            name: '',
-            flightTime: 120,
-            speed: 40,
-          });
-          this.states.setUpRoute.data.selectedDrone = this.states.setUpRoute.data.drones[0];
+          const newDrone: Drone = {
+            name: 'New Drone',
+            speed: 30,
+            flightTime: 100,
+          };
+          this.states.setUpRoute.data.drones.push(newDrone);
+          this.states.setUpRoute.data.selectedDrone = newDrone;
         },
       },
       data: {
@@ -133,8 +150,6 @@ export class HomePage implements AfterViewInit, OnDestroy {
         const drone = this.states.setUpRoute.data.selectedDrone;
 
         const route = await this.droneRouteService.generateRoute(drone.id, startingCoords);
-
-        console.log('route', route);
 
         // line style
         const lineStyle = new Style({
@@ -164,6 +179,8 @@ export class HomePage implements AfterViewInit, OnDestroy {
             lineStyle,
             dashStyle,
           ],
+          updateWhileAnimating: true,
+          updateWhileInteracting: true,
         });
 
         const stroke = dashStyle.getStroke();
@@ -214,7 +231,9 @@ export class HomePage implements AfterViewInit, OnDestroy {
     private mapService: MapService,
     private geolocationService: GeolocationService,
     private cdr: ChangeDetectorRef,
-    private droneRouteService: DroneRouteService
+    private droneRouteService: DroneRouteService,
+    private incidentsService: IncidentsService,
+    private dronesService: DronesService,
   ) {}
 
   async ngOnDestroy() {
@@ -225,10 +244,19 @@ export class HomePage implements AfterViewInit, OnDestroy {
     if (!!this.state.destruct) {
       await this.state.destruct(this.state);
     }
+
+    if (!!this.incidentsPoller) {
+      clearInterval(this.incidentsPoller);
+    }
   }
 
   ngAfterViewInit() {
     this.initialiseMap();
+
+    // get incidents every minute
+    this.incidentsPoller = setInterval(() => {
+      this.getIncidents();
+    }, 60000);
   }
 
   /**
@@ -237,16 +265,13 @@ export class HomePage implements AfterViewInit, OnDestroy {
    * @param state The new state
    */
   async setState(state: MapState) {
-    console.log('setting state to', state);
     // destruct the current state
     if (!!this.state.destruct) {
-      console.log('destructing state');
       await this.state.destruct(this.state);
     }
 
     // set up the new state
     if (!!state.setup) {
-      console.log('setting up state');
       await state.setup(state);
     }
 
@@ -267,8 +292,8 @@ export class HomePage implements AfterViewInit, OnDestroy {
           preload: Infinity,
           source: new XYZ({
             url: 'https://mt{0-3}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
-          })
-        })
+          }),
+        }),
       ],
       view: new View({
         center: fromLonLat([22.9375, -30.5595]), // south africa
@@ -280,6 +305,7 @@ export class HomePage implements AfterViewInit, OnDestroy {
     });
 
     this.geolocationListen();
+    this.getIncidents();
 
     // get the reserve data
     const mapData: any = await this.mapService.getMap();
@@ -443,7 +469,42 @@ export class HomePage implements AfterViewInit, OnDestroy {
     });
   }
 
+  /**
+   * Updates the incidents layer to show incident markers
+   */
+  async getIncidents() {
+    const incidents = await this.incidentsService.getIncidents();
+
+    const layer = new VectorLayer({
+      source: new VectorSource({
+        features: incidents.map(incident => new Feature({
+          geometry: new Point(fromLonLat([incident.longitude, incident.latitude])),
+        })),
+      }),
+      style: new Style({
+        image: new CircleStyle({
+          radius: 6,
+          fill: new Fill({
+            color: 'red',
+          }),
+        }),
+      }),
+    });
+
+    if (this.incidentsLayer) {
+      this.map.removeLayer(this.incidentsLayer);
+    }
+
+    this.incidentsLayer = layer;
+    this.map.addLayer(this.incidentsLayer);
+  }
+
   refresh() {
     this.cdr.detectChanges();
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onPageResize(event) {
+    this.map.updateSize();
   }
 }

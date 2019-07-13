@@ -43,7 +43,7 @@ $tooltip-margin: 10px;
 /*
   Flight overlay 
 */
-.set-up-flight-overlay {
+.form-overlay {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -114,6 +114,21 @@ ion-item {
   margin-bottom: 0 !important;
   width: 50px !important;
   height: 50px !important;
+
+  &:focus {
+    animation: button-active-translation-animation 1s cubic-bezier(0.275, 0.835, 0.420, 1.045) 0s forwards 1 normal running;
+  }
+  @keyframes button-active-translation-animation {
+    0% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-30px);
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
 }
 
 ::ng-deep .fab-vertical-bottom {

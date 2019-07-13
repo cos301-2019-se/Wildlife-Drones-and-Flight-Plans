@@ -7,6 +7,8 @@ import { AuthenticationService } from './services/authentication.service';
 import { GeolocationService, GeolocationMockService } from './services/geolocation.service';
 import { environment } from '../environments/environment';
 import { DroneRouteService, DroneRouteMockService } from './services/drone-route.service';
+import { IncidentsService, IncidentsMockService } from './services/incidents.service';
+import { DronesService, DronesMockService } from './services/drones.service';
 
 export const providers = [
   StatusBar,
@@ -15,5 +17,7 @@ export const providers = [
   AuthenticationService,
   { provide: GeolocationService, useClass: environment.production ? GeolocationService : GeolocationMockService },
   { provide: DroneRouteService, useClass: environment.production ? DroneRouteService : DroneRouteMockService },
+  { provide: IncidentsService, useClass: environment.production ? IncidentsService : IncidentsMockService },
+  { provide: DronesService, useClass: environment.production ? DronesService : DronesMockService },
   { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }
 ];
