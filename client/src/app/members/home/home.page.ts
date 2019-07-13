@@ -308,11 +308,11 @@ export class HomePage implements AfterViewInit, OnDestroy {
     this.getIncidents();
 
     // get the reserve data
-    const mapData: any = await this.mapService.getMap();
-    const reserveShape = mapData.reserve;
+    const reserve: any = await this.mapService.getMap();
+    console.log('reserve', reserve);
 
     // draw the reserve
-    this.drawReserve(mapData.reserve);
+    this.drawReserve(reserve);
 
     // animate zoom to the reserve
     const MAX_ZOOM = 18;
@@ -323,7 +323,7 @@ export class HomePage implements AfterViewInit, OnDestroy {
 
     // set centre coordinates if geolocation hasn't been found yet
     if (!this.coordinates) {
-      const reserveCenter = center(reserveShape).geometry.coordinates;
+      const reserveCenter = center(reserve).geometry.coordinates;
 
       this.coordinates = {
         longitude: reserveCenter[0],
@@ -349,7 +349,7 @@ export class HomePage implements AfterViewInit, OnDestroy {
         zoom: 13,
         minZoom: MIN_ZOOM,
         maxZoom: MAX_ZOOM,
-        extent: transformExtent(bbox(reserveShape), 'EPSG:4326', 'EPSG:3857'),
+        extent: transformExtent(bbox(reserve), 'EPSG:4326', 'EPSG:3857'),
       }));
 
       this.isFollowingGeolocation = true;

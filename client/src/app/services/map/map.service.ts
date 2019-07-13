@@ -10,10 +10,7 @@ export class MapService {
   ) { }
 
   public async getMap() {
-    // TODO: Get the map from the database rather than updating
-    return await this.authService.post(`map/update`, {
-      name: 'Rietvlei Nature Reserve',
-    });
+    return await this.authService.post(`map/reserve`, {});
   }
 
   public async findReserves(top, left, bottom, right) {

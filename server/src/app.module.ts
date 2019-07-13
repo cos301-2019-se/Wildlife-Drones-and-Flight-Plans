@@ -37,6 +37,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './auth/auth.service';
 import { JwtStrategy } from './auth/jwt.strategy';
+import { ConfigService } from './services/config.service';
+import { MapDataService } from './services/map-data.service';
 
 @Module({
   imports: [
@@ -86,6 +88,8 @@ import { JwtStrategy } from './auth/jwt.strategy';
     MapCellDataService,
     AnimalCellWeightService,
     PoachingCellWeightService,
+    ConfigService,
+    MapDataService,
   ],
   exports: [PassportModule, AuthService],
 })

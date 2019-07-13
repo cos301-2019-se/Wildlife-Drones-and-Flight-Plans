@@ -10,24 +10,42 @@ export interface Incident {
   longitude: number;
 }
 
+export interface IncidentType {
+  id: number;
+  type: string;
+}
+
 @Injectable()
 export class IncidentsService {
   constructor(
     private authService: AuthenticationService,
   ) {}
 
-  async addIncident(typeId, descripton, lon, lat) {
-    // TODO: Add incident using the server
+  async addIncident(typeId, description, lon, lat): Promise<boolean> {
+    return await this.authService.post('addIncident', {
+      lon,
+      lat,
+      pType: typeId,
+      description,
+    }) as boolean;
   }
 
-  async getIncidents() {
-    // TODO: Get incidents from the server
-    return [];
+  async getIncidents(): Promise<Incident[]> {
+    const res = await this.authService.post('getIncidents', {});
+
+    return (res as any[]).map(e => ({
+      id: e.id,
+      type: e.type,
+      longitude: e.longitude,
+      latitude: e.latitude,
+      timestamp: e.timestamp,
+      description: e.description,
+    }));
   }
 
-  async getIncidentTypes() {
-    // TODO: Get incident types from the server
-    return [];
+  async getIncidentTypes(): Promise<IncidentType[]> {
+    const res = await this.authService.post('getPoachingIncidentTypes', {});
+    return res as IncidentType[];
   }
 }
 
@@ -68,7 +86,7 @@ export class IncidentsMockService extends IncidentsService {
     },
   ];
 
-  async addIncident(typeId, description, lon, lat) {
+  async addIncident(typeId, description, lon, lat): Promise<boolean> {
     await new Promise(resolve => setTimeout(resolve, 1000)); // simluate latency
 
     const lastId = this.incidents[this.incidents.length - 1].id;
@@ -81,31 +99,33 @@ export class IncidentsMockService extends IncidentsService {
       latitude: lat,
       longitude: lon,
     });
+
+    return true;
   }
 
-  async getIncidents() {
+  async getIncidents(): Promise<Incident[]> {
     await new Promise(resolve => setTimeout(resolve, 1000)); // simulate latency
     return this.incidents;
   }
 
-  async getIncidentTypes() {
+  async getIncidentTypes(): Promise<IncidentType[]> {
     await new Promise(resolve => setTimeout(resolve, 1000)); // simulate latency
     return [
       {
         id: 1,
-        name: 'Trap/snare',
+        type: 'Trap/snare',
       },
       {
         id: 2,
-        name: 'Fence breach',
+        type: 'Fence breach',
       },
       {
         id: 3,
-        name: 'Poachers spotted',
+        type: 'Poachers spotted',
       },
       {
         id: 4,
-        name: 'Found animal',
+        type: 'Found animal',
       }
     ];
   }

@@ -17,7 +17,7 @@ export const providers = [
   AuthenticationService,
   { provide: GeolocationService, useClass: environment.production ? GeolocationService : GeolocationMockService },
   { provide: DroneRouteService, useClass: environment.production ? DroneRouteService : DroneRouteMockService },
-  { provide: IncidentsService, useClass: environment.production ? IncidentsService : IncidentsMockService },
+  IncidentsService,
   { provide: DronesService, useClass: environment.production ? DronesService : DronesMockService },
   { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }
 ];
