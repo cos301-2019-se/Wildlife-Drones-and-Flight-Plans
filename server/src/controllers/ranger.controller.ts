@@ -30,7 +30,7 @@ export class RangerController {
 
   @Post('updateRangerLocation') 
   async updateRangerLocation(@Body() body ) : Promise<boolean> {
-    return await this.rangerService.addRanger(body.lon,body.lat,body.rangerID);
+    return await this.rangerService.updateRangerLocation(body.lon,body.lat,body.rangerID);
   }
 
 }

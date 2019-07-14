@@ -1,19 +1,15 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { AnimalLocationService } from './animal-location.service';
-import { AnimalController } from '../controllers/animal-location.controller';
 import { DatabaseService } from './db.service';
-import { AnimalLocation } from '../entity/animal-location.entity';
 import { CsvReader } from './csv-reader.service';
 import { MapUpdaterService } from './map-updater.service';
 import { GeoService } from './geo.service';
 import { SRTMService } from './srtm.service';
-import { Species } from '../entity/animal-species.entity';
 import { OverpassService } from './overpass.service';
-import { MapPartitionerService } from './map-partitioner.service';
-import { MapCellDataService } from './map-cell-data.service';
-
-//not sure if 10000 is long enough
-jest.setTimeout(5000);
+import { MapPartitionerService } from '../services/map-partitioner.service';
+import { Test, TestingModule } from '@nestjs/testing';
+import { AnimalController } from '../controllers/animal-location.controller';
+import { AnimalLocation } from '../entity/animal-location.entity';
+import { Species } from '../entity/animal-species.entity';
 
 let controller;
 
@@ -27,10 +23,9 @@ beforeAll(async () => {
       CsvReader,
       MapUpdaterService,
       GeoService,
-      SRTMService,  
-      OverpassService, 
+      SRTMService,
+      OverpassService,
       MapPartitionerService,
-      MapCellDataService,
     ],
   }).compile();
 
@@ -63,8 +58,6 @@ beforeAll(async () => {
     altitude: 999999,
     slopiness: 999999,
     species: animalSpeciseType,
-    distanceStreams:999999,
-    active: true,
   };
 
   const location2: AnimalLocation = {
@@ -83,9 +76,7 @@ beforeAll(async () => {
     distanceToIntermittentWater: 999999,
     altitude: 999999,
     slopiness: 999999,
-    distanceStreams:999999,
     species: animalSpeciseType,
-    active: true,
   };
 
   const location3: AnimalLocation = {
@@ -104,9 +95,7 @@ beforeAll(async () => {
     distanceToIntermittentWater: 999999,
     altitude: 999999,
     slopiness: 999999,
-    distanceStreams:999999,
     species: animalSpeciseType,
-    active: true,
   };
 
   const location4: AnimalLocation = {
@@ -125,9 +114,7 @@ beforeAll(async () => {
     distanceToIntermittentWater: 999999,
     altitude: 999999,
     slopiness: 999999,
-    distanceStreams:999999,
     species: animalSpeciseType,
-    active: true,
   };
 
   const location5: AnimalLocation = {
@@ -146,9 +133,7 @@ beforeAll(async () => {
     distanceToIntermittentWater: 999999,
     altitude: 999999,
     slopiness: 999999,
-    distanceStreams:999999,
     species: animalSpeciseType,
-    active: true,
   };
 
   await animalCon.save(location1);
@@ -160,9 +145,7 @@ beforeAll(async () => {
   controller = await module.get<AnimalLocationService>(AnimalLocationService);
 });
 
-
-describe('Get individual animal data',  () => {
-
+describe('Get individual animal data', () => {
   it('should find only the rows with the given animal id AM105', async () => {
     const animalId = 'AM105';
     const res: AnimalLocation[] = await controller.getIndividualAnimalLocationTableData(
