@@ -1,18 +1,24 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, Post, Body, UseGuards } from '@nestjs/common';
 import { PoachingIncidentTypeService } from '../services/poaching-incident-type.service';
+import { AuthGuard } from '@nestjs/passport';
+import { PoachingIncidentType } from 'src/entity/poaching-incident-type.entity';
 
+@UseGuards(AuthGuard('jwt'))
 @Controller()
 export class PoachingIncidentTypeController {
   constructor(
     private readonly poachingIncidentTypeService: PoachingIncidentTypeService,
   ) {}
 
-  @Get('addPoachingIncidentType')
-  addPoachingIncidentType(
-    @Query('poachingType') poachingType: string,
-  ): Promise<boolean> {
-    return this.poachingIncidentTypeService.addPoachingIncidentType(
-      poachingType,
+  @Post('addPoachingIncidentType')
+  async addPoachingIncidentType(@Body() body): Promise<boolean> {
+    return await this.poachingIncidentTypeService.addPoachingIncidentType(
+      body.poachingType,
     );
+  }
+
+  @Post('getPoachingIncidentTypes')
+  async getPoachingIncidentTypes(): Promise<PoachingIncidentType[]> {
+    return await this.poachingIncidentTypeService.getPoachingIncidentTypes();
   }
 }

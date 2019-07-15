@@ -40,3 +40,5 @@ node_modules/
 /server/.map-cache/
 /server/grid.json
 client/\.travis\.yml
+
+*.blend1

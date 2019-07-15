@@ -6,9 +6,11 @@ import {
   Body,
   UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+
 import { ShortestPathService } from '../services/shortest-path.service';
 import { MapUpdaterService } from '../services/map-updater.service';
-import { AuthGuard } from '@nestjs/passport';
+import { MapDataService } from '../services/map-data.service';
 
 @Controller('map')
 @UseGuards(AuthGuard('jwt'))
@@ -16,6 +18,7 @@ export class MapController {
   constructor(
     private shortestPathService: ShortestPathService,
     private mapUpdaterService: MapUpdaterService,
+    private mapDataService: MapDataService,
   ) {}
 
   @Get('random-path')
@@ -65,5 +68,10 @@ export class MapController {
   @Post('update')
   async update(@Body('name') name) {
     return await this.mapUpdaterService.updateMap(name);
+  }
+
+  @Post('reserve')
+  async getReserve() {
+    return await this.mapDataService.getMapFeature('reserve');
   }
 }

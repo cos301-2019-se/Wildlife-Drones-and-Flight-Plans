@@ -14,6 +14,38 @@ export class AnimalCellWeight {
   species: Species;
 
   @Column()
-  weight: number;
+  time0Weight: number;
+
+  @Column()
+  time120Weight: number;
+
+  @Column()
+  time240Weight: number;
+
+  @Column()
+  time360Weight: number;
+
+  @Column()
+  time480Weight: number;
+
+  @Column()
+  time600Weight: number;
+
+  @Column()
+  time720Weight: number;
+
+  @Column()
+  time840Weight: number;
+
+  @Column()
+  time960Weight: number;
+
+  @Column()
+  time1080Weight: number;
  
+  @Column()
+  time1200Weight: number;
+
+  @Column()
+  time1320Weight: number;
 }

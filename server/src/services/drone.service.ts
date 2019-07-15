@@ -14,7 +14,7 @@ export class DroneService {
     avgFlightTime: number,
     speed: number,
     flightTime: number,
-    long: number,
+    lon: number,
     lat: number,
   ): Promise<boolean> {
     const con = await this.databaseService.getConnection();
@@ -26,7 +26,7 @@ export class DroneService {
       drone.avgFlightTime = avgFlightTime;
       drone.speed = speed;
       drone.flightTime = flightTime;
-      drone.longitude = long;
+      drone.longitude = lon;
       drone.latitude = lat;
       drone.active = true;
       // tslint:disable-next-line:no-console
@@ -34,7 +34,7 @@ export class DroneService {
       console.log('Saved a new drone with id: ' + drone.id);
       return addedDrone != null;
     } catch (error) {
-      console.log('Drone was not saved');
+      console.log(error);
       return false;
     }
   }
@@ -46,7 +46,7 @@ export class DroneService {
     avgFlightTime: number,
     speed: number,
     flightTime: number,
-    long: number,
+    lon: number,
     lat: number,
   ): Promise<boolean> {
     const con = await this.databaseService.getConnection();
@@ -63,7 +63,7 @@ export class DroneService {
       drone.avgFlightTime = avgFlightTime;
       drone.speed = speed;
       drone.flightTime = flightTime;
-      drone.longitude = long;
+      drone.longitude = lon;
       drone.latitude = lat;
       // tslint:disable-next-line:no-console
       const updatedDrone = await con.getRepository(Drone).save(drone);
@@ -73,6 +73,20 @@ export class DroneService {
       console.log('Drone was not updated');
       return false;
     }
+  }
+
+  async updateDrones(drones: Drone[]): Promise<boolean> {
+    const conn = await this.databaseService.getConnection();
+    const repo = conn.getRepository(Drone);
+
+    try {
+      await repo.save(drones);
+    } catch (err) {
+      console.error(err);
+      return false;
+    }
+
+    return true;
   }
 
   async deactivateDrone(id: number): Promise<boolean> {
@@ -94,5 +108,20 @@ export class DroneService {
       console.log('Drone was not deactivated');
       return false;
     }
+  }
+
+  async getDrones(activeOnly = true): Promise<Drone[]> {
+    const conn = await this.databaseService.getConnection();
+    const rep = conn.getRepository(Drone);
+
+    if (activeOnly) {
+      return await rep.find({
+        where: {
+          active: true,
+        }
+      });
+    }
+
+    return await rep.find();
   }
 }

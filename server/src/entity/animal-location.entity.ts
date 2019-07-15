@@ -48,9 +48,15 @@ export class AnimalLocation {
   @Column()
   distanceToIntermittentWater: number;
 
+  @Column({ nullable: true })
+  distanceStreams: number;
+
   @Column()
   altitude: number;
 
   @Column()
   slopiness: number;
+
+  @Column({ nullable: true })
+  active: boolean;
 }
