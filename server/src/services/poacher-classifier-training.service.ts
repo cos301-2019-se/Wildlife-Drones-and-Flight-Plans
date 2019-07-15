@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Classifier } from './animal-classifier.service';
+import { Classifier } from './classification-model.service';
 import { PoachingIncidentService } from '../services/poaching-incident.service';
 import { MapCellDataService } from '../services/map-cell-data.service';
 import { SpeciesService } from '../services/species.service';

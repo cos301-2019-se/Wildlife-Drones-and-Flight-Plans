@@ -19,7 +19,6 @@ import { JwtStrategy } from './auth/jwt.strategy';
 import { ConfigService } from './services/config.service';
 import { MapDataService } from './services/map-data.service';
 import { SpeciesService } from './services/species.service';
-import { ClassifierTraining } from './services/animal-classifier-training.service';
 import { GeoService } from './services/geo.service';
 import { MapPartitionerService } from './services/map-partitioner.service';
 import { PoachingIncidentService } from './services/poaching-incident.service';
@@ -33,7 +32,6 @@ export const providers = [
   UserService,
   OverpassService,
   GeoService,
-  ClassifierTraining,
   MapPartitionerService,
   AnimalLocationService,
   AnimalInterestPointService,

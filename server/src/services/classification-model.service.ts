@@ -88,55 +88,39 @@ export class Classifier {
         this.kd = new kdTree(points, (a, b) => {
             return Math.sqrt(Object.keys(a).reduce((sum, key) => {
                 if(key == 'time')
-                {
-                    // Preventing a negative time
-                    let negative = false;
-                    let temp = a[key] - b[key];
-                    if(temp < 0)
-                    {
-                        negative = true;
-                    }
+                {  
+                    const standardizer = keyStandardizers[key];
+                    const aKey = a[key];
+                    const bKey = b[key];
+                    const temp = aKey - bKey;
+                    let unstandardizedValue = 0;
                     if(temp > 720)
                     {
                         // Reverse the subtraction as we dont want a negative
-                        const standardizer = keyStandardizers[key];
-                        if(negative)
-                        {
-                            const value = 1440 - ((standardizer.standardizeExisting(b[key]) - standardizer.standardizeExisting(a[key]))
-                            * -1);
-                            sum += value * value;
-                            return sum;
-                        }
-                        else
-                        {
-                            const value = 1440 - (standardizer.standardizeExisting(b[key]) - standardizer.standardizeExisting(a[key]));
-                            sum += value * value;
-                            return sum;
-                        } 
+                        unstandardizedValue = 1440 - temp;
                     }
-                    else{
-                        //  Keep subtraction as is
-                        const standardizer = keyStandardizers[key];
-                        if(negative)
+                    else if(temp < 0){
+
+                        unstandardizedValue = temp * -1;
+                        if(unstandardizedValue > 720)
                         {
-                            const value = (standardizer.standardizeExisting(a[key]) - standardizer.standardizeExisting(b[key])) * -1;
-                            sum += value * value;
-                            return sum;
+                            unstandardizedValue = 1440 - unstandardizedValue;
                         }
-                        else
-                        {
-                            const value = (standardizer.standardizeExisting(a[key]) - standardizer.standardizeExisting(b[key]));
-                            sum += value * value;
-                            return sum;
-                        } 
                     }
+                    else
+                    {
+                        unstandardizedValue = temp;
+                    }
+                    const value = standardizer.standardizeExisting(unstandardizedValue);
+                    sum += value * value;
+                    return sum;
                 }
                 else
                 {
-                const standardizer = keyStandardizers[key];
-                const value = standardizer.standardizeExisting(a[key]) - standardizer.standardizeExisting(b[key]);
-                sum += value * value;
-                return sum;
+                    const standardizer = keyStandardizers[key];
+                    const value = standardizer.standardizeExisting(a[key]) - standardizer.standardizeExisting(b[key]);
+                    sum += value * value;
+                    return sum;
                 }
             }, 0));
         }, keys);
