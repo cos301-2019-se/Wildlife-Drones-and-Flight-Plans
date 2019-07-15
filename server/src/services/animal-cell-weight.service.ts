@@ -48,7 +48,7 @@ export class AnimalCellWeightService {
     const con = await this.databaseService.getConnection();
     
     const animalCellWeight = new AnimalCellWeight();
-
+    let passed = true;
     JSON.parse(JSON.stringify(data)).forEach(async cellData => {
 
         
@@ -62,6 +62,7 @@ export class AnimalCellWeightService {
 
       if (mapCellIdExist == undefined || speciesIdExist == undefined) {
         console.log('animal species or map cell does not exist');
+        passed = false;
         return false;
       }
 
@@ -78,11 +79,12 @@ export class AnimalCellWeightService {
       } catch (error) {
         console.log(error);
         console.log('Animal cell weight was not saved');
+        passed = false;
         return false;
       }
         
     });
         
-    return false;    
+    return passed;
   }
 }

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Classifier } from './animal-classifier.service';
-import { AnimalLocationService } from '../services/animal-location.service';
+import { PoachingIncidentService } from '../services/poaching-incident.service';
 import { MapCellDataService } from '../services/map-cell-data.service';
 import { SpeciesService } from '../services/species.service';
 import { AnimalCellWeightService } from '../services/animal-cell-weight.service';
@@ -10,30 +10,34 @@ import { AnimalCellWeightService } from '../services/animal-cell-weight.service'
 //  Need to store trained classifier in memory
 
 @Injectable()
-export class ClassifierTraining {
+export class ClassifierTrainingPoaching {
     private classifier: any;
-    constructor(private readonly animalLocationService: AnimalLocationService, private readonly mapCell: MapCellDataService
-        ,       private readonly species: SpeciesService, private readonly animalCell: AnimalCellWeightService) {
+    constructor(private readonly poachingIncidentService: PoachingIncidentService, private readonly mapCell: MapCellDataService) {
     }
 
     //  Trains the model
     // Fetch data from database then train on that data
-    async trainModel(speciesName) {
+    async trainModel() {
         //  fetch data by species name
-        const data = await this.animalLocationService.getSpeciesLocationTableData(speciesName);
+        const data = await this.poachingIncidentService.getAllPoachingIncidentTableData();
 
-        const teachingData = JSON.parse(JSON.stringify(data)).map(animal => ({
-            month: parseInt(animal.month),
-            time: parseInt(animal.time),
-            // temperature: parseInt(animal.temperature),
-            distanceToRivers: parseFloat(animal.distanceToRivers),
-            distanceToDams: parseFloat(animal.distanceToDams),
-            distanceToRoads: parseFloat(animal.distanceToRoads),
-            distanceToResidences: parseFloat(animal.distanceToResidences),
-            distanceToIntermittentWater: parseFloat(animal.distanceToIntermittentWater),
-            altitude: parseFloat(animal.altitude),
-            slopiness: parseFloat(animal.slopiness),
-        }));
+        const jsonData = JSON.parse(JSON.stringify(data));
+        const teachingData = [];
+        // sort all data to teach classifier
+        jsonData.forEach(incident => {
+            teachingData.push({
+                month: parseInt(incident.month),
+                time: parseInt(incident.time),
+                // temperature: parseInt(incident.temperature),
+                distanceToRivers: parseFloat(incident.distanceToRivers),
+                distanceToDams: parseFloat(incident.distanceToDams),
+                distanceToRoads: parseFloat(incident.distanceToRoads),
+                distanceToResidences: parseFloat(incident.distanceToResidences),
+                distanceToIntermittentWater: parseFloat(incident.distanceToIntermittentWater),
+                altitude: parseFloat(incident.altitude),
+                slopiness: parseFloat(incident.slopiness),
+            });
+        });
         //  Populate classifier with teaching data
         this.classifier = new Classifier(teachingData);
         console.log('Done Training Classifier');
@@ -51,7 +55,7 @@ export class ClassifierTraining {
             midPointClassification.push(
                 {
                     month: month,
-                    time: time, // plus 120
+                    time: time,
                     // temperature: parseInt(animal.temperature),
                     distanceToRivers: parseFloat(cell.distanceToRivers),
                     distanceToDams: parseFloat(cell.distanceToDams),
@@ -66,7 +70,7 @@ export class ClassifierTraining {
         });
         //  Once all midpoints have been fetched we need we need to get a classification on each midpoint
         const classifications = this.getClassification(midPointClassification, midPointCellID);
-        const speciesID = await this.species.getSpeciesID(speciesName);
+        // const speciesID = await this.species.getSpeciesID(speciesName);
         // Find min and max values
         let max = -Infinity;
         const min = 0;
@@ -83,7 +87,7 @@ export class ClassifierTraining {
             if (element.weight > newMax) {
                 newMax = element.weight;
             }
-            element.speciesId = speciesID;
+           // element.speciesId = speciesID;
         });
         // tslint:disable-next-line:prefer-const
         const toAdd = 1 - newMax;
@@ -91,8 +95,8 @@ export class ClassifierTraining {
             element.weight = element.weight + toAdd;
         });
         // add all weight to database
-        const added = await this.animalCell.addAnimalCellsWeight(weightedData);
-        return added;
+       // const added = await this.animalCell.addAnimalCellsWeight(weightedData);
+        // return added;
     }
     private normalize(min, max, data) {
         // const delta = max - min;
