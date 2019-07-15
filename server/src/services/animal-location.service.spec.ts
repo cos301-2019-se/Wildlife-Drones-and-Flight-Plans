@@ -3,14 +3,9 @@ import { AnimalLocationService } from './animal-location.service';
 import { AnimalController } from '../controllers/animal-location.controller';
 import { DatabaseService } from './db.service';
 import { AnimalLocation } from '../entity/animal-location.entity';
-import { CsvReader } from './csv-reader.service';
-import { MapUpdaterService } from './map-updater.service';
-import { GeoService } from './geo.service';
-import { SRTMService } from './srtm.service';
 import { Species } from '../entity/animal-species.entity';
-import { OverpassService } from './overpass.service';
-import { MapPartitionerService } from './map-partitioner.service';
-import { MapCellDataService } from './map-cell-data.service';
+import { providers } from '../app.providers';
+import { imports } from '../app.imports';
 
 //not sure if 10000 is long enough
 jest.setTimeout(5000);
@@ -19,19 +14,9 @@ let controller;
 
 beforeAll(async () => {
   const module: TestingModule = await Test.createTestingModule({
-    imports: [],
+    imports,
     controllers: [AnimalController],
-    providers: [
-      AnimalLocationService,
-      DatabaseService,
-      CsvReader,
-      MapUpdaterService,
-      GeoService,
-      SRTMService,  
-      OverpassService, 
-      MapPartitionerService,
-      MapCellDataService,
-    ],
+    providers,
   }).compile();
 
   controller = await module.get<DatabaseService>(DatabaseService);
