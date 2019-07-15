@@ -8,7 +8,7 @@ export class ModelTraining {
   constructor(private readonly animalLocationService: AnimalLocationService, private readonly modelSaving: ModelSaving) {}
 
   // Model Name is referring to the species
-  async trainModel(modelName): Promise<void> {
+  async trainModel(modelName): Promise<boolean> {
     const model = new RegressionModel();
     model.enableLogs(true);
     // AnimalLocationService
@@ -37,6 +37,7 @@ export class ModelTraining {
     outputData.shift();
     model.trainModel(inputData, outputData);
     await model.saveModel(modelName, this.modelSaving);
+    return true;
   }
 
   // Get a prediction from the model specified
