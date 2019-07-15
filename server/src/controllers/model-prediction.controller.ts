@@ -50,7 +50,7 @@ export class ModelPrediction {
   }
 
   @Get('trainElephantModel')
-  trainElephantModel(): Promise<void> {
+  trainElephantModel(): Promise<boolean> {
     return this.modelTraining.trainModel('Elephant');
   }
 
