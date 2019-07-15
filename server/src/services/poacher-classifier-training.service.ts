@@ -28,6 +28,7 @@ export class ClassifierTrainingPoaching {
             teachingData.push({
                 month: parseInt(incident.month),
                 time: parseInt(incident.time),
+                // const temp =JSON.parse(JSON.stringify(incident.commmm));
                 // temperature: parseInt(incident.temperature),
                 distanceToRivers: parseFloat(incident.distanceToRivers),
                 distanceToDams: parseFloat(incident.distanceToDams),

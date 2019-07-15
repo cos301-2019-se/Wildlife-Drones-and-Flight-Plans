@@ -22,7 +22,7 @@ export class ClassifierTraining {
         //  fetch data by species name
         const data = await this.animalLocationService.getSpeciesLocationTableData(speciesName);
         const jsonData = JSON.parse(JSON.stringify(data));
-        console.log(jsonData);
+      //  console.log(jsonData);
         const teachingData = [];
         jsonData.forEach(animal => {
             teachingData.push({
@@ -75,27 +75,83 @@ export class ClassifierTraining {
         const classifications = this.getClassification(midPointClassification, midPointCellID);
         const speciesID = await this.species.getSpeciesID(speciesName);
         // Find min and max values
-        let max = -Infinity;
+        let max = [-Infinity, -Infinity, -Infinity, -Infinity, -Infinity,
+            -Infinity, -Infinity, -Infinity, -Infinity, -Infinity, -Infinity,
+            -Infinity];
         const min = 0;
         const weightedData = classifications.dataArray;
         weightedData.forEach(element => {
-            if (element.weight > max) {
-                max = element.weight;
-            }
+            let weightIndex = 0; // keep track of which max
+            // Calculates max per weight (per 2 hours)
+            max[weightIndex] = this.compareMax(max[weightIndex++], element.weight0);
+            max[weightIndex] = this.compareMax(max[weightIndex++], element.weight120);
+            max[weightIndex] = this.compareMax(max[weightIndex++], element.weight240);
+            max[weightIndex] = this.compareMax(max[weightIndex++], element.weight360);
+            max[weightIndex] = this.compareMax(max[weightIndex++], element.weight480);
+            max[weightIndex] = this.compareMax(max[weightIndex++], element.weight600);
+            max[weightIndex] = this.compareMax(max[weightIndex++], element.weight720);
+            max[weightIndex] = this.compareMax(max[weightIndex++], element.weight840);
+            max[weightIndex] = this.compareMax(max[weightIndex++], element.weight960);
+            max[weightIndex] = this.compareMax(max[weightIndex++], element.weight1080);
+            max[weightIndex] = this.compareMax(max[weightIndex++], element.weight1200);
+            max[weightIndex] = this.compareMax(max[weightIndex++], element.weight1320);
+            //console.log('maxes ' + max);
         });
-        let newMax = -Infinity;
+        let newMax = [-Infinity, -Infinity, -Infinity, -Infinity, -Infinity,
+            -Infinity, -Infinity, -Infinity, -Infinity, -Infinity, -Infinity,
+            -Infinity];
         // We need to normalise all the data so we can have percentages
         weightedData.forEach(element => {
-            element.weight = this.normalize(min, max, element.weight);
-            if (element.weight > newMax) {
-                newMax = element.weight;
-            }
+            let weightIndex = 0; // keep track of which max
+            // assign each weight the normalized value
+            element.weight0  = this.normalize(min, max[weightIndex++], element.weight0);
+            element.weight120  = this.normalize(min, max[weightIndex++], element.weight120);
+            element.weight240  = this.normalize(min, max[weightIndex++], element.weight240);
+            element.weight360  = this.normalize(min, max[weightIndex++], element.weight360);
+            element.weight480  = this.normalize(min, max[weightIndex++], element.weight480);
+            element.weight600  = this.normalize(min, max[weightIndex++], element.weight600);
+            element.weight720  = this.normalize(min, max[weightIndex++], element.weight720);
+            element.weight840  = this.normalize(min, max[weightIndex++], element.weight840);
+            element.weight960  = this.normalize(min, max[weightIndex++], element.weight960);
+            element.weight1080  = this.normalize(min, max[weightIndex++], element.weight1080);
+            element.weight1200  = this.normalize(min, max[weightIndex++], element.weight1200);
+            element.weight1320  = this.normalize(min, max[weightIndex++], element.weight1320);
+            weightIndex = 0;
+            newMax[weightIndex] = this.compareMax(newMax[weightIndex++], element.weight0);
+            newMax[weightIndex] = this.compareMax(newMax[weightIndex++], element.weight120);
+            newMax[weightIndex] = this.compareMax(newMax[weightIndex++], element.weight240);
+            newMax[weightIndex] = this.compareMax(newMax[weightIndex++], element.weight360);
+            newMax[weightIndex] = this.compareMax(newMax[weightIndex++], element.weight480);
+            newMax[weightIndex] = this.compareMax(newMax[weightIndex++], element.weight600);
+            newMax[weightIndex] = this.compareMax(newMax[weightIndex++], element.weight720);
+            newMax[weightIndex] = this.compareMax(newMax[weightIndex++], element.weight840);
+            newMax[weightIndex] = this.compareMax(newMax[weightIndex++], element.weight960);
+            newMax[weightIndex] = this.compareMax(newMax[weightIndex++], element.weight1080);
+            newMax[weightIndex] = this.compareMax(newMax[weightIndex++], element.weight1200);
+            newMax[weightIndex] = this.compareMax(newMax[weightIndex++], element.weight1320);
+            //console.log('new maxes ' + newMax);
             element.speciesId = speciesID;
         });
         // tslint:disable-next-line:prefer-const
-        const toAdd = 1 - newMax;
+        const toAdd = [];
+        newMax.forEach(individualMax => {
+            toAdd.push(1 - individualMax);
+        });
+        //console.log('to add ' + toAdd);
         weightedData.forEach(element => {
-            element.weight = element.weight + toAdd;
+            let weightIndex = 0;
+            element.weight0 += toAdd[weightIndex++];
+            element.weight120 += toAdd[weightIndex++];
+            element.weight240 += toAdd[weightIndex++];
+            element.weight360 += toAdd[weightIndex++];
+            element.weight480 += toAdd[weightIndex++];
+            element.weight600 += toAdd[weightIndex++];
+            element.weight720 += toAdd[weightIndex++];
+            element.weight840 += toAdd[weightIndex++];
+            element.weight960 += toAdd[weightIndex++];
+            element.weight1080 += toAdd[weightIndex++];
+            element.weight1200 += toAdd[weightIndex++];
+            element.weight1320 += toAdd[weightIndex++];
         });
         // add all weight to database
         const added = await this.animalCell.addAnimalCellsWeight(weightedData);
@@ -104,12 +160,22 @@ export class ClassifierTraining {
     private normalize(min, max, data) {
         // const delta = max - min;
         // const val = (data - min) / delta;
-        return max - data;
+        // return max - data;
+       return 1 - (data / max) ;
     }
-
+    // returns greatest number
+    private compareMax(currentMax, value) {
+        if (value > currentMax) {
+            return value;
+        }
+        return currentMax;
+    }
     // Need to call this method to get a classification
     private getClassification(data, dataID) {
         const dataArray = [];
+        let count = 0;
+        // ..let temp = [38694, 38693, 38692];
+        const total = 38680;
         dataID.forEach((cellID, index) => {
             dataArray.push(
                 {
@@ -128,6 +194,12 @@ export class ClassifierTraining {
                     weight1320: this.classifier.getDistance(data[index * 12 + 11]),
                 }
             );
+
+            count++;
+            if (count % 100 === 0) {
+                console.log('weight ' + count + ' of ' + total);
+               // break;
+            }
         });
         return JSON.parse(
             JSON.stringify({
