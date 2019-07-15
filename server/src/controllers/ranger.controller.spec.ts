@@ -23,7 +23,7 @@ describe('MapController (e2e)', () => {
       .send({
         lon: '1233.56',
         lat: '6012.45',
-        rangerID:'7'
+        rangerID:'14'
       })
       .expect('true');
   });

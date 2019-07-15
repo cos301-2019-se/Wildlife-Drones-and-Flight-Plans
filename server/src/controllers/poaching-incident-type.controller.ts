@@ -7,13 +7,10 @@ export class PoachingIncidentTypeController {
     private readonly poachingIncidentTypeService: PoachingIncidentTypeService,
   ) {}
 
-
     @Post('addPoachingIncidentType')
     async addPoachingIncidentType(@Body() body): Promise<boolean> {
       return await this.poachingIncidentTypeService.addPoachingIncidentType(
-        body.poachingType,
-    
-      
+        body.poachingType,    
     );
 }
 }
