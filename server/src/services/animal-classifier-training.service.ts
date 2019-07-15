@@ -21,19 +21,23 @@ export class ClassifierTraining {
     async trainModel(speciesName) {
         //  fetch data by species name
         const data = await this.animalLocationService.getSpeciesLocationTableData(speciesName);
-
-        const teachingData = JSON.parse(JSON.stringify(data)).map(animal => ({
-            month: parseInt(animal.month),
-            time: parseInt(animal.time),
-            // temperature: parseInt(animal.temperature),
-            distanceToRivers: parseFloat(animal.distanceToRivers),
-            distanceToDams: parseFloat(animal.distanceToDams),
-            distanceToRoads: parseFloat(animal.distanceToRoads),
-            distanceToResidences: parseFloat(animal.distanceToResidences),
-            distanceToIntermittentWater: parseFloat(animal.distanceToIntermittentWater),
-            altitude: parseFloat(animal.altitude),
-            slopiness: parseFloat(animal.slopiness),
-        }));
+        const jsonData = JSON.parse(JSON.stringify(data));
+        console.log(jsonData);
+        const teachingData = [];
+        jsonData.forEach(animal => {
+            teachingData.push({
+                month: parseInt(animal.month),
+                time: parseInt(animal.time),
+                // temperature: parseInt(animal.temperature),
+                distanceToRivers: parseFloat(animal.distanceToRivers),
+                distanceToDams: parseFloat(animal.distanceToDams),
+                distanceToRoads: parseFloat(animal.distanceToRoads),
+                distanceToResidences: parseFloat(animal.distanceToResidences),
+                distanceToIntermittentWater: parseFloat(animal.distanceToIntermittentWater),
+                altitude: parseFloat(animal.altitude),
+                slopiness: parseFloat(animal.slopiness),
+            });
+        });
         //  Populate classifier with teaching data
         this.classifier = new Classifier(teachingData);
         console.log('Done Training Classifier');
@@ -46,24 +50,27 @@ export class ClassifierTraining {
         const month = date.getMonth() + 1;
         const currentHours = date.getHours();
         const currentMinutes = date.getMinutes();
-        const time = (currentHours * 60) + currentMinutes;
+       // const time = (currentHours * 60) + currentMinutes;
         cellData.forEach(cell => {
-            midPointClassification.push(
+            for (let i = 0; i < 12; i++) {
+                let time = 120 * i;
+                midPointClassification.push(
                 {
-                    month: month,
-                    time: time, // plus 120
-                    // temperature: parseInt(animal.temperature),
-                    distanceToRivers: parseFloat(cell.distanceToRivers),
-                    distanceToDams: parseFloat(cell.distanceToDams),
-                    distanceToRoads: parseFloat(cell.distanceToRoads),
-                    distanceToResidences: parseFloat(cell.distanceToResidences),
-                    distanceToIntermittentWater: parseFloat(cell.distanceToIntermittentWater),
-                    altitude: parseFloat(cell.altitude),
-                    slopiness: parseFloat(cell.slopiness)
+
+                      month: month,
+                      time: time, // plus 120
+                      // temperature: parseInt(animal.temperature),
+                      distanceToRivers: parseFloat(cell.distanceToRivers),
+                      distanceToDams: parseFloat(cell.distanceToDams),
+                      distanceToRoads: parseFloat(cell.distanceToRoads),
+                      distanceToResidences: parseFloat(cell.distanceToResidences),
+                      distanceToIntermittentWater: parseFloat(cell.distanceToIntermittentWater),
+                      altitude: parseFloat(cell.altitude),
+                      slopiness: parseFloat(cell.slopiness)
+                });
                 }
-            );
             midPointCellID.push(parseInt(cell.id));
-        });
+            });
         //  Once all midpoints have been fetched we need we need to get a classification on each midpoint
         const classifications = this.getClassification(midPointClassification, midPointCellID);
         const speciesID = await this.species.getSpeciesID(speciesName);
@@ -103,11 +110,22 @@ export class ClassifierTraining {
     // Need to call this method to get a classification
     private getClassification(data, dataID) {
         const dataArray = [];
-        data.forEach((training, index) => {
+        dataID.forEach((cellID, index) => {
             dataArray.push(
                 {
-                    cellId: dataID[index],
-                    weight: this.classifier.getDistance(training),
+                    cellId: cellID,
+                    weight0: this.classifier.getDistance(data[index * 12]),
+                    weight120: this.classifier.getDistance(data[index * 12 + 1]),
+                    weight240: this.classifier.getDistance(data[index * 12 + 2]),
+                    weight360: this.classifier.getDistance(data[index * 12 + 3]),
+                    weight480: this.classifier.getDistance(data[index * 12 + 4]),
+                    weight600: this.classifier.getDistance(data[index * 12 + 5]),
+                    weight720: this.classifier.getDistance(data[index * 12 + 6]),
+                    weight840: this.classifier.getDistance(data[index * 12 + 7]),
+                    weight960: this.classifier.getDistance(data[index * 12 + 8]),
+                    weight1080: this.classifier.getDistance(data[index * 12 + 9]),
+                    weight1200: this.classifier.getDistance(data[index * 12 + 10]),
+                    weight1320: this.classifier.getDistance(data[index * 12 + 11]),
                 }
             );
         });
