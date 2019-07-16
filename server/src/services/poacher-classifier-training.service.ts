@@ -2,8 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Classifier } from './animal-classifier.service';
 import { PoachingIncidentService } from '../services/poaching-incident.service';
 import { MapCellDataService } from '../services/map-cell-data.service';
-import { SpeciesService } from '../services/species.service';
-import { AnimalCellWeightService } from '../services/animal-cell-weight.service';
+import { PoachingCellWeightService } from './poaching-cell-weight.service';
 //  Need to fetch the data
 //  Need to train the classifier with the data
 //  Need to be able to get classification
@@ -12,33 +11,42 @@ import { AnimalCellWeightService } from '../services/animal-cell-weight.service'
 @Injectable()
 export class ClassifierTrainingPoaching {
     private classifier: any;
-    constructor(private readonly poachingIncidentService: PoachingIncidentService, private readonly mapCell: MapCellDataService) {
+    constructor(private readonly poachingIncidentService: PoachingIncidentService, private readonly mapCell: MapCellDataService,
+                private readonly poachingCell: PoachingCellWeightService) {
     }
 
     //  Trains the model
     // Fetch data from database then train on that data
     async trainModel() {
         //  fetch data by species name
+        // console.log('test');
         const data = await this.poachingIncidentService.getAllPoachingIncidentTableData();
-
+        // console.log('test');
         const jsonData = JSON.parse(JSON.stringify(data));
         const teachingData = [];
         // sort all data to teach classifier
         jsonData.forEach(incident => {
+            //console.log(incident);
+            const coordinateData  = JSON.parse(incident.CoordinateData);
+            //console.log(coordinateData);
             teachingData.push({
-                month: parseInt(incident.month),
-                time: parseInt(incident.time),
-                // const temp =JSON.parse(JSON.stringify(incident.commmm));
-                // temperature: parseInt(incident.temperature),
-                distanceToRivers: parseFloat(incident.distanceToRivers),
-                distanceToDams: parseFloat(incident.distanceToDams),
-                distanceToRoads: parseFloat(incident.distanceToRoads),
-                distanceToResidences: parseFloat(incident.distanceToResidences),
-                distanceToIntermittentWater: parseFloat(incident.distanceToIntermittentWater),
-                altitude: parseFloat(incident.altitude),
-                slopiness: parseFloat(incident.slopiness),
+                // month: parseInt(incident.month), unsure of relavance
+                // time: parseInt(incident.time),  // not used at the moment
+               /* distanceToFarm: parseFloat(coordinateData.distanceToFarm),
+                distanceToVillage: parseFloat(coordinateData.distanceToVillage),
+                distanceToTown: parseFloat(coordinateData.distanceToTown),
+                distanceToSuburb: parseFloat(coordinateData.distanceToSuburb),
+                distanceToStream: parseFloat(coordinateData.distanceToStream),*/
+                distanceToRivers: parseFloat(coordinateData.distanceToRivers),
+                distanceToDams: parseFloat(coordinateData.distanceToDams),
+                distanceToRoads: parseFloat(coordinateData.distanceToRoads),
+                distanceToResidences: parseFloat(coordinateData.distanceToResidences),
+                distanceToIntermittentWater: parseFloat(coordinateData.distanceToIntermittentWater),
+                altitude: parseFloat(coordinateData.altitude),
+                slopiness: parseFloat(coordinateData.slopiness),
             });
         });
+       //console.log(teachingData);
         //  Populate classifier with teaching data
         this.classifier = new Classifier(teachingData);
         console.log('Done Training Classifier');
@@ -47,17 +55,9 @@ export class ClassifierTrainingPoaching {
         const cellData = JSON.parse(JSON.stringify(result));
         const midPointClassification = [];
         const midPointCellID = [];
-        const date = new Date();
-        const month = date.getMonth() + 1;
-        const currentHours = date.getHours();
-        const currentMinutes = date.getMinutes();
-        const time = (currentHours * 60) + currentMinutes;
         cellData.forEach(cell => {
             midPointClassification.push(
                 {
-                    month: month,
-                    time: time,
-                    // temperature: parseInt(animal.temperature),
                     distanceToRivers: parseFloat(cell.distanceToRivers),
                     distanceToDams: parseFloat(cell.distanceToDams),
                     distanceToRoads: parseFloat(cell.distanceToRoads),
@@ -91,23 +91,26 @@ export class ClassifierTrainingPoaching {
            // element.speciesId = speciesID;
         });
         // tslint:disable-next-line:prefer-const
-        const toAdd = 1 - newMax;
+        const toAdd = 1 - newMax; // to get values between for example 0.6 and 1 instead of 0.2 and 0.4
         weightedData.forEach(element => {
             element.weight = element.weight + toAdd;
         });
         // add all weight to database
-       // const added = await this.animalCell.addAnimalCellsWeight(weightedData);
-        // return added;
+        const added = await this.poachingCell.addPoachingCellsWeight(weightedData);
+        return added;
     }
     private normalize(min, max, data) {
         // const delta = max - min;
         // const val = (data - min) / delta;
-        return max - data;
+        return 1 - (data / max) ;
     }
 
     // Need to call this method to get a classification
     private getClassification(data, dataID) {
         const dataArray = [];
+        let count = 0;
+        const total = 38680;
+        //console.log(data);
         data.forEach((training, index) => {
             dataArray.push(
                 {
@@ -115,6 +118,12 @@ export class ClassifierTrainingPoaching {
                     weight: this.classifier.getDistance(training),
                 }
             );
+            count++;
+            if (count % 100 === 0) {
+               console.log('cell ' + count + ' of ' + total);
+
+                // break;
+            }
         });
         return JSON.parse(
             JSON.stringify({

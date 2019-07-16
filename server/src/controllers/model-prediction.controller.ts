@@ -1,9 +1,11 @@
 import { Controller, Get, Post, Query } from '@nestjs/common';
 import { ModelTraining } from '../services/model-training.service';
 import {ClassifierTraining} from '../services/animal-classifier-training.service';
+import { ClassifierTrainingPoaching } from '../services/poacher-classifier-training.service';
 @Controller()
 export class ModelPrediction {
-  constructor(private readonly modelTraining: ModelTraining, private readonly classifier: ClassifierTraining) {}
+  constructor(private readonly modelTraining: ModelTraining, private readonly classifier: ClassifierTraining,
+              private readonly poaching: ClassifierTrainingPoaching) {}
 
 
   @Get('getPredictionData')
@@ -58,4 +60,9 @@ export class ModelPrediction {
   trainClassificationModel(): Promise<boolean> {
     return this.classifier.trainModel('Elephant');
   }
+
+    @Get('trainClassificationModelPoaching')
+    trainClassificationModelPoaching(): Promise<boolean> {
+        return this.poaching.trainModel();
+    }
 }

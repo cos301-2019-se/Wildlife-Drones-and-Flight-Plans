@@ -21,6 +21,7 @@ export class ClassifierTraining {
     async trainModel(speciesName) {
         //  fetch data by species name
         const data = await this.animalLocationService.getSpeciesLocationTableData(speciesName);
+        const speciesID = await this.species.getSpeciesID(speciesName);
         const jsonData = JSON.parse(JSON.stringify(data));
       //  console.log(jsonData);
         const teachingData = [];
@@ -48,15 +49,11 @@ export class ClassifierTraining {
         const midPointCellID = [];
         const date = new Date();
         const month = date.getMonth() + 1;
-        const currentHours = date.getHours();
-        const currentMinutes = date.getMinutes();
-       // const time = (currentHours * 60) + currentMinutes;
         cellData.forEach(cell => {
             for (let i = 0; i < 12; i++) {
                 let time = 120 * i;
                 midPointClassification.push(
                 {
-
                       month: month,
                       time: time, // plus 120
                       // temperature: parseInt(animal.temperature),
@@ -73,7 +70,7 @@ export class ClassifierTraining {
             });
         //  Once all midpoints have been fetched we need we need to get a classification on each midpoint
         const classifications = this.getClassification(midPointClassification, midPointCellID);
-        const speciesID = await this.species.getSpeciesID(speciesName);
+
         // Find min and max values
         let max = [-Infinity, -Infinity, -Infinity, -Infinity, -Infinity,
             -Infinity, -Infinity, -Infinity, -Infinity, -Infinity, -Infinity,
@@ -152,10 +149,40 @@ export class ClassifierTraining {
             element.weight1080 += toAdd[weightIndex++];
             element.weight1200 += toAdd[weightIndex++];
             element.weight1320 += toAdd[weightIndex++];
+            // element.weight0 = 0;
+            // element.weight120 = 0;
+            // element.weight240 = 0;
+            // element.weight360 = 0;
+            // element.weight480 = 0;
+            // element.weight600 = 0;
+            // element.weight720 = 0;
+            // element.weight840 = 0;
+            // element.weight960 = 0;
+            // element.weight1080 = 0;
+            // element.weight1200 = 0;
+            // element.weight1320 = 0;
         });
         // add all weight to database
         const added = await this.animalCell.addAnimalCellsWeight(weightedData);
-        return added;
+        // weightedData.forEach(async animData => {
+        //     const added = await this.animalCell.addAnimalCellsWeight(animData);
+        //    // return added;
+        // });
+        return true ;
+        // const start = async () => {
+        //     await  weightedData.forEach(async animData => {
+        //         const added = await this.animalCell.addAnimalCellWeight(animData.cellId,
+        //           animData.speciesId, animData.weight0, animData.weight120
+        //           , animData.weight240, animData.weight360, animData.weight480
+        //           , animData.weight600, animData.weight720, animData.weight840
+        //           , animData.weight960, animData.weight1080, animData.weight1200
+        //           , animData.weight1320);
+        //         // return added;
+        //     });
+        //     //console.log('Done');
+        // };
+        // start();
+        // return true;
     }
     private normalize(min, max, data) {
         // const delta = max - min;
@@ -174,7 +201,11 @@ export class ClassifierTraining {
     private getClassification(data, dataID) {
         const dataArray = [];
         let count = 0;
-        // ..let temp = [38694, 38693, 38692];
+       // let temp = [38694, 38693, 38692];
+        let temp = [];
+        for (let i = 0; i < 100 ; i++) {
+            temp.push(i);
+        }
         const total = 38680;
         dataID.forEach((cellID, index) => {
             dataArray.push(
@@ -196,8 +227,8 @@ export class ClassifierTraining {
             );
 
             count++;
-            if (count % 100 === 0) {
-                console.log('weight ' + count + ' of ' + total);
+            if (count % 1000 === 0) {
+                console.log('cell ' + count + ' of ' + total);
                // break;
             }
         });

@@ -25,7 +25,7 @@ export class AnimalCellWeightService {
     weight1080: number,
     weight1200: number,
     weight1320: number,
-    weight1440: number,
+    // weight1440: number,
   ): Promise<boolean> {
     const con = await this.databaseService.getConnection();
     const animalCellWeight = new AnimalCellWeight();

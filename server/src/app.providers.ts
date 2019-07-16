@@ -25,6 +25,7 @@ import { MapPartitionerService } from './services/map-partitioner.service';
 import { PoachingIncidentService } from './services/poaching-incident.service';
 import { AuthService } from './auth/auth.service';
 import { ModelSaving } from './services/model-saving.service';
+import { ClassifierTrainingPoaching } from './services/poacher-classifier-training.service';
 
 export const providers = [
   MapUpdaterService,
@@ -54,4 +55,5 @@ export const providers = [
   ConfigService,
   MapDataService,
   ModelSaving,
+  ClassifierTrainingPoaching,
 ];
