@@ -48,8 +48,6 @@ export class ClassifierTraining {
         const midPointCellID = [];
         const date = new Date();
         const month = date.getMonth() + 1;
-        const currentHours = date.getHours();
-        const currentMinutes = date.getMinutes();
        // const time = (currentHours * 60) + currentMinutes;
         cellData.forEach(cell => {
             for (let i = 0; i < 12; i++) {
