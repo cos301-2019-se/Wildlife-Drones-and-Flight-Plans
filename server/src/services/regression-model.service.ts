@@ -1,5 +1,8 @@
 const MLR = require('ml-regression-multivariate-linear');
 import * as fs from 'fs';
+
+// TODO: Implement a regression service that is a factory for loading and saving models.
+
 export class RegressionModel {
   private model: any;
   private logsEnabled: boolean;

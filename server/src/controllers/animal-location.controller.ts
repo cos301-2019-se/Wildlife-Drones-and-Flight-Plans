@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Query, Body } from '@nestjs/common';
 import { AnimalLocationService } from '../services/animal-location.service';
+import { AnimalLocation } from 'src/entity/animal-location.entity';
 
 @Controller()
 export class AnimalController {
@@ -82,7 +83,7 @@ export class AnimalController {
   //   );
   // }
   @Post('getSpeciesLocationTableData')
-  async getSpeciesLocationTableData(@Body() body): Promise<JSON> {
+  async getSpeciesLocationTableData(@Body() body): Promise<AnimalLocation[]> {
     return await this.animalLocationService.getSpeciesLocationTableData(
       body.animalSpecies,
       );

@@ -86,21 +86,18 @@ export class MapCellDataService {
     }    
   }
 
-  async getCellsData(): Promise<JSON> {
+  /**
+   * Returns cell data from the database
+   */
+  async getCellsData(): Promise<MapCellData[]> {
     const con = await this.databaseService.getConnection();
 
     try {
-      let cellsData = await con.getRepository(MapCellData).find();
-
-      // tslint:disable-next-line:no-console
-
-      console.log('Cells data retrieved');
-      //console.log(cellsData);
-      return JSON.parse(JSON.stringify(cellsData));
+      return await con.getRepository(MapCellData).find();
     } catch (error) {
       console.log(error);
       console.log('Cells data not retrieved');
-      return JSON.parse('false');
+      return undefined;
     }
   }
 }
