@@ -70,7 +70,6 @@ export class ClassifierTraining {
             });
         //  Once all midpoints have been fetched we need we need to get a classification on each midpoint
         const classifications = this.getClassification(midPointClassification, midPointCellID);
-
         // Find min and max values
         let max = [-Infinity, -Infinity, -Infinity, -Infinity, -Infinity,
             -Infinity, -Infinity, -Infinity, -Infinity, -Infinity, -Infinity,
@@ -149,18 +148,6 @@ export class ClassifierTraining {
             element.weight1080 += toAdd[weightIndex++];
             element.weight1200 += toAdd[weightIndex++];
             element.weight1320 += toAdd[weightIndex++];
-            // element.weight0 = 0;
-            // element.weight120 = 0;
-            // element.weight240 = 0;
-            // element.weight360 = 0;
-            // element.weight480 = 0;
-            // element.weight600 = 0;
-            // element.weight720 = 0;
-            // element.weight840 = 0;
-            // element.weight960 = 0;
-            // element.weight1080 = 0;
-            // element.weight1200 = 0;
-            // element.weight1320 = 0;
         });
         // add all weight to database
         const added = await this.animalCell.addAnimalCellsWeight(weightedData);
@@ -227,8 +214,8 @@ export class ClassifierTraining {
             );
 
             count++;
-            if (count % 1000 === 0) {
-                console.log('cell ' + count + ' of ' + total);
+            if (count % 100 === 0) {
+                console.log('weight ' + count + ' of ' + total);
                // break;
             }
         });
