@@ -45,18 +45,6 @@ describe('Authorization service', () => {
       });
   });
 
-  it('/addUser (POST)', async () => {
-    await request(app.getHttpServer())
-      .post('/addUser')
-      .send({
-        name: 'Anne',
-        username: 'jm',
-        password: '123',
-        job: 'Pilot',
-        email: 'gst@gmail.com',
-      })
-      .expect('true');
-  });
 
   it('/getUsers)', () => {
     return request(app.getHttpServer())
