@@ -112,11 +112,10 @@ export class GeoService {
    * @param cellSizeKm The length of a cell's edge in kilometres
    */
   public partitionIntoGrid(polygon, cellSizeKm) {
-    const simplifiedPolygon = this.simplifyGeometry(polygon);
     const bounds = this.getBoundingBox(polygon);
     return squareGrid(bounds, cellSizeKm, {
       units: 'kilometers',
-    }).features.filter(feature => this.isInPolygon(feature, simplifiedPolygon));
+    }).features.filter(feature => this.isInPolygon(feature, polygon));
   }
 
   public flattenGeo(geoJSON) {

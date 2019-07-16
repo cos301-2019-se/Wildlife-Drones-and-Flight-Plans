@@ -6,12 +6,14 @@ import { MapPartitionerService } from './map-partitioner.service';
 import { DatabaseService } from './db.service';
 import { MapDataService } from '../services/map-data.service';
 import { ReserveConfiguration } from '../entity/reserve-configuration.entity';
+import { ConfigService } from './config.service';
 @Injectable()
 export class MapUpdaterService {
   constructor(
     private overpass: OverpassService,
     private mapPartitioner: MapPartitionerService,
     private databaseService: DatabaseService,
+    private config: ConfigService,
   ) {}
 
   /**
@@ -19,20 +21,15 @@ export class MapUpdaterService {
    * @param name The name of the reserve
    */
   async updateMap(name: string) {
-    const { reserve, features } = await this.getMapFeatures(name);
+    const config = await this.config.getConfig();
+    config.reserveName = name;
 
-    const grid = await this.mapPartitioner.partitionMap(reserve, features, 1);
+    // save the reserve name for the system
+    await this.config.setConfig(config);
 
-    console.log('grid', grid);
+    const { reserve, features } = await this.getMapFeatures(config.reserveName);
 
-    const dbConn = await this.databaseService.getConnection();
-    const reserveConfigCon = await dbConn.getRepository(ReserveConfiguration);
-
-    let reserveConfig: ReserveConfiguration = {
-      reserveName: name,
-      cellSize: '1',
-    };
-    await reserveConfigCon.save(reserveConfig);
+    const grid = await this.mapPartitioner.partitionMap(reserve, features, config.cellSize);
 
     return {
       ...features,
@@ -57,7 +54,7 @@ export class MapUpdaterService {
     let mapData = new MapDataService(this.databaseService);
 
     //save to table
-    await mapData.addMapData('reserve', reserves.features);
+    await mapData.addMapData('reserve', reserves.features[0]);
 
     const dams = await this.overpass
       .query(`area["name"="${name}"]->.boundaryarea;

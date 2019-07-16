@@ -15,16 +15,24 @@ export class Drone {
   @Column()
   avgFlightTime: number;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   speed: number;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   flightTime: number;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   longitude: number;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   latitude: number;
 
   @Column()

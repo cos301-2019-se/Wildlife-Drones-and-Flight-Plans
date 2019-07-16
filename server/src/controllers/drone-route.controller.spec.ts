@@ -17,6 +17,21 @@ describe('MapController (e2e)', () => {
     await app.init();
   });
 
+  it('/login (POST)', async () => {
+    await request(app.getHttpServer())
+      .post('/login')
+      .send({
+        email: 'gst@gmail.com',
+        password: '123',
+      })
+      .then(response => {
+        // console.log("The token that is given back " + response.body.accessToken)
+
+        token = response.body.accessToken;
+        console.log('got token', token);
+      });
+  });
+
   it('/addDroneRoute (POST)', async () => {
     await request(app.getHttpServer())
       .post('/addDroneRoute')
@@ -24,6 +39,7 @@ describe('MapController (e2e)', () => {
         id: '1',
         points: '1227906',
       })
+      .set('Authorization', `Bearer ${token}`)
       .expect('true');
   });
 
@@ -35,6 +51,7 @@ describe('MapController (e2e)', () => {
         points: '1228900',
         percent: '40'
       })
+      .set('Authorization', `Bearer ${token}`)
       .expect('true');
   });
 
@@ -44,6 +61,7 @@ describe('MapController (e2e)', () => {
       .send({
         id: '1',
       })
+      .set('Authorization', `Bearer ${token}`)
       .expect('true');
   });
 

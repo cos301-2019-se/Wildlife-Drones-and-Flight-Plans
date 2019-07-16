@@ -1,30 +1,14 @@
 import { ShortestPathService } from './shortest-path.service';
-import { MapUpdaterService } from './map-updater.service';
-
-import { GeoService } from './geo.service';
-import { SRTMService } from './srtm.service';
-import { OverpassService } from './overpass.service';
-import { MapPartitionerService } from './map-partitioner.service';
 import { Test, TestingModule } from '@nestjs/testing';
-import { DatabaseService } from './db.service';
-import { MapCellDataService } from './map-cell-data.service';
+import { providers } from '../app.providers';
+import { imports } from '../app.imports';
 
 jest.setTimeout(30000);
 let controller;
 beforeAll(async () => {
   const module: TestingModule = await Test.createTestingModule({
-    imports: [],
-    // controllers: [AnimalController],
-    providers: [
-      MapUpdaterService,
-      GeoService,
-      SRTMService,
-      OverpassService,
-      MapPartitionerService,
-      ShortestPathService,
-      DatabaseService,
-      MapCellDataService,
-    ],
+    imports,
+    providers,
   }).compile();
   controller = await module.get(ShortestPathService);
   //controller = await module.get<ShortestPathService>(ShortestPathService);

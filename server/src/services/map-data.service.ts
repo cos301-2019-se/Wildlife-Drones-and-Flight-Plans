@@ -23,4 +23,21 @@ export class MapDataService {
       return false;
     }
   }
+
+  async getMapFeature(featureName: string): Promise<any> {
+    const conn = await this.databaseService.getConnection();
+    const mapData = conn.getRepository(MapData);
+
+    const feature = await mapData.findOne({
+      where: {
+        feature: featureName,
+      },
+    });
+
+    if (!feature) {
+      return undefined;
+    }
+
+    return JSON.parse(feature.properties);
+  }
 }

@@ -17,14 +17,30 @@ describe('MapController (e2e)', () => {
     await app.init();
   });
 
+  it('/login (POST)', async () => {
+    await request(app.getHttpServer())
+      .post('/login')
+      .send({
+        email: 'gst@gmail.com',
+        password: 'Reddbull@1',
+      })
+      .then(response => {
+        // console.log("The token that is given back " + response.body.accessToken)
+
+        token = response.body.accessToken;
+       // console.log('got token', token);
+      });
+  });
+
   it('/addRanger (POST)', async () => {
     await request(app.getHttpServer())
       .post('/addRanger')
       .send({
         lon: '1233.56',
         lat: '6012.45',
-        rangerID:'14'
+        rangerID:'20'
       })
+      .set('Authorization', `Bearer ${token}`)
       .expect('true');
   });
 
@@ -34,8 +50,9 @@ describe('MapController (e2e)', () => {
       .send({
         lon: '32323',
         lat: '1232.0',
-        rangerID:'7'
+        rangerID:'2'
       })
+      .set('Authorization', `Bearer ${token}`)
       .expect('true');
   });
 

@@ -17,12 +17,28 @@ describe('MapController (e2e)', () => {
     await app.init();
   });
 
+  it('/login (POST)', async () => {
+    await request(app.getHttpServer())
+      .post('/login')
+      .send({
+        email: 'gst@gmail.com',
+        password: '123',
+      })
+      .then(response => {
+        // console.log("The token that is given back " + response.body.accessToken)
+
+        token = response.body.accessToken;
+       // console.log('got token', token);
+      });
+  });
+
   it('/addPoachingIncidentType (POST)', async () => {
     await request(app.getHttpServer())
       .post('/addPoachingIncidentType')
       .send({
-        poachingType: "bow&arrow"
+        poachingType: "snare"
       })
+      .set('Authorization', `Bearer ${token}`)
       .expect('true');
   });
 });

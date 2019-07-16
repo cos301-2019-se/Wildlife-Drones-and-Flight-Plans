@@ -8,6 +8,7 @@ import bbox from '@turf/bbox';
 import { GeoService, GeoSearchSet } from './geo.service';
 import { SRTMService } from './srtm.service';
 import { lengthToDegrees } from '@turf/helpers';
+import { MoreThanOrEqual } from 'typeorm';
 
 const LOCATION_BIAS = lengthToDegrees(300, 'meters');
 @Injectable()
@@ -22,7 +23,7 @@ export class PoachingIncidentService {
   async addPoachingIncident(
     lon: number,
     lat: number,
-    pType: string,
+    pType: string | number,
     description: string,
   ): Promise<boolean> {
     const con = await this.databaseService.getConnection();
@@ -66,9 +67,9 @@ export class PoachingIncidentService {
     try {
       const poachingIncidentType = await con
         .getRepository(PoachingIncidentType)
-        .findOne({ type: pType });
+        .findOne(typeof pType === 'string' ? { type: pType } : { id: pType });
 
-      if (poachingIncidentType == undefined) {
+      if (typeof poachingIncidentType === 'undefined') {
         console.log('The type of incident does not exist.');
         return false;
       } else {
@@ -125,5 +126,22 @@ export class PoachingIncidentService {
       console.log('The type of incident does not exist.');
       return false;
     }
+  }
+  /**
+   * Get all poaching incidents since the given date
+   * If since is null, then will return for the last week
+   */
+  async getPoachingIncidents(since: Date = null) {
+    since = since ? since : new Date(Date.now() - 86400000 * 7);
+
+    const con = await this.databaseService.getConnection();
+    const incidentsRepository = con.getRepository(PoachingIncident);
+
+    return await incidentsRepository.find({
+      where: {
+        timestamp: MoreThanOrEqual(since),
+      },
+      loadRelationIds: true,
+    });
   }
 }

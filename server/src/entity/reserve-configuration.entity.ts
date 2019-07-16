@@ -5,6 +5,6 @@ export class ReserveConfiguration {
   @PrimaryColumn('text')
   reserveName: string;
 
-  @Column('text')
-  cellSize: string;
+  @Column()
+  cellSize: number;
 }

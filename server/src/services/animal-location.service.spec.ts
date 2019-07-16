@@ -1,5 +1,6 @@
 import { AnimalLocationService } from './animal-location.service';
 import { DatabaseService } from './db.service';
+
 import { CsvReader } from './csv-reader.service';
 import { MapUpdaterService } from './map-updater.service';
 import { GeoService } from './geo.service';
@@ -10,23 +11,23 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AnimalController } from '../controllers/animal-location.controller';
 import { AnimalLocation } from '../entity/animal-location.entity';
 import { Species } from '../entity/animal-species.entity';
+import { providers } from '../app.providers';
+//
+import { imports } from '../app.imports';
+import { AppModule } from '../app.module';
+
+
+//not sure if 10000 is long enough
+jest.setTimeout(5000);
+
 
 let controller;
 
 beforeAll(async () => {
   const module: TestingModule = await Test.createTestingModule({
-    imports: [],
-    controllers: [AnimalController],
-    providers: [
-      AnimalLocationService,
-      DatabaseService,
-      CsvReader,
-      MapUpdaterService,
-      GeoService,
-      SRTMService,
-      OverpassService,
-      MapPartitionerService,
-    ],
+    imports :[AppModule],
+     controllers: [AnimalController],
+     providers,
   }).compile();
 
   controller = await module.get<DatabaseService>(DatabaseService);
@@ -58,6 +59,8 @@ beforeAll(async () => {
     altitude: 999999,
     slopiness: 999999,
     species: animalSpeciseType,
+    active: true,
+    distanceStreams: 999999,
   };
 
   const location2: AnimalLocation = {
@@ -77,6 +80,8 @@ beforeAll(async () => {
     altitude: 999999,
     slopiness: 999999,
     species: animalSpeciseType,
+    active: true,
+    distanceStreams: 999999,
   };
 
   const location3: AnimalLocation = {
@@ -96,6 +101,8 @@ beforeAll(async () => {
     altitude: 999999,
     slopiness: 999999,
     species: animalSpeciseType,
+    active: true,
+    distanceStreams: 999999,
   };
 
   const location4: AnimalLocation = {
@@ -115,6 +122,8 @@ beforeAll(async () => {
     altitude: 999999,
     slopiness: 999999,
     species: animalSpeciseType,
+    active: true,
+    distanceStreams: 999999,
   };
 
   const location5: AnimalLocation = {
@@ -134,6 +143,8 @@ beforeAll(async () => {
     altitude: 999999,
     slopiness: 999999,
     species: animalSpeciseType,
+    active: true,
+    distanceStreams: 999999
   };
 
   await animalCon.save(location1);
