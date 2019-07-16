@@ -11,11 +11,25 @@ export class UserController {
     private readonly authService: AuthService,
   ) {}
 
+
+  /**
+   * Returns all the users in the system 
+   * Being used for testing purposes 
+   */
+
   @Get('getUsers')
   @UseGuards(AuthGuard('jwt'))
   async getAllUsers(): Promise<User[]> {
     return await this.userService.getAllUsers();
   }
+
+  /**
+   * Logs a user into the system and grants access to gaurded endpoints
+   * This is saved within the database 
+   * @param email The email of the user being added to the system 
+   * @param password The password that will be used to authenticate a user on the system
+   * Will return true if the function executed correctly 
+   */
 
   @Post('login')
   async loginUser(@Body() body): Promise<JSON> {
@@ -25,6 +39,14 @@ export class UserController {
     }
   }
 
+  /**
+   * Adds a user to the system ,this is done by an admin
+   * This is saved within the database 
+   * @param name The name of the person being added to the system 
+   * @param email The email of the user being added to the system
+   * @param password The secret key a user will use to log into he system
+   * @param job The job type of the user being added either Pilot,Admin or Ranger (in lowercase)
+   */
   @Post('addUser')
   async addUser(@Body() body): Promise<boolean> {
     return await this.userService.addUser(
@@ -35,6 +57,9 @@ export class UserController {
     );
   }
 
+  /**
+   * Testing function to validate tokens and gaurded access 
+   */
   @Post('vToken')
   vToken(@Body() body): boolean {
     return this.authService.validateToken(body.token);

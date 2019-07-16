@@ -10,6 +10,16 @@ export class PoachingIncidentController {
     private readonly poachingIncidentService: PoachingIncidentService,
   ) {}
 
+
+  /**
+   * Adds a poaching incident to the system 
+   * This is saved within the database 
+   * @param pType The type of poaching incident being added 
+   * @param lon The longtitude coordinate of the incident 
+   * @param lat The latitude coordinate of the incident 
+   * @param description A Description of the incident that took place
+   */
+  
   @Post('addIncident')
   async addPoachingIncident(@Body() body): Promise<boolean > {
     return await this.poachingIncidentService.addPoachingIncident(
@@ -21,6 +31,11 @@ export class PoachingIncidentController {
 
   }
 
+  /**
+   * Retrieves all incidents recorded from the system
+   * This information is then returned as an array of incidents
+   */
+  
   @Post('getIncidents')
   async getPoachingIncidents(): Promise<PoachingIncident[]> {
     return await this.poachingIncidentService.getPoachingIncidents();

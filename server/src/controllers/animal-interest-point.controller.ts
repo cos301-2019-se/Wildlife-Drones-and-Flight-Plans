@@ -12,6 +12,11 @@ export class AnimalInterestPointController {
   //   return this.animalInterestPointService.addAnimalInterestPoint();
   // }
 
+  
+ /**
+   * Adds a new animal interest point to the system
+   * This will be saved in a table within the database
+   */
   @Post('addAnimalInterestPoint')
   async addAnimalInterestPoint() :Promise <boolean> {
     return this.animalInterestPointService.addAnimalInterestPoint();

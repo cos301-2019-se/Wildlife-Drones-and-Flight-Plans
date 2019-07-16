@@ -10,6 +10,13 @@ export class PoachingIncidentTypeController {
     private readonly poachingIncidentTypeService: PoachingIncidentTypeService,
   ) {}
 
+  /**
+   * Adds a poaching incident type to the system 
+   * For example a snare or a gunshot etc.
+   * This is saved within the database 
+   * @param poachingType The type of poaching incident being added 
+   */
+
   @Post('addPoachingIncidentType')
   async addPoachingIncidentType(@Body() body): Promise<boolean> {
     return await this.poachingIncidentTypeService.addPoachingIncidentType(
@@ -17,6 +24,11 @@ export class PoachingIncidentTypeController {
     );
   }
 
+  /**
+   * Retrieves the different types of incidents that are recorded on the ssystem 
+   * This information is retrieved from the database
+   */
+  
   @Post('getPoachingIncidentTypes')
   async getPoachingIncidentTypes(): Promise<PoachingIncidentType[]> {
     return await this.poachingIncidentTypeService.getPoachingIncidentTypes();
