@@ -124,7 +124,7 @@ export class ModelTraining {
       if(cellId > currentCount)
       {
         currentCount += countPercentage;
-        console.log('Classified ' + (cellId / cellData.length) * 100 + '%');
+        console.log('Classified ' + Math.floor((cellId / cellData.length) * 100) + '%');
       }
       for (let i = 0; i < 12; i++) {
         const time = i * 120;
