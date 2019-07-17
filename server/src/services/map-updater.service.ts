@@ -98,6 +98,7 @@ export class MapUpdaterService {
         nwr(area.boundaryarea)[water][intermittent=yes];
         nwr(area.boundaryarea)[natural=water][intermittent=yes];
         nwr(area.boundaryarea)[waterway][intermittent=yes];
+        nwr(area.boundaryarea)[waterway=stream];
       );
       out geom;`);
     // tslint:disable-next-line:no-console
@@ -132,76 +133,31 @@ export class MapUpdaterService {
 
     console.log('residential', residential.features.length);
 
-    const farms = await this.overpass
-      .query(`node["name"="${name}"];
-      (       
-         nwr["name"="${name}"];
-         node  (around:5000)
-              ["place"= "farm"];
-      );             
-      out geom;`);
+    const externalResidential = await this.overpass
+      .query(`
+        nwr[name="${name}"]->.reserve;
+        area[name="${name}"]->.boundary;
 
-    await mapData.addMapData('farms', farms.features);
+        (
+          .reserve;
+          nwr(around:5000)[place];
+          nwr(around:5000)[landuse=residential];
+        )->.a;
+
+        (
+          nwr(area.boundary)[place];
+          nwr(area.boundary)[landuse=residential];
+        )->.b;
+
+        (.a; - .b;)->._;
+        (._; - .reserve;)->._;
+        
+        out geom;`);
+
+    await mapData.addMapData('externalResidential', externalResidential.features);
 
     // tslint:disable-next-line:no-console
-    console.log('farms', farms.features.length);
-
-    const streams = await this.overpass
-      .query(` area["name"="${name}"]->.boundaryarea;
-      (
-        nwr(area.boundaryarea)[waterway=stream];
-        - nwr(area.boundaryarea)[intermittent=yes];
-      );
-      (._;>;);
-      out geom;
-      >;`);
-    // tslint:disable-next-line:no-console
-    console.log('streams', streams.features.length);
-
-    //save to table
-    await mapData.addMapData('streams', streams.features);
-
-    const suburbs = await this.overpass
-      .query(`node["name"="${name}"];
-      (       
-         nwr["name"="${name}"];
-         node  (around:5000)
-              ["place"= "suburb"];
-      );             
-      out geom;`);
-    // tslint:disable-next-line:no-console
-    console.log('suburbs', suburbs.features.length);
-
-    //save to table
-    await mapData.addMapData('suburbs', suburbs.features);
-
-    const villages = await this.overpass
-      .query(`node["name"="${name}"];
-      (       
-         nwr["name"="${name}"];
-         node  (around:5000)
-              ["place"= "village"];
-      );             
-      out geom;`);
-    // tslint:disable-next-line:no-console
-    console.log('villages', villages.features.length);
-
-    //save to table
-    await mapData.addMapData('villages', villages.features);
-
-    const towns = await this.overpass
-      .query(`node["name"="${name}"];
-      (       
-         nwr["name"="${name}"];
-         node  (around:5000)
-              ["place"= "town"];
-      );             
-      out geom;`);
-    // tslint:disable-next-line:no-console
-    console.log('towns', towns.features.length);
-
-    //save to table
-    await mapData.addMapData('towns', towns.features);
+    console.log('externalResidential', externalResidential.features.length);
 
     // tslint:disable-next-line:no-console
     console.log('downloaded map data');
@@ -216,11 +172,7 @@ export class MapUpdaterService {
         intermittentWater: intermittentWater.features,
         roads: roads.features,
         residential: residential.features,
-        streams: streams.features,
-        towns: towns.features,
-        suburbs: suburbs.features,
-        villages: villages.features,
-        farms: farms.features,
+        externalResidential: externalResidential.features,
       },
     };
   }

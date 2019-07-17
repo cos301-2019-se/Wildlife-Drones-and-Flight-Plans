@@ -95,19 +95,12 @@ export class PoachingIncidentService {
               lon,
               lat,
             ).distance,
-            distanceToFarm: featureSearchers.farms.getNearest(lon, lat)
-              .distance,
-            distanceToVillage: featureSearchers.villages.getNearest(lon, lat)
-              .distance,
-            distanceToTown: featureSearchers.towns.getNearest(lon, lat)
-              .distance,
-            distanceToSuburb: featureSearchers.suburbs.getNearest(lon, lat)
-              .distance,
+            distanceToExternalResidences: featureSearchers.externalResidences.getNearest(lon, lat).distance,
             distanceToIntermittentWater: featureSearchers.intermittentWater.getNearest(
               lon,
               lat,
             ).distance,
-            'altitude:': altitudeInfo.averageAltitude,
+            altitude: altitudeInfo.averageAltitude,
             slopiness: altitudeInfo.variance,
           }),
         };
