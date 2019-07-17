@@ -112,6 +112,8 @@ export class MapCellDataService {
 
   async getMapCells(): Promise<Array<{
     id: number;
+    lon: number;
+    lat: number;
     poachingWeight: number;
     animalWeights: Array<{
       speciesId: number;
@@ -121,9 +123,7 @@ export class MapCellDataService {
   {
     const con = await this.databaseService.getConnection();
 
-    try {
-
-    
+    try {    
       const cellsData = await con.getRepository(MapCellData).find({
         loadEagerRelations: true,
         relations: ["animalCell","poachingCell", "animalCell.species"]
@@ -133,6 +133,8 @@ export class MapCellDataService {
 
       return cellsData.map(cell => ({
         id: cell.id,
+        lon: cell.cellMidLongitude,
+        lat: cell.cellMidLatitude,
         poachingWeight: (cell.poachingCell[0] ? cell.poachingCell[0].weight : undefined),
         animalWeights: (cell.animalCell.length ? cell.animalCell.map(animalCell => ({
           speciesId: animalCell.species.id,
@@ -145,27 +147,6 @@ export class MapCellDataService {
       console.log('Cells data not retrieved');
       //return JSON.parse('false');
       return undefined;
-    }
-  }
-
-  async getCellsHeatData(): Promise<MapCellData> {
-    const con = await this.databaseService.getConnection();
-
-    const animalWeightTable = con.getRepository(AnimalCellWeight);
-    const poachingWeightTable = con.getRepository(PoachingCellWeight);
-
-    try {
-      let cellsData = await con.getRepository(MapCellData).find();
-
-      // tslint:disable-next-line:no-console
-
-      console.log('Cells data retrieved');
-      //console.log(cellsData);
-      return JSON.parse(JSON.stringify(cellsData));
-    } catch (error) {
-      console.log(error);
-      console.log('Cells data not retrieved');
-      return JSON.parse('false');
     }
   }
 }
