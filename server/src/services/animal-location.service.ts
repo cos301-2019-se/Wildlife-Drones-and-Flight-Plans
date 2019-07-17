@@ -338,25 +338,18 @@ export class AnimalLocationService {
     );
   }
 
-  async getSpeciesLocationTableData(animalSpecies): Promise<JSON> {
+  async getSpeciesLocationTableData(animalSpecies: string): Promise<AnimalLocation[]> {
     const con = await this.databaseService.getConnection();
 
-    const animalSpeciseType = await JSON.parse(
-      JSON.stringify(
-        await con.getRepository(Species).find({ species: animalSpecies }),
-      ),
-    );
+    const animalSpeciesType = await con.getRepository(Species).findOne({ species: animalSpecies });
 
     try {
-      return JSON.parse(
-        JSON.stringify(
-          await con
-            .getRepository(AnimalLocation)
-            .find({ species: animalSpeciseType[0]['id'] }),
-        ),
-      );
+      return await con
+        .getRepository(AnimalLocation)
+        .find({ species: animalSpeciesType });
     } catch (error) {
-      return JSON.parse('false');
+      console.error(error);
+      return undefined;
     }
   }
 
