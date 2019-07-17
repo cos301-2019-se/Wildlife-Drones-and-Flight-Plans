@@ -7,27 +7,6 @@ import { AuthGuard } from '@nestjs/passport';
 export class DroneController {
   constructor(private readonly droneService: DroneService) {}
 
-  //add drone info to drone table in database
-  // @Get('addDrone')
-  // async addDrone(
-  //   @Query('name') name: string,
-  //   @Query('avgSpeed') avgSpeed: number,
-  //   @Query('avgFlightTime') avgFlightTime: number,
-  //   @Query('speed') speed: number,
-  //   @Query('flightTime') flightTime: number,
-  //   @Query('long') long: number,
-  //   @Query('lat') lat: number,
-  // ): Promise<boolean> {
-  //   return this.droneService.addDrone(
-  //     name,
-  //     avgSpeed,
-  //     avgFlightTime,
-  //     speed,
-  //     flightTime,
-  //     long,
-  //     lat,
-  //   );
-  // }
 
    /**
    * Add a new drone to the system
@@ -53,31 +32,6 @@ export class DroneController {
     );
   }
   
-
-  //update drone info in table
-  // @Get('updateDrone')
-  // async updateDrone(
-  //   @Query('id') id: number,
-  //   @Query('name') name: string,
-  //   @Query('avgSpeed') avgSpeed: number,
-  //   @Query('avgFlightSpeed') avgFlightSpeed: number,
-  //   @Query('speed') speed: number,
-  //   @Query('flightTime') flightTime: number,
-  //   @Query('long') long: number,
-  //   @Query('lat') lat: number,
-  // ): Promise<boolean> {
-  //   return this.droneService.updateInfo(
-  //     id,
-  //     name,
-  //     avgSpeed,
-  //     avgFlightSpeed,
-  //     speed,
-  //     flightTime,
-  //     long,
-  //     lat,
-  //   );
-  // }
-
 
   /**
    * Updates the location of the drone 
@@ -106,11 +60,7 @@ export class DroneController {
     );
   }
 
-  //deactivate drone in table
-  // @Get('deactivateDrone')
-  // async deactivateDrone(@Query('id') id: number): Promise<boolean> {
-  //   return this.droneService.deactivateDrone(id);
-  // }
+  
 
   /**
    *Remove a drone from the system using the drone ID
@@ -125,7 +75,7 @@ export class DroneController {
 
 
   /**
-   *Returns a list of all the registered drones on the system
+   * Returns a list of all the registered drones on the system
    * Returns a value of true if the function executed sucessfully
    * @param id The identification number of the drone in the system
    */

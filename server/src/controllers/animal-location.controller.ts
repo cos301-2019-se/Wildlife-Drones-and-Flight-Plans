@@ -5,23 +5,6 @@ import { AnimalLocationService } from '../services/animal-location.service';
 export class AnimalController {
   constructor(private readonly animalLocationService: AnimalLocationService) {}
 
-  // @Get('addAnimalLocationData')
-  // addAnimalLocationData(
-  //   @Query('animalId') animalId: string,
-  //   @Query('date') date: Date,
-  //   @Query('long') long: number,
-  //   @Query('lat') lat: number,
-  //   @Query('animalSpecies') animalSpecies: string,
-  // ): Promise<boolean> {
-  //   return this.animalLocationService.addAnimalLocationData(
-  //     animalId,
-  //     date,
-  //     long,
-  //     lat,
-  //     animalSpecies,
-  //   );
-  // }
-
    /**
    * Adds animal tracking data to the system
    * Returns a value of true if the function executed sucessfully
@@ -33,8 +16,6 @@ export class AnimalController {
    * @param lon The longtitude coordinate of the drone's location
    * @param lat The latitude coordinate  of the drone's location
    */
-
-
   @Post('addAnimalLocationData')
   async addAnimalLocationData(@Body() body): Promise<boolean> {
        return await this.animalLocationService.addAnimalLocationData(
@@ -47,11 +28,6 @@ export class AnimalController {
         body.habitat,
       );
     }
-  
-  // @Get('addAnimalLocationDataCSV')
-  // addAnimalLocationDataCSV(@Query('filename') filename: string): void {
-  //   this.animalLocationService.addAnimalLocationDataCSV(filename);
-  // }
 
 
    /**
@@ -59,17 +35,10 @@ export class AnimalController {
    * Returns a value of true if the function executed sucessfully
    * @param filename The csv file to be uploaded with animal data in it
    */
-
   @Post('addAnimalLocationDataCSV')
   async addAnimalLocationDataCSV (@Body() body) :Promise<void> {
     return await this.animalLocationService.addAnimalLocationDataCSV(body.filename);
   }
-
-
-  // @Get('getAllAnimalLocationTableData')
-  // getAllAnimalsLocationData(): Promise<JSON> {
-  //   return this.animalLocationService.getAllAnimalsLocationTableData();
-  // }
 
 
     /**
@@ -80,20 +49,7 @@ export class AnimalController {
   async getAllAnimalLocationTableData() : Promise<boolean> {
     return await this.getAllAnimalLocationTableData();
   }
-  // async getAllAnimalsLocationData(): Promise<JSON> {
-  //   return await this.animalLocationService.getAllAnimalsLocationTableData();
-  // }
-
-  // @Get('getIndividualAnimalLocationTableData')
-  // getIndividualAnimalLocationData(
-  //   @Query('animalID') animalID: string,
-  // ): Promise<JSON> {
-  //   return this.animalLocationService.getIndividualAnimalLocationTableData(
-  //     animalID,
-  //   );
-  // }
-
-
+  
    /**
    * Returns information about an individual animal location from the table 
    * Returns a value of true if the function executed sucessfully
@@ -107,14 +63,6 @@ export class AnimalController {
          );
   }
 
-  // @Get('getSpeciesLocationTableData')
-  // getSpeciesLocationTableData(
-  //   @Query('animalSpecies') animalSpecies: string,
-  // ): Promise<JSON> {
-  //   return this.animalLocationService.getSpeciesLocationTableData(
-  //     animalSpecies,
-  //   );
-  // }
 
    /**
    * Returns information species and their location

@@ -22,6 +22,18 @@ export class AnimalLocationService {
     private readonly altitude: SRTMService,
   ) {}
 
+    /**
+   * Adds animal tracking data to the system
+   * Returns a value of true if the function executed sucessfully
+   * @param animalId The identification number of the animal in the system
+   * @param date The date the data was added to
+   * @param animalSpecies The type of species the animal is
+   * @param temp Temperature recorded 
+   * @param habitat The animal habitat
+   * @param lon The longtitude coordinate of the drone's location
+   * @param lat The latitude coordinate  of the drone's location
+   */
+
   async addAnimalLocationData(
     animalId: string,
     date: Date,
@@ -150,6 +162,12 @@ export class AnimalLocationService {
     }   
   }
 
+
+   /**
+   * Used to upload csv files containg tracking data about various animals  
+   * Returns a value of true if the function executed sucessfully
+   * @param filename The csv file to be uploaded with animal data in it
+   */
   async addAnimalLocationDataCSV(filename): Promise<void> {
     const csvFile = filename;
     const MAX_BUFFER_SIZE = 50000;
@@ -321,6 +339,10 @@ export class AnimalLocationService {
     });
   }
 
+   /**
+   * Returns the table containing all the data in the animal location table 
+   * Returns a value of true if the function executed sucessfully
+   */
   async getAllAnimalsLocationTableData(): Promise<JSON> {
     const con = await this.databaseService.getConnection();
     const animalData = JSON.parse(
@@ -328,7 +350,13 @@ export class AnimalLocationService {
     );
     return animalData;
   }
-
+  
+  /**
+   * Returns information about an individual animal location from the table 
+   * Returns a value of true if the function executed sucessfully
+   * The information is retrieved from the database
+   * @param animalId The identification number of the animal in the system
+   */
   async getIndividualAnimalLocationTableData(animalID): Promise<JSON> {
     const con = await this.databaseService.getConnection();
     return JSON.parse(
@@ -337,7 +365,13 @@ export class AnimalLocationService {
       ),
     );
   }
-
+  
+  /**
+   * Returns information species and their location
+   * Returns a value of true if the function executed sucessfully
+   * The information is retrieved from the database
+   * @param animalId The identification number of the animal in the system
+   */
   async getSpeciesLocationTableData(animalSpecies): Promise<JSON> {
     const con = await this.databaseService.getConnection();
 
@@ -359,7 +393,11 @@ export class AnimalLocationService {
       return JSON.parse('false');
     }
   }
-
+  
+  /**
+   * Deactivates an animal ID, esentially removing an animal from the system
+   * @param animalId The id that the animal is register with on the system
+   */
   async deactivateAnimal(animalId): Promise<Boolean> {
     const con = await this.databaseService.getConnection();
 

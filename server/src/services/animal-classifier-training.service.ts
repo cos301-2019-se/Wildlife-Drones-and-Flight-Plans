@@ -12,8 +12,12 @@ export class ClassifierTraining {
     constructor(private readonly animalLocationService: AnimalLocationService) {
     }
 
-    //  Trains the model
-    // Fetch data from database then train on that data
+    /**
+   * Trains the classifier model for predictions and weights
+   * Fetches the data from the database and then uses it to train the model
+   * The result is weights formed by the classifier
+   */
+
     async trainModel() {
         //  fetch data
         const data = await this.animalLocationService.getAllAnimalsLocationTableData();
@@ -38,6 +42,9 @@ export class ClassifierTraining {
         this.classifier = new Classifier(teachingData);
     }
 
+    /**
+   * Returns the classification in a form of distance
+   */
     getClassification(data)
     {
         return this.classifier.getDistance(data);

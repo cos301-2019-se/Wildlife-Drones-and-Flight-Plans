@@ -7,7 +7,17 @@ import { Drone } from '../entity/drone.entity';
 export class DroneService {
   constructor(private readonly databaseService: DatabaseService) {}
 
-  //add drone to Drone table in database.
+  /**
+   * Add a new drone to the system
+   * Returns a value of true if the function executed sucessfully
+   * @param name The name of the drone 
+   * @param avgSpeed The average speed at which the drone travels
+   * @param avgFlightTime The average time a drone can fly 
+   * @param speed The top speed a drone can fecth
+   * @param lon The longtitude coordinate of the drone's location
+   * @param lat The latitude coordinate  of the drone's location
+   */
+
   async addDrone(
     name: string,
     avgSpeed: number,
@@ -39,6 +49,18 @@ export class DroneService {
     }
   }
 
+  /**
+   * Updates the location of the drone 
+   * Returns a value of true if the function executed sucessfully
+   * @param id The identification number of the drone in the system
+   * @param name The name of the drone 
+   * @param avgSpeed The average speed at which the drone travels
+   * @param avgFlightSpeed The average flight speed at which a drone can fly 
+   * @param flightTime The amount of time the drone can fly 
+   * @param speed The top speed a drone can fetch
+   * @param lon The longtitude coordinate of the drone's location
+   * @param lat The latitude coordinate  of the drone's location
+   */
   async updateInfo(
     id: number,
     name: string,
@@ -75,6 +97,11 @@ export class DroneService {
     }
   }
 
+  /**
+   *Update the features of a drone registered on the system
+   * Returns a value of true if the function executed sucessfully
+   * @param id The identification number of the drone in the system
+   */
   async updateDrones(drones: Drone[]): Promise<boolean> {
     const conn = await this.databaseService.getConnection();
     const repo = conn.getRepository(Drone);
@@ -88,6 +115,12 @@ export class DroneService {
 
     return true;
   }
+
+  /**
+   *Remove a drone from the system using the drone ID
+   * Returns a value of true if the function executed sucessfully
+   * @param id The identification number of the drone in the system
+   */
 
   async deactivateDrone(id: number): Promise<boolean> {
     const con = await this.databaseService.getConnection();
@@ -110,6 +143,11 @@ export class DroneService {
     }
   }
 
+   /**
+   *Returns a list of all the registered drones on the system
+   * Returns a value of true if the function executed sucessfully
+   * @param id The identification number of the drone in the system
+   */
   async getDrones(activeOnly = true): Promise<Drone[]> {
     const conn = await this.databaseService.getConnection();
     const rep = conn.getRepository(Drone);

@@ -5,15 +5,6 @@ import { DroneRouteService } from '../services/drone-route.service';
 export class DroneRouteController {
   constructor(private readonly droneRouteService: DroneRouteService) {}
 
-  //add drone route info to drone route table in database
-  // @Get('addDroneRoute')
-  // async addDroneRoute(
-  //   @Query('routeId') id: number,
-  //   @Query('points') points: string,
-  // ): Promise<boolean> {
-  //   return this.droneRouteService.addDroneRoute(id, points);
-  // }
-
     /**
    * Adds a new drone route to the list of routes
    * Returns a value of true if the function executed sucessfully
@@ -24,16 +15,6 @@ export class DroneRouteController {
   async addDroneRoute(@Body() body): Promise<boolean>{
     return await this.droneRouteService.addDroneRoute(body.id, body.points);
   }
-
-  //update drone route info in table
-  // @Get('updateDroneRoute')
-  // async updateDroneRoute(
-  //   @Query('routeId') id: number,
-  //   @Query('points') points: string,
-  //   @Query('percent') percent: number,
-  // ): Promise<boolean> {
-  //   return this.droneRouteService.updateDroneRoute(id, points, percent);
-  // }
 
    /**
    * Updates the route for the done to follow
@@ -48,11 +29,7 @@ export class DroneRouteController {
     return await this.droneRouteService.updateDroneRoute(body.id, body.points, body.percent);
   }
 
-  //deactivate drone in table
-  // @Get('deactivateDroneRoute')
-  // async deactivateDroneRoute(@Query('routeid') id: number): Promise<boolean> {
-  //   return this.droneRouteService.deactivateDroneRoute(id);
-  // }
+
 
    /**
    * Deactivates a drone and removes the drone from the active listed drones

@@ -9,7 +9,25 @@ import { Species } from '../entity/animal-species.entity';
 export class AnimalCellWeightService {
   constructor(private readonly databaseService: DatabaseService) {}
 
-  // add cell data to map cell data table in database.
+  /**
+   * Adds cell data to map cell data table in database.
+   * This is saved within the database 
+   * @param mapCellId The id allocated to the cell after being broken up into a grid
+   * @param speciesID The id allocated to the animal of interest by the system
+   * @param weight120 The classification weight at time 02:00
+   * @param weight240 The classification weight at time 04:00
+   * @param weight360 The classification weight at time 06:00
+   * @param weight480 The classification weight at time 08:00
+   * @param weight600 The classification weight at time 10:00
+   * @param weight720 The classification weight at time 12:00 (mid day)
+   * @param weight840 The classification weight at time 14:00
+   * @param weight960 The classification weight at time 16:00
+   * @param weight1080 The classification weight at time 18:00
+   * @param weight1200 The classification weight at time 20:00
+   * @param weight1320 The classification weight at time 22:00
+   * @param weight1440 The classification weight at time 24:00/00:00
+   */
+
   async addAnimalCellWeight(
     mapCellId: number,
     speciesId: number,
@@ -71,6 +89,14 @@ export class AnimalCellWeightService {
       return false;
     }
   }
+
+
+  /**
+   * Adds cell data to map cell data table in database in JSON format.
+   * @param data All the animal cell weight data from the classifier in JSON format
+   * Adds animal cell weight data to database
+   * this data will be used bty the classifier   
+   */
 
   async addAnimalCellsWeight(data: JSON): Promise<boolean> {
     const con = await this.databaseService.getConnection();

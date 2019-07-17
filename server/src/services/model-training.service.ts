@@ -7,7 +7,11 @@ import { AnimalLocationService } from '../services/animal-location.service';
 export class ModelTraining {
   constructor(private readonly animalLocationService: AnimalLocationService) {}
 
-  // Model Name is refering to the species
+  /**
+   * Trains the model for the animal predictions to be made
+   * @param modelName The name under which the model will be saved , this name refers to the animal species 
+   */
+  
   async trainModel(modelName): Promise<void> {
     const model = new RegressionModel();
     model.enableLogs(true);
@@ -40,7 +44,11 @@ export class ModelTraining {
     model.saveModel(modelName);
   }
 
-  // Get a prediction from the model specified
+  /**
+   * Makes a prediction to the whereabouts of where an animal may be
+   * @param modelName The name under which the model is  saved 
+   * @param predictioninput The predicted results to where the animal's location is
+   */
   async predict(modelName, predictioninput): Promise<JSON> {
     const tempModel = new RegressionModel();
     const model = tempModel.loadModel(modelName);

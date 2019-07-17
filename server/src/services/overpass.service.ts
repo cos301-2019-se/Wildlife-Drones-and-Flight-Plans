@@ -61,16 +61,29 @@ export class OverpassService {
     return queryValue.replace(/[\[\]()"']/, '');
   }
 
+   /**
+   * Returns the path to the cached query for faster access
+   * @param query The cached information in question
+   */
   private async getCachedQueryPath(query) {
     const queryHash = await sha256(query);
     return `.map-cache/${queryHash}`;
   }
 
+  /**
+   * Caches a query made, for faster access in the future
+   * @param query The data/information that needs toi be cached
+   * @param result Returns the path to the cacthed query
+   */
   private async cacheQuery(query, result) {
     const cachePath = await this.getCachedQueryPath(query);
     fs.outputFileSync(cachePath, JSON.stringify(result));
   }
 
+  /**
+   * Returns the actual cached query for faster access
+   * @param query The cached information in question
+   */
   private async getCachedQuery(query) {
     const cachedPath = await this.getCachedQueryPath(query);
     if (fs.existsSync(cachedPath)) {

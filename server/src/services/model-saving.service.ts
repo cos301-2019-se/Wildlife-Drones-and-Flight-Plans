@@ -7,6 +7,11 @@ import { ModelData } from '../entity/model.entity';
 export class ModelSaving {
   constructor(private readonly databaseService: DatabaseService) {}
 
+  /**
+   * Adds a new model to the set if saved models on the system 
+   * @param name The name under which the model will be saved 
+   * @param data The data that contains the actuals saved model
+   */
   async addModel(name: string, data: JSON): Promise<boolean> {
     const con = await this.databaseService.getConnection();
     const model = new ModelData();
@@ -25,6 +30,11 @@ export class ModelSaving {
     }
   }
 
+  /**
+   * Returns a saved model from the system , by using a name lookup
+   * @param name The name under which the model will is saved 
+   * 
+   */
   async getModel(name: string): Promise<JSON> {
     const con = await this.databaseService.getConnection();
 

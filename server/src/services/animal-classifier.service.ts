@@ -65,7 +65,9 @@ class Standardizer {
 
 export class Classifier {
     private kd: any;
-    //  Creates the kd tree
+    /**
+   * The constructor uses points to create a new classifier.
+   */
     constructor(points) {
         const SAMPLE_SIZE = 20000;
         if (points.length > SAMPLE_SIZE) {
@@ -95,8 +97,13 @@ export class Classifier {
         }, keys);
     }
 
-    //  Gets the distance based on values.
-    //  We use this to determine probability of cell containing animal based on external factors
+    /**
+   * Adds cell data to map cell data table in database.
+   * Gets the distance based on values.
+   * We use this to determine probability of cell containing animal based on external factors
+   * @param ob is the object the distance to is being measured 
+   * @param n is the number of neigbours that should be visited
+   */
     public getDistance(ob, n = 10) {
         const nearest = this.kd.nearest(ob, n);
         //console.log(nearest);

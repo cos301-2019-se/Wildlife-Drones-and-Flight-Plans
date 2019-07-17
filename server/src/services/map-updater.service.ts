@@ -38,6 +38,11 @@ export class MapUpdaterService {
     };
   }
 
+  /**
+   * Returns the map features requested from the paramater
+   * @param name The name of the feuture that is being requested
+   */
+
   async getMapFeatures(name: string) {
     // tslint:disable-next-line:no-console
     console.log('map name', name);

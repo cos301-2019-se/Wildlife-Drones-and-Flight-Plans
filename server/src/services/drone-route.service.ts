@@ -8,7 +8,13 @@ import { Drone } from '../entity/drone.entity';
 export class DroneRouteService {
   constructor(private readonly databaseService: DatabaseService) {}
 
-  // add drone route to Drone route table in database
+   /**
+   * Adds a new drone route to the list of routes
+   * Returns a value of true if the function executed sucessfully
+   * @param id The identification number of the drone in the system
+   * @param points Are the points of the route that needs to be followed
+   */
+
   async addDroneRoute(id: number, points: string): Promise<boolean> {
     const con = await this.databaseService.getConnection();
     const droneRoute = new DroneRoute();
@@ -41,6 +47,15 @@ export class DroneRouteService {
     }
   }
 
+  /**
+   * Updates the route for the done to follow
+   * Returns a value of true if the function executed sucessfully
+   * The information is retrieved from the database
+   * @param id The identification number of the drone in the system
+   * @param points Are the points of the route that needs to be followed
+   * @param percent Indicates how far along the drone is on it's route
+   */
+
   async updateDroneRoute(
     id: number,
     points: string,
@@ -68,7 +83,12 @@ export class DroneRouteService {
       return false;
     }
   }
-
+  
+  /**
+   * Deactivates a drone and removes the drone from the active listed drones
+   * Returns a value of true if the function executed sucessfully
+   * @param id The identification number of the drone in the system
+   */
   async deactivateDroneRoute(id: number): Promise<boolean> {
     const con = await this.databaseService.getConnection();
     const droneRoute = await con.getRepository(DroneRoute).findOne({ id: id });

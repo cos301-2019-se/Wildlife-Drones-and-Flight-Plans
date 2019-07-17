@@ -8,6 +8,9 @@ export class ConfigService {
     private databaseService: DatabaseService,
   ) {}
 
+  /** 
+   * Returns the configuration function results
+   */
   async getConfig(): Promise<ReserveConfiguration> {
     const conn = await this.databaseService.getConnection();
     const rep = conn.getRepository(ReserveConfiguration);
@@ -17,6 +20,9 @@ export class ConfigService {
     return config;
   }
 
+  /** 
+   * Sets the configuration function arguments
+   */
   async setConfig(config: ReserveConfiguration): Promise<void> {
     const conn = await this.databaseService.getConnection();
     const rep = conn.getRepository(ReserveConfiguration);

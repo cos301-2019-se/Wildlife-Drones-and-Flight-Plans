@@ -24,10 +24,10 @@ export class MapController {
  /**
    * Makes a get request to the random-path function
    * Returns a random path to follow upon successfull execution
-   * @param top A random number generated
-   * @param bottom A random number generated
-   * @param left A random number generated
-   * @param right A random number generated
+   * @param top A random number generated for the border
+   * @param bottom A random number generated for the border
+   * @param left A random number generated for the border
+   * @param right A random number generated for the border
    * @param startX A random number coordinate to start at
    * @param startY A random number coordinate to start at
    */

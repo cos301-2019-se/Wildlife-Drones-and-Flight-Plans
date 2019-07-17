@@ -7,7 +7,16 @@ import { MapCellData } from '../entity/map-cell-data.entity';
 export class MapCellDataService {
   constructor(private readonly databaseService: DatabaseService) {}
 
-  // add cell data to map cell data table in database.
+
+  /**
+   * Adds cell data to map cell data table in database.
+   * @param cellMidLatitude The latitatude coordinate in the middle of the cell
+   * @param cellMidLongitude The logtitude coordinate in the middle of the cell
+   * @param cellData JSON object containing all information about a particular cell
+   * @param cellAltitude The altitude of the cell
+   * @param cellSlopiness The degree of the slope in the cell
+   * Returns true ipon successfull execution
+   */
   async addCellData(
     cellMidLongitude: number,
     cellMidLatitude: number,
@@ -86,6 +95,9 @@ export class MapCellDataService {
     }    
   }
 
+  /**
+   * Retrieves cell data of teh map from teh cell data table in database.
+   */
   async getCellsData(): Promise<JSON> {
     const con = await this.databaseService.getConnection();
 

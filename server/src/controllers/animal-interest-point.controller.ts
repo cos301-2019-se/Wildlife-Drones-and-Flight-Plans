@@ -7,15 +7,10 @@ export class AnimalInterestPointController {
     private readonly animalInterestPointService: AnimalInterestPointService,
   ) {}
 
-  // @Get('addAnimalInterestPoint')
-  // async addAnimalInterestPoint(): Promise<boolean> {
-  //   return this.animalInterestPointService.addAnimalInterestPoint();
-  // }
-
-  
  /**
    * Adds a new animal interest point to the system
    * This will be saved in a table within the database
+   * Returns a value of true if the function executed sucessfully
    */
   @Post('addAnimalInterestPoint')
   async addAnimalInterestPoint() :Promise <boolean> {

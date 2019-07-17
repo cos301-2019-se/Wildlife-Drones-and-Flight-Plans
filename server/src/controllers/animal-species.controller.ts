@@ -5,11 +5,6 @@ import { SpeciesService } from '../services/species.service';
 export class SpeciesController {
   constructor(private readonly speciesService: SpeciesService) {}
 
-  // @Get('addSpeciesData')
-  // addSpecies(@Query('speciesType') speciesType: string): Promise<boolean> {
-  //   return this.speciesService.addSpecies(speciesType);
-  // }
-
     /**
    * Adds a new species to the system
    * Returns a value of true if the function executed sucessfully
