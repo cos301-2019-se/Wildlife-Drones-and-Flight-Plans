@@ -3,13 +3,15 @@ import * as fs from 'fs';
 import axios from 'axios';
 import * as GeoTiff from 'geotiff';
 import { MultiPromise } from '../libraries/multi-promise';
-import * as computeVariance from 'compute-variance';
 
 const TIFF_WIDTH = 2048;
 const TIFF_HEIGHT = 2048;
 
 /**
  * Provides altitude data from NASA shuttle radar topography mission
+ * The tiles are downloaded from webservice-energy.org's API
+ * The tiles are cached on download and are later read and parsed
+ * as GeoTIFF files.
  */
 @Injectable()
 export class SRTMService {
@@ -52,7 +54,17 @@ export class SRTMService {
     const averageAltitude =
       rasters[0].reduce((sum, altitude) => sum + altitude, 0) /
       (rasters.width * rasters.height);
-    const variance = computeVariance(rasters[0]);
+
+    const minAltitude = rasters[0].reduce(
+      (min, altitude) => (altitude < min ? altitude : min),
+      Infinity,
+    );
+    const maxAltitude = rasters[0].reduce(
+      (max, altitude) => (altitude > max ? altitude : max),
+      -Infinity,
+    );
+
+    const variance = minAltitude - maxAltitude;
 
     return {
       averageAltitude,
@@ -60,6 +72,10 @@ export class SRTMService {
     };
   }
 
+  /**
+   * Downloads and caches an srtm tile for the given bounds
+   * @param bounds The bounds
+   */
   private async download(bounds): Promise<any> {
     const cacheDir = this.getCacheDir(bounds);
     if (this.mapReadyWaiter === null) {
@@ -80,10 +96,19 @@ export class SRTMService {
     return await this.mapReadyWaiter.ready();
   }
 
+  /**
+   * Gets the name of the file which stores the tile cache
+   * for given bounds
+   * @param bounds The bounds
+   */
   private getCacheDir(bounds): string {
     return `.map-cache/srtm-${bounds.join(',')}.tif`;
   }
 
+  /**
+   * Constructs a url to download an srtm tile
+   * @param bounds The bounds of the tile
+   */
   private buildUrl(bounds): string {
     const url = `http://www.webservice-energy.org/mapserv/srtm?layers=srtm_s0&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&FORMAT=image%2Ftiff&SRS=EPSG:4326&BBOX=${bounds.join(
       ',',
