@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  JoinColumn,
+} from 'typeorm';
 import { AnimalCellWeight } from './animal-cell-weight.entity';
 import { PoachingCellWeight } from './poaching-cell-weight.entity';
 
@@ -37,11 +43,17 @@ export class MapCellData {
   @Column()
   slopiness: number;
 
-  @OneToMany(type => AnimalCellWeight, animalCellWeight => animalCellWeight.cell)
-    @JoinColumn()
-    animalCell: AnimalCellWeight[];
+  @OneToMany(
+    type => AnimalCellWeight,
+    animalCellWeight => animalCellWeight.cell,
+  )
+  @JoinColumn()
+  animalCell: AnimalCellWeight[];
 
-    @OneToMany(type => PoachingCellWeight, poachingCellWeight => poachingCellWeight.cell)
-    @JoinColumn()
-    poachingCell: PoachingCellWeight[];
+  @OneToMany(
+    type => PoachingCellWeight,
+    poachingCellWeight => poachingCellWeight.cell,
+  )
+  @JoinColumn()
+  poachingCell: PoachingCellWeight[];
 }
