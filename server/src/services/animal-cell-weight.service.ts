@@ -8,7 +8,6 @@ import { Species } from '../entity/animal-species.entity';
 @Injectable()
 export class AnimalCellWeightService {
   constructor(private readonly databaseService: DatabaseService) {}
-
  /**
   * Description - Adds animal cell weights to animalCellWeights table, 
   *               returns true if data successfully inserted and false if 

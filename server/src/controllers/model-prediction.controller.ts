@@ -55,6 +55,11 @@ export class ModelPrediction {
 
   @Get('trainClassificationModel')
   trainClassificationModel(): Promise<boolean> {
-    return this.modelTraining.trainClassifierModel('Elephant');
+    return this.modelTraining.trainAnimalClassifierModel('Elephant');
   }
+
+    @Get('trainClassificationModelPoaching')
+    trainClassificationModelPoaching(): Promise<boolean> {
+        return this.modelTraining.trainPoachingClassifierModel();
+    }
 }

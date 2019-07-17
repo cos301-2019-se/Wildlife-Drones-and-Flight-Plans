@@ -6,7 +6,8 @@ import { MapCellDataService } from '../services/map-cell-data.service';
 import { SpeciesService } from '../services/species.service';
 import { AnimalCellWeightService } from '../services/animal-cell-weight.service';
 import { Classifier } from './classification-model.service';
-import { AnimalCellWeight } from 'src/entity/animal-cell-weight.entity';
+import { PoachingIncidentService } from '../services/poaching-incident.service';
+import { PoachingCellWeightService } from './poaching-cell-weight.service';
 // This class trains the models from database data
 @Injectable()
 export class ModelTraining {
@@ -16,6 +17,8 @@ export class ModelTraining {
     private readonly mapCell: MapCellDataService,
     private readonly species: SpeciesService,
     private readonly animalCell: AnimalCellWeightService,
+    private readonly poachingIncidentService: PoachingIncidentService,
+    private readonly poachingCell: PoachingCellWeightService
   ) {}
 
   // Model Name is referring to the species
@@ -84,7 +87,7 @@ export class ModelTraining {
     );
   }
 
-  async trainClassifierModel(speciesName) {
+  async trainAnimalClassifierModel(speciesName) {
     //  fetch data by species name
 
     const speciesId = await this.species.getSpeciesID(speciesName);
@@ -141,6 +144,53 @@ export class ModelTraining {
       await this.animalCell.addAnimalCellsWeight(animalCellWeight);
       await new Promise(resolve => setTimeout(resolve, 0)); // breathe for a bit to let other functions run
     }
+    return true;
+  }
+
+  async trainPoachingClassifierModel() {
+    //  fetch data by species name
+    const data = await this.poachingIncidentService.getAllPoachingIncidentTableData();
+    const jsonData = JSON.parse(JSON.stringify(data));
+    const teachingData = [];
+    // sort all data to teach classifier
+    jsonData.forEach(incident => {
+      const coordinateData  = JSON.parse(incident.CoordinateData);
+      teachingData.push({
+        distanceToRivers: parseFloat(coordinateData.distanceToRivers),
+        distanceToDams: parseFloat(coordinateData.distanceToDams),
+        distanceToRoads: parseFloat(coordinateData.distanceToRoads),
+        distanceToResidences: parseFloat(coordinateData.distanceToResidences),
+        distanceToIntermittentWater: parseFloat(coordinateData.distanceToIntermittentWater),
+        altitude: parseFloat(coordinateData.altitude),
+        slopiness: parseFloat(coordinateData.slopiness),
+      });
+    });
+    //  Populate classifier with teaching data
+    console.time('Populate KNN');
+    const classifier = new Classifier(teachingData);
+    console.timeEnd('Populate KNN');
+    //  Once classifier is done being taught we need to fetch all map cell data midpoints from the database.
+    console.time('Fetch Cell Data');
+    const cellData = await this.mapCell.getCellsData();
+    console.timeEnd('Fetch Cell Data');
+    console.log('Done Training Classifier');
+    //  Once classifier is done being taught we need to fetch all map cell data midpoints from the database.
+    cellData.forEach(cell => {
+      const midPointClassification = {
+          distanceToRivers: cell.distanceToRivers,
+          distanceToDams: cell.distanceToDams,
+          distanceToRoads: cell.distanceToRoads,
+          distanceToResidences: cell.distanceToResidences,
+          distanceToIntermittentWater: cell.distanceToIntermittentWater,
+          altitude: cell.altitude,
+          slopiness: cell.slopiness
+        };
+      const poachingCellWeight = {
+        cellId: cell.id,
+        weight: classifier.getDistance(midPointClassification),
+      };
+      const added = this.poachingCell.addPoachingCellsWeight([poachingCellWeight]);
+    });
     return true;
   }
 }
