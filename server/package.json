@@ -47,7 +47,6 @@
     "axios": "^0.18.0",
     "bcrypt": "^3.0.6",
     "big-json": "^2.0.2",
-    "compute-variance": "^3.0.0",
     "csv-parser": "^2.3.0",
     "fs-extra": "^7.0.1",
     "geolib": "^2.0.24",
