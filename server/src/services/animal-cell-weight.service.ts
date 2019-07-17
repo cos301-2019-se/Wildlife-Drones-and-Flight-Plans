@@ -43,7 +43,7 @@ export class AnimalCellWeightService {
       .findOne({ cell: mapCellIdExist, species: speciesIdExist });
 
     if (cellWeight == undefined) {
-      const animalCellWeight = new AnimalCellWeight();  
+      const animalCellWeight = new AnimalCellWeight();
       try {
         animalCellWeight.cell = mapCellIdExist;
         animalCellWeight.species = speciesIdExist;

@@ -149,22 +149,18 @@ export class ModelTraining {
 
   async trainPoachingClassifierModel() {
     //  fetch data by species name
-    const data = await this.poachingIncidentService.getAllPoachingIncidentTableData();
-    const jsonData = JSON.parse(JSON.stringify(data));
-    const teachingData = [];
+   // const teachingData = [];
     // sort all data to teach classifier
-    jsonData.forEach(incident => {
-      const coordinateData  = JSON.parse(incident.CoordinateData);
-      teachingData.push({
-        distanceToRivers: parseFloat(coordinateData.distanceToRivers),
-        distanceToDams: parseFloat(coordinateData.distanceToDams),
-        distanceToRoads: parseFloat(coordinateData.distanceToRoads),
-        distanceToResidences: parseFloat(coordinateData.distanceToResidences),
-        distanceToIntermittentWater: parseFloat(coordinateData.distanceToIntermittentWater),
-        altitude: parseFloat(coordinateData.altitude),
-        slopiness: parseFloat(coordinateData.slopiness),
-      });
-    });
+    const teachingData = (await this.poachingIncidentService.getAllPoachingIncidentTableData()).map(incident => ({
+      distanceToRivers: JSON.parse(incident.CoordinateData).distanceToRivers,
+      distanceToDams: JSON.parse(incident.CoordinateData).distanceToDams,
+        distanceToRoads: JSON.parse(incident.CoordinateData).distanceToRoads,
+        distanceToResidences: JSON.parse(incident.CoordinateData).distanceToResidences,
+        distanceToIntermittentWater: JSON.parse(incident.CoordinateData).distanceToIntermittentWater,
+        altitude: JSON.parse(incident.CoordinateData).altitude,
+        slopiness: JSON.parse(incident.CoordinateData).slopiness,
+    }));
+
     //  Populate classifier with teaching data
     console.time('Populate KNN');
     const classifier = new Classifier(teachingData);
@@ -173,24 +169,25 @@ export class ModelTraining {
     console.time('Fetch Cell Data');
     const cellData = await this.mapCell.getCellsData();
     console.timeEnd('Fetch Cell Data');
-    console.log('Done Training Classifier');
     //  Once classifier is done being taught we need to fetch all map cell data midpoints from the database.
-    cellData.forEach(cell => {
-      const midPointClassification = {
-          distanceToRivers: cell.distanceToRivers,
-          distanceToDams: cell.distanceToDams,
-          distanceToRoads: cell.distanceToRoads,
-          distanceToResidences: cell.distanceToResidences,
-          distanceToIntermittentWater: cell.distanceToIntermittentWater,
-          altitude: cell.altitude,
-          slopiness: cell.slopiness
-        };
+    for (const cell of cellData) {
+      const poacherCellWeight = {
+        distanceToRivers: cell.distanceToRivers,
+        distanceToDams: cell.distanceToDams,
+        distanceToRoads: cell.distanceToRoads,
+        distanceToResidences: cell.distanceToResidences,
+        distanceToIntermittentWater: cell.distanceToIntermittentWater,
+        altitude: cell.altitude,
+        slopiness: cell.slopiness
+      };
       const poachingCellWeight = {
         cellId: cell.id,
-        weight: classifier.getDistance(midPointClassification),
+        weight: classifier.getDistance(poacherCellWeight),
       };
-      const added = this.poachingCell.addPoachingCellsWeight([poachingCellWeight]);
-    });
+      console.log(`Cell ${cell.id}`);
+      await this.poachingCell.addPoachingCellsWeight([poachingCellWeight]);
+      await new Promise(resolve => setTimeout(resolve, 0));
+    }
     return true;
   }
 }

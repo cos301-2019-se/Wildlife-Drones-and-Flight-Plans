@@ -6,7 +6,7 @@ import { MapCellData } from '../entity/map-cell-data.entity';
 
 @Injectable()
 export class PoachingCellWeightService {
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(private readonly databaseService: DatabaseService) { }
 
   // add cell data to map cell data table in database.
   async addPoachingCellWeight(
@@ -46,35 +46,61 @@ export class PoachingCellWeightService {
   async addPoachingCellsWeight(data: any[]): Promise<boolean> {
     const con = await this.databaseService.getConnection();
 
-    const poachingCellWeight = new PoachingCellWeight();
+
 
     data.forEach(async cellData => {
       const mapCellIdExist = await con
         .getRepository(MapCellData)
         .findOne({ id: cellData.cellId });
 
+      const cellID = await con
+        .getRepository(PoachingCellWeight)
+        .findOne({ cell: cellData.cellId });
+
       if (mapCellIdExist == undefined) {
         console.log('Map cell does not exist');
         return false;
       }
 
-      try {
-        poachingCellWeight.cell = mapCellIdExist;
-        poachingCellWeight.weight = cellData.weight;
-        // tslint:disable-next-line:no-console
-        const addedPoachingCellWeight = await con
-          .getRepository(PoachingCellWeight)
-          .save(poachingCellWeight);
-        console.log(
-          'Saved poaching cell weight data with id: ' + poachingCellWeight.id,
-        );
-        return addedPoachingCellWeight != null;
-      } catch (error) {
-        console.log(error);
-        console.log('Poaching cell weight was not saved');
-        return false;
+      if (cellID == undefined) {
+        try {
+          const poachingCellWeight = new PoachingCellWeight();
+          poachingCellWeight.cell = mapCellIdExist;
+          poachingCellWeight.weight = cellData.weight;
+          // tslint:disable-next-line:no-console
+          const addedPoachingCellWeight = await con
+            .getRepository(PoachingCellWeight)
+            .save(poachingCellWeight);
+          console.log(
+            'Saved poaching cell weight data with id: ' + poachingCellWeight.id,
+          );
+          return addedPoachingCellWeight != null;
+        } catch (error) {
+          console.log(error);
+          console.log('Poaching cell weight was not saved');
+          return false;
+        }
+      }
+      else {
+        try {
+          cellID.cell = mapCellIdExist;
+          cellID.weight = cellData.weight;
+          // tslint:disable-next-line:no-console
+          const updatedPoachingCellWeight = await con
+            .getRepository(PoachingCellWeight)
+            .save(cellID);
+          console.log(
+            'Updated poaching cell weight data with id: ' + cellID.id,
+          );
+          return updatedPoachingCellWeight != null;
+        } catch (error) {
+          console.log(error);
+          console.log('Poaching cell weight was not updated');
+          return false;
+        }
       }
     });
+
 
     return false;
   }
