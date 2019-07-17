@@ -156,13 +156,6 @@ export class ModelTraining {
     jsonData.forEach(incident => {
       const coordinateData  = JSON.parse(incident.CoordinateData);
       teachingData.push({
-        // month: parseInt(incident.month), unsure of relavance
-        // time: parseInt(incident.time),  // not used at the moment
-        /* distanceToFarm: parseFloat(coordinateData.distanceToFarm),
-         distanceToVillage: parseFloat(coordinateData.distanceToVillage),
-         distanceToTown: parseFloat(coordinateData.distanceToTown),
-         distanceToSuburb: parseFloat(coordinateData.distanceToSuburb),
-         distanceToStream: parseFloat(coordinateData.distanceToStream),*/
         distanceToRivers: parseFloat(coordinateData.distanceToRivers),
         distanceToDams: parseFloat(coordinateData.distanceToDams),
         distanceToRoads: parseFloat(coordinateData.distanceToRoads),
