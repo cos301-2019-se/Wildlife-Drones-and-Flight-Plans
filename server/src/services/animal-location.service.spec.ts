@@ -8,7 +8,7 @@ import { providers } from '../app.providers';
 import { imports } from '../app.imports';
 
 //not sure if 10000 is long enough
-jest.setTimeout(5000);
+jest.setTimeout(10000);
 
 let controller;
 

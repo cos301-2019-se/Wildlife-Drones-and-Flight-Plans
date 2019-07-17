@@ -2,6 +2,12 @@
 import { Injectable, RequestTimeoutException } from '@nestjs/common';
 import { DatabaseService } from './db.service';
 import { MapCellData } from '../entity/map-cell-data.entity';
+import { AnimalCellWeight } from '../entity/animal-cell-weight.entity';
+import { PoachingCellWeight } from '../entity/poaching-cell-weight.entity';
+import { json } from 'body-parser';
+import { Species } from '../entity/animal-species.entity';
+import { ForeignKeyMetadata } from 'typeorm/metadata/ForeignKeyMetadata';
+import { TableForeignKey } from 'typeorm';
 
 @Injectable()
 export class MapCellDataService {
@@ -88,6 +94,65 @@ export class MapCellDataService {
 
   async getCellsData(): Promise<JSON> {
     const con = await this.databaseService.getConnection();
+
+    try {
+      let cellsData = await con.getRepository(MapCellData).find();
+
+      // tslint:disable-next-line:no-console
+
+      console.log('Cells data retrieved');
+      //console.log(cellsData);
+      return JSON.parse(JSON.stringify(cellsData));
+    } catch (error) {
+      console.log(error);
+      console.log('Cells data not retrieved');
+      return JSON.parse('false');
+    }
+  }
+
+  async getMapCells(): Promise<Array<{
+    id: number;
+    poachingWeight: number;
+    animalWeights: Array<{
+      speciesId: number;
+      weights: number[];
+    }>;
+  }>> 
+  {
+    const con = await this.databaseService.getConnection();
+
+    try {
+
+    
+      const cellsData = await con.getRepository(MapCellData).find({
+        loadEagerRelations: true,
+        relations: ["animalCell","poachingCell", "animalCell.species"]
+        
+      });// .createQueryBuilder('data')
+      // return cellsData
+
+      return cellsData.map(cell => ({
+        id: cell.id,
+        poachingWeight: (cell.poachingCell[0] ? cell.poachingCell[0].weight : undefined),
+        animalWeights: (cell.animalCell.length ? cell.animalCell.map(animalCell => ({
+          speciesId: animalCell.species.id,
+          weights: Array.from({ length: 12 }, (v, k) => k * 120)
+                        .map(minute => animalCell[`time${minute}Weight`]),
+        })) : []),
+      }));
+    } catch (error) {
+      console.log(error);
+      console.log('Cells data not retrieved');
+      //return JSON.parse('false');
+      return undefined;
+    }
+  }
+
+  async getCellsHeatData(): Promise<MapCellData> {
+    const con = await this.databaseService.getConnection();
+
+    const animalWeightTable = con.getRepository(AnimalCellWeight);
+    const poachingWeightTable = con.getRepository(PoachingCellWeight);
 
     try {
       let cellsData = await con.getRepository(MapCellData).find();
