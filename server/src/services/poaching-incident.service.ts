@@ -9,6 +9,8 @@ import { GeoService, GeoSearchSet } from './geo.service';
 import { SRTMService } from './srtm.service';
 import { lengthToDegrees } from '@turf/helpers';
 import { MoreThanOrEqual } from 'typeorm';
+import { PoachingCellWeight } from '../entity/poaching-cell-weight.entity';
+import { MapCellData } from '../entity/map-cell-data.entity';
 
 const LOCATION_BIAS = lengthToDegrees(300, 'meters');
 @Injectable()
@@ -143,5 +145,28 @@ export class PoachingIncidentService {
       },
       loadRelationIds: true,
     });
+  }
+
+  async getPoachingWeights() {
+    const con = await this.databaseService.getConnection();
+
+    try {
+      let cellsData = await con.getRepository(PoachingCellWeight)//.find({ relations: ["cell"] });
+      .createQueryBuilder('data')   
+      .innerJoinAndSelect("data.cell", "id")
+      .select(['id.id','data.weight'])
+      .getMany();
+
+   // let cellsData = await con.getRepository(AnimalCellWeight).find();
+
+      // tslint:disable-next-line:no-console
+      console.log(cellsData); 
+      //console.log('Cells data retrieved');     
+      return JSON.parse(JSON.stringify(cellsData));
+    } catch (error) {
+      console.log(error);
+      console.log('Cells data not retrieved');
+      return JSON.parse('false');
+    }
   }
 }

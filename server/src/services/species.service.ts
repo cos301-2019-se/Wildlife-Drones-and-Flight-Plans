@@ -34,4 +34,10 @@ export class SpeciesService {
     console.log('Animal id retrived: ' + id);
     return id;
   }
+
+  async getSpecies(): Promise<Species[]> {
+    const con = await this.databaseService.getConnection();
+
+    return await con.getRepository(Species).find();
+  }
 }
