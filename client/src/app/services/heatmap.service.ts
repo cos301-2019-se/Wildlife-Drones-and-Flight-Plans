@@ -12,7 +12,10 @@ export interface MapCell {
   id: number;
   lon: number;
   lat: number;
-  weight: number;
+  poachingWeight: number;
+  animalWeights: {
+    [species: number]: number[];
+  };
   geoJSON: any;
 }
 
@@ -28,7 +31,7 @@ export class HeatmapService {
    * data for animal species.
    */
   async getAnimalSpecies(): Promise<Species[]> {
-    const res = await this.auth.get('/getSpecies', {});
+    const res = await this.auth.post('getSpecies', {});
     return res as Species[];
   }
 
@@ -36,7 +39,7 @@ export class HeatmapService {
    * Get the size of a cell in kilometres
    */
   async getCellSize(): Promise<number> {
-    return await this.auth.get('/map/getCellSize', {}) as number;
+    return await this.auth.post('map/getCellSize', {}) as number;
   }
 
   /**
@@ -46,7 +49,7 @@ export class HeatmapService {
    * the cells.
    */
   async getCells(): Promise<MapCell[]> {
-    const res = await this.auth.get('/map/getMapCells', {});
+    const res = await this.auth.post('map/getMapCells', {});
 
     const cellSize = await this.getCellSize();
     const halfCellSizeDeg = convertLength(cellSize / 2, 'kilometers', 'degrees');
@@ -55,7 +58,11 @@ export class HeatmapService {
       id: cell.cellId,
       lon: cell.lon, // x
       lat: cell.lat, // y
-      weight: 0,
+      poachingWeight: cell.poachingWeight,
+      animalWeights: cell.animalWeights.reduce((ob, animalWeightList) => {
+        ob[animalWeightList.speciesId] = animalWeightList.weights;
+        return ob;
+      }, {}),
       geoJSON: bboxPolygon([
         cell.lon - halfCellSizeDeg, // minX
         cell.lat - halfCellSizeDeg, // minY

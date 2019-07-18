@@ -22,7 +22,9 @@
   <!-- end of add marker overlay -->
 
   <!-- set up flight overlay -->
-  <div class="form-overlay" *ngIf="state === states.setUpRoute || state === states.addMarkerDetails" @form-animation>
+  <div class="form-overlay"
+    *ngIf="state === states.setUpRoute || state === states.addMarkerDetails || state === states.options"
+    @form-animation>
     <!-- drone information form -->
     <ng-container *ngIf="state === states.setUpRoute">
       <ion-item no-padding>
@@ -65,6 +67,16 @@
         <ion-textarea [(ngModel)]="states.addMarkerDetails.data.description"></ion-textarea>
       </ion-item>
     </ng-container>
+
+    <!-- options form -->
+    <ng-container *ngIf="state === states.options">
+      <ion-item no-padding>
+        <ion-label>Show poaching heatmap</ion-label>
+        <ion-checkbox slot="end"
+          [(ngModel)]="states.options.data.enablePoachingHeatmap"
+        ></ion-checkbox>
+      </ion-item>
+    </ng-container>
   </div>
   <!-- end of set up flight overlay -->
 
@@ -95,7 +107,7 @@
     <!-- cancel button -->
     <ion-fab-button class="confirmation-button" size="small" color="dark"
     *ngIf="state.confirmations.cancel"
-      (click)="state.confirmations.cancel()" @button-animation
+      (click)="state.confirmations.cancel(state)" @button-animation
     >
       <ion-icon name="close"></ion-icon>
     </ion-fab-button>
@@ -103,17 +115,26 @@
     <!-- add button -->
     <ion-fab-button class="confirmation-button confirmation-button-middle" size="small" color="dark"
       *ngIf="state.confirmations.add"
-      (click)="state.confirmations.add()" @add-button-animation
+      (click)="state.confirmations.add(state)" @add-button-animation
     >
       <ion-icon name="add"></ion-icon>
     </ion-fab-button>
 
     <!-- done button -->
     <ion-fab-button class="confirmation-button" size="small" color="dark"
-      (click)="state.confirmations.done()" @button-animation
+      (click)="state.confirmations.done(state)" @button-animation
       [disabled]="state === states.addMarker && !withinReserve"
     >
       <ion-icon name="checkmark"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
+  <!-- fab top right settings button -->
+  <ion-fab slot="fixed" vertical="top" horizontal="end">
+    <ion-fab-button size="small" color="dark"
+      (click)="setState(states.options)"
+    >
+      <ion-icon name="settings"></ion-icon>
     </ion-fab-button>
   </ion-fab>
   

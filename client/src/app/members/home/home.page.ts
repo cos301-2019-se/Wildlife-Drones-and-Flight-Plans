@@ -32,6 +32,7 @@ import center from '@turf/center';
 import { IncidentsService } from '../../services/incidents.service';
 import { DronesService } from 'src/app/services/drones.service';
 import { Drone } from '../../services/drones.service';
+import { HeatmapService, MapCell } from '../../services/heatmap.service';
 
 interface MapState {
   setup?: (self: MapState) => Promise<any>;
@@ -64,6 +65,10 @@ export class HomePage implements AfterViewInit, OnDestroy {
 
   incidentsLayer = null;
   private incidentsPoller = null;
+
+  poachingHeatmapLayer = null;
+  animalHeatmapLayer = null;
+  private timePoller = null;
 
   public withinReserve = true;
 
@@ -229,6 +234,98 @@ export class HomePage implements AfterViewInit, OnDestroy {
         this.goToGeolocation();
       },
     },
+    // map options state
+    options: {
+      setup: async (self) => {
+        if (!self.data.cellData.length) {
+          self.data.cellData = await this.heatmapService.getCells();
+        }
+
+        if (!self.data.species.length) {
+          self.data.species = await this.heatmapService.getAnimalSpecies();
+        }
+
+        self.updateMapForTime(self);
+      },
+      confirmations: {
+        done: async (self) => {
+          self.showPoachingHeatmap(self);
+          this.setState(this.states.default);
+        },
+      },
+      data: {
+        cellData: [],
+        species: [],
+        enablePoachingHeatmap: false,
+        enableAnimalHeatmap: false,
+        animalHeatmapSpecies: null,
+        time: new Date(),
+      },
+      updateMapForTime: async (self) => {
+        if (!self.data.enableAnimalHeatmap) {
+          return;
+        }
+
+        // get the minutes in the day
+        const minutes = self.data.time.getHours() * 60 + self.data.time.getMinutes();
+        self.showAnimalHeatmap(minutes, self.data.species);
+      },
+      showPoachingHeatmap: (self) => {
+        console.log('is showing heatmap', self.data.showPoachingHeatmap);
+        if (!self.data.enablePoachingHeatmap) {
+          if (this.poachingHeatmapLayer) {
+            this.map.removeLayer(this.poachingHeatmapLayer);
+          }
+          return;
+        }
+
+        const cells = self.data.cellData;
+        const features = cells.map((cell: MapCell) => ({
+          ...cell.geoJSON,
+          properties: {
+            weight: cell.poachingWeight,
+          },
+        }));
+
+        const heatmap = self.createHeatmap(features);
+        if (this.poachingHeatmapLayer) {
+          this.map.removeLayer(this.poachingHeatmapLayer);
+        }
+        this.poachingHeatmapLayer = heatmap;
+        this.map.addLayer(heatmap);
+      },
+      showAnimalHeatmap: (minutes, species) => {
+
+      },
+      createHeatmap: (cells) => {
+        const OPACITY = 0.8;
+
+        return new VectorLayer({
+          source: new VectorSource({
+            features: new GeoJSON().readFeatures({
+              type: 'FeatureCollection',
+              features: cells,
+            }, {
+              featureProjection: 'EPSG:3857',
+            }),
+          }),
+          updateWhileAnimating: false,
+          updateWhileInteracting: false,
+          // preload: Infinity,
+          renderMode: 'image',
+          style: cell => {
+            return new Style({
+              stroke: new Stroke({
+                color: 'white'
+              }),
+              fill: new Fill({
+                color: [255, 0, 0, cell.getProperties().weight * OPACITY]
+              }),
+            });
+          },
+        });
+      },
+    }
   };
 
   state: MapState = this.states.default;
@@ -240,6 +337,7 @@ export class HomePage implements AfterViewInit, OnDestroy {
     private droneRouteService: DroneRouteService,
     private incidentsService: IncidentsService,
     private dronesService: DronesService,
+    private heatmapService: HeatmapService,
   ) {}
 
   async ngOnDestroy() {
@@ -254,6 +352,10 @@ export class HomePage implements AfterViewInit, OnDestroy {
     if (!!this.incidentsPoller) {
       clearInterval(this.incidentsPoller);
     }
+
+    if (!!this.timePoller) {
+      clearInterval(this.timePoller);
+    }
   }
 
   ngAfterViewInit() {
@@ -262,6 +364,12 @@ export class HomePage implements AfterViewInit, OnDestroy {
     // get incidents every minute
     this.incidentsPoller = setInterval(() => {
       this.getIncidents();
+    }, 60000);
+
+    // get the time every few minutes
+    this.timePoller = setInterval(() => {
+      this.states.options.data.time = new Date();
+      this.states.options.updateMapForTime(this.states.options);
     }, 60000);
   }
 
@@ -285,6 +393,11 @@ export class HomePage implements AfterViewInit, OnDestroy {
     this.state = state;
   }
 
+  /**
+   * Initialises the map element and tile layers.
+   * Starts geolocation listening and getting incidents.
+   * Then draws the reserve and zooms to it.
+   */
   async initialiseMap() {
     await new Promise(resolve => setTimeout(resolve, 0));
     const mapEl = this.mapElement.nativeElement;

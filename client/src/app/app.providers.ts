@@ -9,6 +9,7 @@ import { environment } from '../environments/environment';
 import { DroneRouteService, DroneRouteMockService } from './services/drone-route.service';
 import { IncidentsService, IncidentsMockService } from './services/incidents.service';
 import { DronesService, DronesMockService } from './services/drones.service';
+import { HeatmapService } from './services/heatmap.service';
 
 export const providers = [
   StatusBar,
@@ -19,5 +20,6 @@ export const providers = [
   { provide: DroneRouteService, useClass: environment.production ? DroneRouteService : DroneRouteMockService },
   IncidentsService,
   DronesService,
+  HeatmapService,
   { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }
 ];
