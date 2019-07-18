@@ -23,11 +23,24 @@ describe('MapController (e2e)', () => {
       .send({
         name: 'Anne',
         username: 'jm',
-        password: '123',
+        password: 'Reddbull@1',
         job: 'Pilot',
         email: 'gst@gmail.com',
       })
       .expect('true');
+  });
+
+  it('/addUser (POST)', async () => {
+    await request(app.getHttpServer())
+      .post('/addUser')
+      .send({
+        name: 'Anne',
+        username: 'jm',
+        password: '123',
+        job: 'Pilot',
+        email: 'gst@gmail.com',
+      })
+      .expect('false');
   });
 
   it('/login (POST)', async () => {

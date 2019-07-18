@@ -82,6 +82,24 @@ export class AuthenticationService {
     }
   }
 
+  /** 
+   * Validates the received password against the minimum password requirements.
+   * Sends a boolean value as a response.
+   * Matches a string of 8 or more characters.
+   * That contains at least one digit.
+   * At least one lowercase character. 
+   * At least one uppercase character.
+   * And can contain some special characters.
+   * @param password The user's password 
+  */
+
+  passRequirements(password) {
+    var re = /(?=^.{8,}$)(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\s)[0-9a-zA-Z!@#$%^&*()]*$/;
+    // Test returns true of false
+    console.log(re.test(password))
+    return re.test(password);
+  }
+
   /**
    * Validate user email and password, then store saved token
    * to storage.
@@ -107,18 +125,35 @@ export class AuthenticationService {
       this.authenticationState.next(false);
       return false;
     }
+    else {
+      // need to get custom token
+      // Save email
+      let res: any;
+      try {
+        res = await this.post('login', {
+          email,
+          password,
+        });
+      } catch (err) {
+        console.error(err);
+        throw err;
+      }
 
-    const token = res.accessToken;
+      if (!res || !res.accessToken || res.accessToken === '') {
+        console.log('User does not exist');
+        this.authenticationState.next(false);
+        return;
+      }
 
-    await this.storage.set(TOKEN_KEY, token);
-    await this.storage.set(EMAIL_KEY, email);
+      const token = res.accessToken;
 
-    this.authenticationState.next(true);
+      await this.storage.set(TOKEN_KEY, token);
+      await this.storage.set(EMAIL_KEY, email);
 
     console.log('Token received from server side ', token);
     return true;
   }
-
+  }
   /**
    * Clear the user's token and log out.
    */

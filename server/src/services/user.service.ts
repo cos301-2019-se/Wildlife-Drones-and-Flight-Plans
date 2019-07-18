@@ -30,18 +30,44 @@ export class UserService {
     return bcrypt.compareSync(password, existingUser.password);
   }
 
+/** 
+   * Validates the received password against the minimum password requirements.
+   * Sends a boolean value as a response.
+   * Matches a string of 8 or more characters.
+   * That contains at least one digit.
+   * At least one lowercase character. 
+   * At least one uppercase character.
+   * And can contain some special characters.
+   * @param password The user's password 
+  */
+
+ passRequirements(password) {
+  var re = /(?=^.{8,}$)(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\s)[0-9a-zA-Z!@#$%^&*()]*$/;
+  // Test returns true of false
+  console.log(re.test(password))
+  return re.test(password);
+}
+
+
+
   async addUser(name, email, password, job): Promise<boolean> {
-    const con = await this.databaseService.getConnection();
 
-    const user = new User();
-    user.name = name;
-    user.email = email;
-    user.password = password;
-    user.jobType = job;
+    if(this.passRequirements(password)) {
+      const con = await this.databaseService.getConnection();
 
-    const insertedUser = await con.getRepository(User).save(user);
+      const user = new User();
+      user.name = name;
+      user.email = email;
+      user.password = password;
+      user.jobType = job;
 
-    return !!insertedUser;
+      const insertedUser = await con.getRepository(User).save(user);
+
+      return !!insertedUser;
+    }
+    else {
+      return false;
+    }
   }
 
   async validateUser(payload: JwtPayload) {
