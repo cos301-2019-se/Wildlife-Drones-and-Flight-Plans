@@ -16,20 +16,20 @@ export class MapCellDataService {
     cellSlopiness: number,
   ): Promise<boolean> {
     const con = await this.databaseService.getConnection();
-   
-    
+
     const mapMid = await con.getRepository(MapCellData).findOne({cellMidLatitude : cellMidLatitude, cellMidLongitude : cellMidLongitude});
 
-    if (cellData['rivers'] == null) cellData['rivers'] = -100;
+    if (cellData['rivers'] == null) { cellData['rivers'] = -100; }
 
-    if (cellData['dams'] == null) cellData['dams'] = -100;
+    if (cellData['dams'] == null) { cellData['dams'] = -100; }
 
-    if (cellData['roads'] == null) cellData['roads'] = -100;
+    if (cellData['roads'] == null) { cellData['roads'] = -100; }
 
-    if (cellData['residential'] == null) cellData['residential'] = -100;
+    if (cellData['residential'] == null) { cellData['residential'] = -100; }
 
-    if (cellData['intermittentWater'] == null)
+    if (cellData['intermittentWater'] == null) {
       cellData['intermittentWater'] = -100;
+    }
 
     if(mapMid == undefined )
     {

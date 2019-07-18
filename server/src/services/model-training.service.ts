@@ -149,11 +149,11 @@ export class ModelTraining {
 
   async trainPoachingClassifierModel() {
     //  fetch data by species name
-    const data = await this.poachingIncidentService.getAllPoachingIncidentTableData();
-    const jsonData = JSON.parse(JSON.stringify(data));
+    const poachingData = await this.poachingIncidentService.getAllPoachingIncidentTableData();
+    // const jsonData = JSON.parse(JSON.stringify(data));
     const teachingData = [];
     // sort all data to teach classifier
-    jsonData.forEach(incident => {
+    poachingData.forEach(incident => {
       const coordinateData  = JSON.parse(incident.CoordinateData);
       teachingData.push({
         // time: parseInt(incident.time),  // not used at the moment
@@ -181,6 +181,7 @@ export class ModelTraining {
           distanceToDams: cell.distanceToDams,
           distanceToRoads: cell.distanceToRoads,
           distanceToResidences: cell.distanceToResidences,
+          distanceToExternalResidences: cell.distanceToExternalResidences,
           // distanceToIntermittentWater: cell.distanceToIntermittentWater,
           // altitude: cell.altitude,
           slopiness: cell.slopiness

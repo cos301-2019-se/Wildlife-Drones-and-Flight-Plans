@@ -142,19 +142,15 @@ export class PoachingIncidentService {
     }
   }
 
-  async getAllPoachingIncidentTableData(): Promise<JSON> {
+  async getAllPoachingIncidentTableData(): Promise<PoachingIncident[]> {
     const con = await this.databaseService.getConnection();
 
     try {
-      return JSON.parse(
-        JSON.stringify(
-          await con
+      return await con
             .getRepository(PoachingIncident)
-            .find(),
-        ),
-      );
+            .find();
     } catch (error) {
-      return JSON.parse('false');
+      return undefined;
     }
   }
   /**

@@ -37,6 +37,9 @@ export class MapCellData {
   @Column()
   distanceToIntermittentWater: number;
 
+  @Column({ nullable: true })
+  distanceToExternalResidences: number;
+
   @Column()
   altitude: number;
 

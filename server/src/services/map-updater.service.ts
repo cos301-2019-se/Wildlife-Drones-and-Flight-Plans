@@ -89,7 +89,7 @@ export class MapUpdaterService {
     // tslint:disable-next-line:no-console
     console.log('rivers', rivers.features.length);
 
-    //save to table
+    // save to table
     await mapData.addMapData('rivers', rivers.features);
 
     const intermittentWater = await this.overpass
@@ -104,7 +104,7 @@ export class MapUpdaterService {
     // tslint:disable-next-line:no-console
     console.log('intermittent', intermittentWater.features.length);
 
-    //save to table
+    // save to table
     await mapData.addMapData('intermittent', intermittentWater.features);
 
     const roads = await this.overpass
@@ -151,7 +151,7 @@ export class MapUpdaterService {
 
         (.a; - .b;)->._;
         (._; - .reserve;)->._;
-        
+
         out geom;`);
 
     await mapData.addMapData('externalResidential', externalResidential.features);
