@@ -28,7 +28,7 @@ describe('Authorization service', () => {
         job: 'Pilot',
         email: 'gst@gmail.com',
       })
-      .expect('true');
+      .expect('false');
   });
 
   it('/login (POST)', async () => {
@@ -51,8 +51,8 @@ describe('Authorization service', () => {
       .send({
         name: 'Anne',
         username: 'jm',
-        password: '123',
-        job: 'Pilot',
+        password: 'Jannie@3412',
+        job: 'Ranger',
         email: 'gst@gmail.com',
       })
       .expect('true');

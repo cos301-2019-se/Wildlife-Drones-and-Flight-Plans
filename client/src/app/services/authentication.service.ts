@@ -153,7 +153,7 @@ export class AuthenticationService {
     console.log('Token received from server side ', token);
     return true;
   }
-
+  }
   /**
    * Clear the user's token and log out.
    */
