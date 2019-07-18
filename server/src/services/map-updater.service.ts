@@ -14,6 +14,7 @@ export class MapUpdaterService {
     private mapPartitioner: MapPartitionerService,
     private databaseService: DatabaseService,
     private config: ConfigService,
+    private mapData: MapDataService,
   ) {}
 
   /**
@@ -50,11 +51,8 @@ export class MapUpdaterService {
     // tslint:disable-next-line:no-console
     console.log('reserves', reserves.features.length);
 
-    //map service instance
-    let mapData = new MapDataService(this.databaseService);
-
     //save to table
-    await mapData.addMapData('reserve', reserves.features[0]);
+    await this.mapData.addMapData('reserve', reserves.features[0]);
 
     const dams = await this.overpass
       .query(`area["name"="${name}"]->.boundaryarea;
@@ -75,7 +73,7 @@ export class MapUpdaterService {
     console.log('dams', dams.features.length);
 
     // //save to table
-    await mapData.addMapData('dams', dams.features);
+    await this.mapData.addMapData('dams', dams.features);
 
     const rivers = await this.overpass
       .query(`area["name"="${name}"]->.boundaryarea;
@@ -90,7 +88,7 @@ export class MapUpdaterService {
     console.log('rivers', rivers.features.length);
 
     //save to table
-    await mapData.addMapData('rivers', rivers.features);
+    await this.mapData.addMapData('rivers', rivers.features);
 
     const intermittentWater = await this.overpass
       .query(`area["name"="${name}"]->.boundaryarea;
@@ -104,7 +102,7 @@ export class MapUpdaterService {
     console.log('intermittent', intermittentWater.features.length);
 
     //save to table
-    await mapData.addMapData('intermittent', intermittentWater.features);
+    await this.mapData.addMapData('intermittent', intermittentWater.features);
 
     const roads = await this.overpass
       .query(`area["name"="${name}"]->.boundaryarea;
@@ -117,7 +115,7 @@ export class MapUpdaterService {
     console.log('roads', roads.features.length);
 
     //save to table
-    await mapData.addMapData('roads', roads.features);
+    await this.mapData.addMapData('roads', roads.features);
 
     const residential = await this.overpass
       .query(`area["name"="${name}"]->.boundaryarea;
@@ -128,7 +126,7 @@ export class MapUpdaterService {
       out geom;`);
 
     //save to table
-    await mapData.addMapData('residential', residential.features);
+    await this.mapData.addMapData('residential', residential.features);
 
     console.log('residential', residential.features.length);
 
@@ -141,7 +139,7 @@ export class MapUpdaterService {
       );             
       out geom;`);
 
-    await mapData.addMapData('farms', farms.features);
+    await this.mapData.addMapData('farms', farms.features);
 
     // tslint:disable-next-line:no-console
     console.log('farms', farms.features.length);
@@ -159,7 +157,7 @@ export class MapUpdaterService {
     console.log('streams', streams.features.length);
 
     //save to table
-    await mapData.addMapData('streams', streams.features);
+    await this.mapData.addMapData('streams', streams.features);
 
     const suburbs = await this.overpass
       .query(`node["name"="${name}"];
@@ -173,7 +171,7 @@ export class MapUpdaterService {
     console.log('suburbs', suburbs.features.length);
 
     //save to table
-    await mapData.addMapData('suburbs', suburbs.features);
+    await this.mapData.addMapData('suburbs', suburbs.features);
 
     const villages = await this.overpass
       .query(`node["name"="${name}"];
@@ -187,7 +185,7 @@ export class MapUpdaterService {
     console.log('villages', villages.features.length);
 
     //save to table
-    await mapData.addMapData('villages', villages.features);
+    await this.mapData.addMapData('villages', villages.features);
 
     const towns = await this.overpass
       .query(`node["name"="${name}"];
@@ -201,7 +199,7 @@ export class MapUpdaterService {
     console.log('towns', towns.features.length);
 
     //save to table
-    await mapData.addMapData('towns', towns.features);
+    await this.mapData.addMapData('towns', towns.features);
 
     // tslint:disable-next-line:no-console
     console.log('downloaded map data');

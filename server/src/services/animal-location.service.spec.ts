@@ -18,7 +18,7 @@ import { AppModule } from '../app.module';
 
 
 //not sure if 10000 is long enough
-jest.setTimeout(5000);
+jest.setTimeout(10000);
 
 
 let controller;

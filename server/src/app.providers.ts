@@ -1,3 +1,4 @@
+
 import { MapUpdaterService } from './services/map-updater.service';
 import { ShortestPathService } from './services/shortest-path.service';
 import { DatabaseService } from './services/db.service';
@@ -19,11 +20,11 @@ import { JwtStrategy } from './auth/jwt.strategy';
 import { ConfigService } from './services/config.service';
 import { MapDataService } from './services/map-data.service';
 import { SpeciesService } from './services/species.service';
-import { ClassifierTraining } from './services/animal-classifier-training.service';
 import { GeoService } from './services/geo.service';
 import { MapPartitionerService } from './services/map-partitioner.service';
 import { PoachingIncidentService } from './services/poaching-incident.service';
 import { AuthService } from './auth/auth.service';
+import { ModelSaving } from './services/model-saving.service';
 
 export const providers = [
   MapUpdaterService,
@@ -32,7 +33,6 @@ export const providers = [
   UserService,
   OverpassService,
   GeoService,
-  ClassifierTraining,
   MapPartitionerService,
   AnimalLocationService,
   AnimalInterestPointService,
@@ -52,5 +52,5 @@ export const providers = [
   PoachingCellWeightService,
   ConfigService,
   MapDataService,
-
+  ModelSaving,
 ];
