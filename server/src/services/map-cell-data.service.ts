@@ -1,14 +1,10 @@
 /* tslint:disable:no-console */
-import { Injectable, RequestTimeoutException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { DatabaseService } from './db.service';
 import { MapCellData } from '../entity/map-cell-data.entity';
 import { AnimalCellWeight } from '../entity/animal-cell-weight.entity';
 import { PoachingCellWeight } from '../entity/poaching-cell-weight.entity';
-import { json } from 'body-parser';
-import { Species } from '../entity/animal-species.entity';
-import { ForeignKeyMetadata } from 'typeorm/metadata/ForeignKeyMetadata';
-import { TableForeignKey } from 'typeorm';
-import { Normalize } from 'src/libraries/normalize';
+import { Normalize } from '../libraries/normalize';
 
 @Injectable()
 export class MapCellDataService {
