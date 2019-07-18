@@ -22,7 +22,7 @@ describe('MapController (e2e)', () => {
       .post('/login')
       .send({
         email: 'gst@gmail.com',
-        password: '123',
+        password: 'Reddbull@1',
       })
       .then(response => {
         // console.log("The token that is given back " + response.body.accessToken)

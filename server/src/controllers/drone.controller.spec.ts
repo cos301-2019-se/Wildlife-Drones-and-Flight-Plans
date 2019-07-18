@@ -22,7 +22,7 @@ describe('MapController (e2e)', () => {
       .post('/login')
       .send({
         email: 'gst@gmail.com',
-        password: '123',
+        password: 'Reddbull@1',
       })
       .then(response => {
         // console.log("The token that is given back " + response.body.accessToken)
@@ -53,7 +53,7 @@ describe('MapController (e2e)', () => {
     await request(app.getHttpServer())
       .post('/updateDrone')
       .send({
-        id: '1',
+        id: '2',
         name: 'poach2',
         avgSpeed: '60',
         avgFlightTime:'120',
@@ -70,7 +70,7 @@ describe('MapController (e2e)', () => {
     await request(app.getHttpServer())
       .post('/deactivateDrone')
       .send({
-        id: '2',
+        id: '1',
       })
       .set('Authorization', `Bearer ${token}`)
       .expect('true');

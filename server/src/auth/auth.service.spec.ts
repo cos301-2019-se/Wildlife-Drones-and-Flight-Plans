@@ -36,7 +36,7 @@ describe('Authorization service', () => {
       .post('/login')
       .send({
         email: 'gst@gmail.com',
-        password: '123',
+        password: 'Reddbull@1',
       })
       .then(response => {
         // console.log("The token that is given back " + response.body.accessToken)
@@ -51,8 +51,8 @@ describe('Authorization service', () => {
       .send({
         name: 'Anne',
         username: 'jm',
-        password: 'Jannie@3412',
-        job: 'Ranger',
+        password: 'Reddbull@1',
+        job: 'ranger',
         email: 'gst@gmail.com',
       })
       .expect('true');
