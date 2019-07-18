@@ -38,7 +38,7 @@ describe('MapController (e2e)', () => {
       .send({
         lon: '1233.56',
         lat: '6012.45',
-        rangerID:'18'
+        rangerID:'19'
       })
       .set('Authorization', `Bearer ${token}`)
       .expect('true');

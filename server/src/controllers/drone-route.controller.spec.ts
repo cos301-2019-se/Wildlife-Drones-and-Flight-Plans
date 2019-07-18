@@ -36,7 +36,7 @@ describe('MapController (e2e)', () => {
     await request(app.getHttpServer())
       .post('/addDroneRoute')
       .send({
-        id: '1',
+        id: '3',
         points: '1227906',
       })
       .set('Authorization', `Bearer ${token}`)
@@ -47,7 +47,7 @@ describe('MapController (e2e)', () => {
     await request(app.getHttpServer())
       .post('/updateDroneRoute')
       .send({
-        id: '2',
+        id: '3',
         points: '1228900',
         percent: '40'
       })
@@ -59,7 +59,7 @@ describe('MapController (e2e)', () => {
     await request(app.getHttpServer())
       .post('/deactivateDroneRoute')
       .send({
-        id: '1',
+        id: '3',
       })
       .set('Authorization', `Bearer ${token}`)
       .expect('true');
