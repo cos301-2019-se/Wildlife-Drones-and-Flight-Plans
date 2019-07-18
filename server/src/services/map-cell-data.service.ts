@@ -11,7 +11,7 @@ import { TableForeignKey } from 'typeorm';
 
 @Injectable()
 export class MapCellDataService {
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(private readonly databaseService: DatabaseService) { }
 
   // add cell data to map cell data table in database.
   async addCellData(
@@ -22,9 +22,9 @@ export class MapCellDataService {
     cellSlopiness: number,
   ): Promise<boolean> {
     const con = await this.databaseService.getConnection();
-   
-    
-    const mapMid = await con.getRepository(MapCellData).findOne({cellMidLatitude : cellMidLatitude, cellMidLongitude : cellMidLongitude});
+
+
+    const mapMid = await con.getRepository(MapCellData).findOne({ cellMidLatitude: cellMidLatitude, cellMidLongitude: cellMidLongitude });
 
     if (cellData['rivers'] == null) cellData['rivers'] = -100;
 
@@ -37,8 +37,7 @@ export class MapCellDataService {
     if (cellData['intermittentWater'] == null)
       cellData['intermittentWater'] = -100;
 
-    if(mapMid == undefined )
-    {
+    if (mapMid == undefined) {
       try {
         const mapCellData = new MapCellData();
         mapCellData.cellMidLatitude = cellMidLatitude;
@@ -66,7 +65,7 @@ export class MapCellDataService {
       }
     }
 
-    else{
+    else {
       try {
         mapMid.lastVisited = new Date();
         mapMid.distanceToRivers = parseFloat(cellData['rivers']);
@@ -89,7 +88,7 @@ export class MapCellDataService {
         console.log('Cell data was not saved');
         return false;
       }
-    }    
+    }
   }
 
   /**
@@ -111,39 +110,96 @@ export class MapCellDataService {
     id: number;
     lon: number;
     lat: number;
-    poachingWeight: number;
-    animalWeights: Array<{
-      speciesId: number;
-      weights: number[];
-    }>;
-  }>> 
-  {
+  }>> {
     const con = await this.databaseService.getConnection();
-
-    try {    
-      const cellsData = await con.getRepository(MapCellData).find({
-        loadEagerRelations: true,
-        relations: ["animalCell","poachingCell", "animalCell.species"]
-        
-      });// .createQueryBuilder('data')
-      // return cellsData
-
+    try {
+      const cellsData = await con.getRepository(MapCellData).find();
       return cellsData.map(cell => ({
         id: cell.id,
         lon: cell.cellMidLongitude,
         lat: cell.cellMidLatitude,
-        poachingWeight: (cell.poachingCell[0] ? cell.poachingCell[0].weight : undefined),
-        animalWeights: (cell.animalCell.length ? cell.animalCell.map(animalCell => ({
-          speciesId: animalCell.species.id,
-          weights: Array.from({ length: 12 }, (v, k) => k * 120)
-                        .map(minute => animalCell[`time${minute}Weight`]),
-        })) : []),
       }));
     } catch (error) {
-      console.log(error);
-      console.log('Cells data not retrieved');
-      //return JSON.parse('false');
+      console.error('error');
       return undefined;
     }
   }
+
+  /*async getSpeciesWeightDataForTime(speciesId:number,time:number){
+    const con = await this.databaseService.getConnection();
+    try {
+      const cellsData = await con.getRepository(AnimalCellWeight).find({
+        where:{
+          species:speciesId,
+        }
+      });
+      return cellsData.map(cell => ({
+        id: cell.id,
+        weight: cell.weight,
+      }));
+    } catch (error) {
+      console.error('error');
+      return undefined;
+    }
+  }*/
+
+  async getCellPoachingWeight():Promise<Array<{
+    id: number;
+    weight: number;
+  }>>
+  {
+    const con = await this.databaseService.getConnection();
+    try {
+      const cellsData = await con.getRepository(PoachingCellWeight).find({
+        loadRelationIds:true
+      });
+      return cellsData.map(cell => ({
+        id: cell.cell.id,
+        weight: cell.weight,
+      }));
+    } catch (error) {
+      console.error('error');
+      return undefined;
+    }
+  }
+
+  // async getMapCells(): Promise<Array<{
+  //   id: number;
+  //   lon: number;
+  //   lat: number;
+  //   poachingWeight: number;
+  //   animalWeights: Array<{
+  //     speciesId: number;
+  //     weights: number[];
+  //   }>;
+  // }>> 
+  // {
+  //   const con = await this.databaseService.getConnection();
+
+  //   try {    
+  //     const cellsData = await con.getRepository(MapCellData).find({
+  //       loadEagerRelations: true,
+  //       relations: ["animalCell","poachingCell", "animalCell.species"]
+
+  //     });// .createQueryBuilder('data')
+  //     // return cellsData
+
+  //     return cellsData.map(cell => ({
+  //       id: cell.id,
+  //       lon: cell.cellMidLongitude,
+  //       lat: cell.cellMidLatitude,
+  //       poachingWeight: (cell.poachingCell[0] ? cell.poachingCell[0].weight : undefined),
+  //       animalWeights: (cell.animalCell.length ? cell.animalCell.map(animalCell => ({
+  //         speciesId: animalCell.species.id,
+  //         weights: Array.from({ length: 12 }, (v, k) => k * 120)
+  //                       .map(minute => animalCell[`time${minute}Weight`]),
+  //       })) : []),
+  //     }));
+  //   } catch (error) {
+  //     console.log(error);
+  //     console.log('Cells data not retrieved');
+  //     //return JSON.parse('false');
+  //     return undefined;
+  //   }
+  // }
 }

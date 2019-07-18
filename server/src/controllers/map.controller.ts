@@ -83,6 +83,12 @@ export class MapController {
     return this.mapCellDataService.getMapCells();
   }
 
+  @Post('getCellPoachingWeight')
+  getCellPoachingWeight() {    
+    console.log('calling');
+    return this.mapCellDataService.getCellPoachingWeight();
+  }
+
   /**
    * Gets the size of a map cell from the database
    */
