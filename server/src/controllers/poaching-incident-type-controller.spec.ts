@@ -39,6 +39,6 @@ describe('MapController (e2e)', () => {
         poachingType: "snare"
       })
       .set('Authorization', `Bearer ${token}`)
-      .expect('true');
+      .expect('false');
   });
 });
