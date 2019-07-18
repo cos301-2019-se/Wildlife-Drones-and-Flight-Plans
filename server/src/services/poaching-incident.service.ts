@@ -129,6 +129,40 @@ export class PoachingIncidentService {
       return false;
     }
   }
+
+  async getPoachingIncidentTableData(poachingIncident): Promise<JSON> {
+    const con = await this.databaseService.getConnection();
+
+    const poachingIncidentType = await
+      con
+        .getRepository(PoachingIncidentType)
+        .findOne({ type: poachingIncident });
+
+    try {
+      return JSON.parse(
+        JSON.stringify(
+          await con
+            .getRepository(PoachingIncident)
+            .find({ type: poachingIncidentType }),
+        ),
+      );
+    } catch (error) {
+      return JSON.parse('false');
+    }
+  }
+
+  async getAllPoachingIncidentTableData(): Promise<PoachingIncident[]> {
+    const con = await this.databaseService.getConnection();
+
+    try {
+         return await con
+            .getRepository(PoachingIncident)
+            .find();
+    } catch (error) {
+      console.error(error);
+      return undefined;
+    }
+  }
   /**
    * Get all poaching incidents since the given date
    * If since is null, then will return for the last week
