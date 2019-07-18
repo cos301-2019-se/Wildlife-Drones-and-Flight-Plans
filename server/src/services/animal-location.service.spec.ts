@@ -12,10 +12,8 @@ import { AnimalController } from '../controllers/animal-location.controller';
 import { AnimalLocation } from '../entity/animal-location.entity';
 import { Species } from '../entity/animal-species.entity';
 import { providers } from '../app.providers';
-//
 import { imports } from '../app.imports';
-import { AppModule } from '../app.module';
-
+import { controllers } from '../app.controllers';
 
 //not sure if 10000 is long enough
 jest.setTimeout(10000);
@@ -25,9 +23,9 @@ let controller;
 
 beforeAll(async () => {
   const module: TestingModule = await Test.createTestingModule({
-    imports : imports,
-     controllers: controller,
-     providers : providers
+    imports:imports,
+    controllers:controller,
+    providers:providers
   }).compile();
 
   controller = await module.get<DatabaseService>(DatabaseService);

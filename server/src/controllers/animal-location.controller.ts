@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Query, Body } from '@nestjs/common';
 import { AnimalLocationService } from '../services/animal-location.service';
-import { AnimalLocation } from 'src/entity/animal-location.entity';
+import { AnimalLocation } from '../entity/animal-location.entity';
 
 @Controller()
 export class AnimalController {
