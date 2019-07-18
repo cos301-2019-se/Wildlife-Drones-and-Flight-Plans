@@ -83,10 +83,16 @@ export class MapController {
     return this.mapCellDataService.getMapCells();
   }
 
-  @Post('getCellPoachingWeight')
-  getCellPoachingWeight() {    
+  @Post('getSpeciesWeightDataForTime')
+  async getSpeciesWeightDataForTime(@Body() body) {    
     console.log('calling');
-    return this.mapCellDataService.getCellPoachingWeight();
+    return await this.mapCellDataService.getSpeciesWeightDataForTime(body.species, body.time);
+  }
+
+  @Post('getCellPoachingWeight')
+  async getCellPoachingWeight() {    
+    console.log('calling');
+    return await this.mapCellDataService.getCellPoachingWeight();
   }
 
   /**

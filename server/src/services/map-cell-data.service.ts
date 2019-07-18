@@ -8,6 +8,7 @@ import { json } from 'body-parser';
 import { Species } from '../entity/animal-species.entity';
 import { ForeignKeyMetadata } from 'typeorm/metadata/ForeignKeyMetadata';
 import { TableForeignKey } from 'typeorm';
+import { Normalize } from 'src/libraries/normalize';
 
 @Injectable()
 export class MapCellDataService {
@@ -120,45 +121,56 @@ export class MapCellDataService {
         lat: cell.cellMidLatitude,
       }));
     } catch (error) {
+      console.error(error);
+      return undefined;
+    }
+  }
+
+  async getSpeciesWeightDataForTime(speciesId: number, time: number):Promise<Array<{
+    id: number;
+    weight: number;
+  }>> {
+    const con = await this.databaseService.getConnection();
+    try {
+      const cellsData = await con.getRepository(AnimalCellWeight).find({
+        where: {
+          species: speciesId,
+        },
+        relations: ['species', 'cell'],
+      });
+
+      const normalizedWeights = Normalize.normalize(cellsData.map(cd => cd[`time${time}Weight`]))
+
+      return cellsData.map((cell, cellIndex) => ({
+        id: cell.cell.id,
+        weight: normalizedWeights[cellIndex],
+      }));
+    } catch (error) {
       console.error('error');
       return undefined;
     }
   }
 
-  /*async getSpeciesWeightDataForTime(speciesId:number,time:number){
-    const con = await this.databaseService.getConnection();
-    try {
-      const cellsData = await con.getRepository(AnimalCellWeight).find({
-        where:{
-          species:speciesId,
-        }
-      });
-      return cellsData.map(cell => ({
-        id: cell.id,
-        weight: cell.weight,
-      }));
-    } catch (error) {
-      console.error('error');
-      return undefined;
-    }
-  }*/
-
-  async getCellPoachingWeight():Promise<Array<{
+  async getCellPoachingWeight(): Promise<Array<{
     id: number;
     weight: number;
-  }>>
-  {
+  }>> {
     const con = await this.databaseService.getConnection();
     try {
+      console.log('Getting cell data');
       const cellsData = await con.getRepository(PoachingCellWeight).find({
-        loadRelationIds:true
+        relations: ['cell']
       });
-      return cellsData.map(cell => ({
-        id: cell.cell.id,
-        weight: cell.weight,
+      console.log('Got cell data', cellsData.length);
+
+      const normalizedWeights = Normalize.normalize(cellsData.map(cw => cw.weight));
+
+      return cellsData.map((cd, cdIdx) => ({
+        id: cd.cell.id,
+        weight: normalizedWeights[cdIdx],
       }));
     } catch (error) {
-      console.error('error');
+      console.error(error);
       return undefined;
     }
   }
