@@ -41,7 +41,7 @@ describe('MapController (e2e)', () => {
         rangerID:'19'
       })
       .set('Authorization', `Bearer ${token}`)
-      .expect('true');
+      .expect('false');
   });
 
   it('/updateRangerLocation (POST)', async () => {
@@ -53,7 +53,7 @@ describe('MapController (e2e)', () => {
         rangerID:'18'
       })
       .set('Authorization', `Bearer ${token}`)
-      .expect('true');
+      .expect('false');
   });
 
 
