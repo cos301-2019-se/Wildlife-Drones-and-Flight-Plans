@@ -40,7 +40,7 @@ describe('MapController (e2e)', () => {
         points: '1227906',
       })
       .set('Authorization', `Bearer ${token}`)
-      .expect('false');
+      .expect('true');
   });
 
   it('/updateDroneRoute (POST)', async () => {
@@ -52,7 +52,7 @@ describe('MapController (e2e)', () => {
         percent: '40'
       })
       .set('Authorization', `Bearer ${token}`)
-      .expect('false');
+      .expect('true');
   });
 
   it('/deactivateDroneRoute (POST)', async () => {
@@ -62,7 +62,7 @@ describe('MapController (e2e)', () => {
         id: '3',
       })
       .set('Authorization', `Bearer ${token}`)
-      .expect('false');
+      .expect('true');
   });
 
 });
