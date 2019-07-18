@@ -9,6 +9,8 @@ import { GeoService, GeoSearchSet } from './geo.service';
 import { SRTMService } from './srtm.service';
 import { lengthToDegrees } from '@turf/helpers';
 import { MoreThanOrEqual } from 'typeorm';
+import { PoachingCellWeight } from '../entity/poaching-cell-weight.entity';
+import { MapCellData } from '../entity/map-cell-data.entity';
 
 const LOCATION_BIAS = lengthToDegrees(300, 'meters');
 @Injectable()
@@ -127,6 +129,40 @@ export class PoachingIncidentService {
       return false;
     }
   }
+
+  async getPoachingIncidentTableData(poachingIncident): Promise<JSON> {
+    const con = await this.databaseService.getConnection();
+
+    const poachingIncidentType = await
+      con
+        .getRepository(PoachingIncidentType)
+        .findOne({ type: poachingIncident });
+
+    try {
+      return JSON.parse(
+        JSON.stringify(
+          await con
+            .getRepository(PoachingIncident)
+            .find({ type: poachingIncidentType }),
+        ),
+      );
+    } catch (error) {
+      return JSON.parse('false');
+    }
+  }
+
+  async getAllPoachingIncidentTableData(): Promise<PoachingIncident[]> {
+    const con = await this.databaseService.getConnection();
+
+    try {
+         return await con
+            .getRepository(PoachingIncident)
+            .find();
+    } catch (error) {
+      console.error(error);
+      return undefined;
+    }
+  }
   /**
    * Get all poaching incidents since the given date
    * If since is null, then will return for the last week
@@ -143,5 +179,28 @@ export class PoachingIncidentService {
       },
       loadRelationIds: true,
     });
+  }
+
+  async getPoachingWeights() {
+    const con = await this.databaseService.getConnection();
+
+    try {
+      let cellsData = await con.getRepository(PoachingCellWeight)//.find({ relations: ["cell"] });
+      .createQueryBuilder('data')   
+      .innerJoinAndSelect("data.cell", "id")
+      .select(['id.id','data.weight'])
+      .getMany();
+
+   // let cellsData = await con.getRepository(AnimalCellWeight).find();
+
+      // tslint:disable-next-line:no-console
+      console.log(cellsData); 
+      //console.log('Cells data retrieved');     
+      return JSON.parse(JSON.stringify(cellsData));
+    } catch (error) {
+      console.log(error);
+      console.log('Cells data not retrieved');
+      return JSON.parse('false');
+    }
   }
 }
