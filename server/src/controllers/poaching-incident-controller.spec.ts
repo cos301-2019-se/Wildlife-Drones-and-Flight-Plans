@@ -32,17 +32,4 @@ describe('MapController (e2e)', () => {
       });
   });
 
-  it('/addIncident (POST)', async () => {
-    await request(app.getHttpServer())
-      .post('/addIncident')
-      .send({
-        lon: '1233.56',
-        lat: '6012.45',
-        pType : 'snare',
-        description : 'Geskiet met die boog'
-
-      })
-      .set('Authorization', `Bearer ${token}`)
-      .expect('true');
-  });
 });
