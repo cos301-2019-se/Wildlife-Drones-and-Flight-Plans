@@ -26,8 +26,8 @@ let controller;
 beforeAll(async () => {
   const module: TestingModule = await Test.createTestingModule({
     imports : imports,
-     controllers: controllers,
-     providers :providers
+     controllers: controller,
+     providers : providers
   }).compile();
 
   controller = await module.get<DatabaseService>(DatabaseService);
