@@ -1,11 +1,4 @@
-import {
-  Controller,
-  Get,
-  Query,
-  Post,
-  Body,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Query, Post, Body, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
 import { ShortestPathService } from '../services/shortest-path.service';
@@ -78,19 +71,22 @@ export class MapController {
   }
 
   @Post('getMapCells')
-  getMapCells() {    
+  getMapCells() {
     console.log('calling');
     return this.mapCellDataService.getMapCells();
   }
 
   @Post('getSpeciesWeightDataForTime')
-  async getSpeciesWeightDataForTime(@Body() body) {    
+  async getSpeciesWeightDataForTime(@Body() body) {
     console.log('calling');
-    return await this.mapCellDataService.getSpeciesWeightDataForTime(body.species, body.time);
+    return await this.mapCellDataService.getSpeciesWeightDataForTime(
+      body.species,
+      body.time,
+    );
   }
 
   @Post('getCellPoachingWeight')
-  async getCellPoachingWeight() {    
+  async getCellPoachingWeight() {
     console.log('calling');
     return await this.mapCellDataService.getCellPoachingWeight();
   }

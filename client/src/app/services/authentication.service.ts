@@ -124,8 +124,7 @@ export class AuthenticationService {
       console.log('User does not exist');
       this.authenticationState.next(false);
       return false;
-    }
-    else {
+    } else {
       // need to get custom token
       // Save email
       let res: any;
@@ -150,9 +149,11 @@ export class AuthenticationService {
       await this.storage.set(TOKEN_KEY, token);
       await this.storage.set(EMAIL_KEY, email);
 
-    console.log('Token received from server side ', token);
-    return true;
-  }
+      this.authenticationState.next(true);
+
+      console.log('Token received from server side ', token);
+      return true;
+    }
   }
   /**
    * Clear the user's token and log out.

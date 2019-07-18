@@ -12,11 +12,11 @@ export interface MapCell {
   id: number;
   lon: number;
   lat: number;
-  poachingWeight: number;
-  animalWeights: {
-    [species: number]: number[];
-  };
   geoJSON: any;
+}
+
+export interface CellWeightMap {
+  [cellId: number]: number;
 }
 
 @Injectable()
@@ -55,14 +55,9 @@ export class HeatmapService {
     const halfCellSizeDeg = convertLength(cellSize / 2, 'kilometers', 'degrees');
 
     const cells: MapCell[] = (res as any[]).map(cell => ({
-      id: cell.cellId,
+      id: cell.id,
       lon: cell.lon, // x
       lat: cell.lat, // y
-      poachingWeight: cell.poachingWeight,
-      animalWeights: cell.animalWeights.reduce((ob, animalWeightList) => {
-        ob[animalWeightList.speciesId] = animalWeightList.weights;
-        return ob;
-      }, {}),
       geoJSON: bboxPolygon([
         cell.lon - halfCellSizeDeg, // minX
         cell.lat - halfCellSizeDeg, // minY
@@ -72,5 +67,27 @@ export class HeatmapService {
     }));
 
     return cells;
+  }
+
+  /**
+   * Returns the poaching cell weights for all cells
+   */
+  async getPoachingDataCellWeights(): Promise<CellWeightMap> {
+    const res = await this.auth.post('map/getCellPoachingWeight', {});
+
+    return res as CellWeightMap;
+  }
+
+  /**
+   * Returns the animal classifier cell weights for all cells
+   * for the given animal species at the given time (in minutes)
+   */
+  async getSpeciesDataCellWeights(speciesId: number, minutes: number): Promise<CellWeightMap> {
+    const res = await this.auth.post('map/getSpeciesWeightDataForTime', {
+      species: speciesId,
+      time: minutes,
+    });
+
+    return res as CellWeightMap;
   }
 }

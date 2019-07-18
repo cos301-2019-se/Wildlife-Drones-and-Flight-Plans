@@ -243,13 +243,15 @@ export class HomePage implements AfterViewInit, OnDestroy {
 
         if (!self.data.species.length) {
           self.data.species = await this.heatmapService.getAnimalSpecies();
+          self.data.animalHeatmapSpecies = self.data.species[0].id;
         }
 
-        self.updateMapForTime(self);
+        self.updateTime(self);
       },
       confirmations: {
         done: async (self) => {
           self.showPoachingHeatmap(self);
+          self.showAnimalHeatmap(self);
           this.setState(this.states.default);
         },
       },
@@ -259,52 +261,73 @@ export class HomePage implements AfterViewInit, OnDestroy {
         enablePoachingHeatmap: false,
         enableAnimalHeatmap: false,
         animalHeatmapSpecies: null,
-        time: new Date(),
+        useCurrentTime: true,
+        time: 0,
       },
-      updateMapForTime: async (self) => {
-        if (!self.data.enableAnimalHeatmap) {
-          return;
+      updateTime: (self) => {
+        if (self.data.useCurrentTime) {
+          self.data.time = Math.floor(
+            (new Date().getHours() * 60 + new Date().getMinutes()) / 120
+          ) * 120; // time in minutes floored to two hours
         }
-
-        // get the minutes in the day
-        const minutes = self.data.time.getHours() * 60 + self.data.time.getMinutes();
-        self.showAnimalHeatmap(minutes, self.data.species);
       },
-      showPoachingHeatmap: (self) => {
-        console.log('is showing heatmap', self.data.showPoachingHeatmap);
+      showPoachingHeatmap: async (self) => {
         if (!self.data.enablePoachingHeatmap) {
           if (this.poachingHeatmapLayer) {
             this.map.removeLayer(this.poachingHeatmapLayer);
+            this.poachingHeatmapLayer = null;
           }
           return;
         }
 
-        const cells = self.data.cellData;
-        const features = cells.map((cell: MapCell) => ({
-          ...cell.geoJSON,
-          properties: {
-            weight: cell.poachingWeight,
-          },
-        }));
+        const weights = await this.heatmapService.getPoachingDataCellWeights();
 
-        const heatmap = self.createHeatmap(features);
+        const heatmap = self.createHeatmap(self, weights, [255, 0, 0]);
         if (this.poachingHeatmapLayer) {
           this.map.removeLayer(this.poachingHeatmapLayer);
         }
         this.poachingHeatmapLayer = heatmap;
-        this.map.addLayer(heatmap);
+        this.map.addLayer(this.poachingHeatmapLayer);
       },
-      showAnimalHeatmap: (minutes, species) => {
+      showAnimalHeatmap: async (self) => {
+        self.updateTime(self);
 
+        if (!self.data.enableAnimalHeatmap) {
+          if (this.animalHeatmapLayer) {
+            this.map.removeLayer(this.animalHeatmapLayer);
+            this.animalHeatmapLayer = null;
+          }
+          return;
+        }
+
+        const weights = await this.heatmapService.getSpeciesDataCellWeights(
+          self.data.animalHeatmapSpecies,
+          self.data.time,
+        );
+
+        const heatmap = self.createHeatmap(self, weights, [0, 0, 255]);
+
+        if (this.animalHeatmapLayer) {
+          this.map.removeLayer(this.animalHeatmapLayer);
+        }
+        this.animalHeatmapLayer = heatmap;
+        this.map.addLayer(this.animalHeatmapLayer);
       },
-      createHeatmap: (cells) => {
+      createHeatmap: (self, cellWeights, rgb) => {
         const OPACITY = 0.8;
+
+        const features = self.data.cellData.map((cell: MapCell) => ({
+          ...cell.geoJSON,
+          properties: {
+            weight: cellWeights[cell.id],
+          },
+        }));
 
         return new VectorLayer({
           source: new VectorSource({
             features: new GeoJSON().readFeatures({
               type: 'FeatureCollection',
-              features: cells,
+              features,
             }, {
               featureProjection: 'EPSG:3857',
             }),
@@ -315,11 +338,8 @@ export class HomePage implements AfterViewInit, OnDestroy {
           renderMode: 'image',
           style: cell => {
             return new Style({
-              stroke: new Stroke({
-                color: 'white'
-              }),
               fill: new Fill({
-                color: [255, 0, 0, cell.getProperties().weight * OPACITY]
+                color: [...rgb, cell.getProperties().weight * OPACITY]
               }),
             });
           },
@@ -368,8 +388,7 @@ export class HomePage implements AfterViewInit, OnDestroy {
 
     // get the time every few minutes
     this.timePoller = setInterval(() => {
-      this.states.options.data.time = new Date();
-      this.states.options.updateMapForTime(this.states.options);
+      this.states.options.showAnimalHeatmap(this.states.options);
     }, 60000);
   }
 
@@ -428,7 +447,6 @@ export class HomePage implements AfterViewInit, OnDestroy {
 
     // get the reserve data
     const reserve: any = await this.mapService.getMap();
-    console.log('reserve', reserve);
 
     // draw the reserve
     this.drawReserve(reserve);
