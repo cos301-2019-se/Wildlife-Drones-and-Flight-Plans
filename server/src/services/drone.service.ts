@@ -20,6 +20,7 @@ export class DroneService {
     const con = await this.databaseService.getConnection();
     const drone = new Drone();
 
+    
     try {
       drone.name = name;
       drone.avgSpeed = avgSpeed;
