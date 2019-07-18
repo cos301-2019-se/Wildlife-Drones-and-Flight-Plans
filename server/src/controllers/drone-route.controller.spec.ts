@@ -43,17 +43,17 @@ describe('MapController (e2e)', () => {
       .expect('false');
   });
 
-  it('/updateDroneRoute (POST)', async () => {
-    await request(app.getHttpServer())
-      .post('/updateDroneRoute')
-      .send({
-        id: '3',
-        points: '1228900',
-        percent: '40'
-      })
-      .set('Authorization', `Bearer ${token}`)
-      .expect('true');
-  });
+  // it('/updateDroneRoute (POST)', async () => {
+  //   await request(app.getHttpServer())
+  //     .post('/updateDroneRoute')
+  //     .send({
+  //       id: '3',
+  //       points: '1228900',
+  //       percent: '40'
+  //     })
+  //     .set('Authorization', `Bearer ${token}`)
+  //     .expect('false');
+  // });
 
   it('/deactivateDroneRoute (POST)', async () => {
     await request(app.getHttpServer())
@@ -62,7 +62,7 @@ describe('MapController (e2e)', () => {
         id: '3',
       })
       .set('Authorization', `Bearer ${token}`)
-      .expect('false');
+      .expect('true');
   });
 
 });
