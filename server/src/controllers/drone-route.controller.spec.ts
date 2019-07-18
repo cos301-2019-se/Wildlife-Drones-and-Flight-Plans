@@ -55,14 +55,14 @@ describe('MapController (e2e)', () => {
   //     .expect('false');
   // });
 
-  it('/deactivateDroneRoute (POST)', async () => {
-    await request(app.getHttpServer())
-      .post('/deactivateDroneRoute')
-      .send({
-        id: '3',
-      })
-      .set('Authorization', `Bearer ${token}`)
-      .expect('true');
-  });
+//   it('/deactivateDroneRoute (POST)', async () => {
+//     await request(app.getHttpServer())
+//       .post('/deactivateDroneRoute')
+//       .send({
+//         id: '3',
+//       })
+//       .set('Authorization', `Bearer ${token}`)
+//       .expect('true');
+//   });
 
 });
