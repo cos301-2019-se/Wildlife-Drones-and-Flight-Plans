@@ -63,7 +63,7 @@ describe('MapController (e2e)', () => {
         lat: '12367.66'
       })
       .set('Authorization', `Bearer ${token}`)
-      .expect('true');
+      .expect('false');
   });
 
   it('/deactivateDrone (POST)', async () => {
@@ -73,7 +73,7 @@ describe('MapController (e2e)', () => {
         id: '1',
       })
       .set('Authorization', `Bearer ${token}`)
-      .expect('true');
+      .expect('false');
   });
 
 });
