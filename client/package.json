@@ -29,6 +29,7 @@
     "@ionic/angular": "^4.1.0",
     "@ionic/storage": "^2.2.0",
     "@turf/bbox": "^6.0.1",
+    "@turf/bbox-polygon": "^6.0.1",
     "@turf/boolean-contains": "^6.0.1",
     "@turf/center": "^6.0.1",
     "@turf/flatten": "^5.1.5",

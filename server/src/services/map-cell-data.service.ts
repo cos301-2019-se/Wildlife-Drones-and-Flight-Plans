@@ -5,6 +5,7 @@ import { MapCellData } from '../entity/map-cell-data.entity';
 import { AnimalCellWeight } from '../entity/animal-cell-weight.entity';
 import { PoachingCellWeight } from '../entity/poaching-cell-weight.entity';
 import { Normalize } from '../libraries/normalize';
+import { Standardizer, IQRIfy } from '../libraries/Standardizer';
 
 @Injectable()
 export class MapCellDataService {
@@ -103,6 +104,10 @@ export class MapCellDataService {
     }
   }
 
+  /**
+   * Returns all map cells with their ID, lon and lat
+   * centres. Does not return any other data.
+   */
   async getMapCells(): Promise<Array<{
     id: number;
     lon: number;
@@ -122,10 +127,15 @@ export class MapCellDataService {
     }
   }
 
-  async getSpeciesWeightDataForTime(speciesId: number, time: number):Promise<Array<{
-    id: number;
-    weight: number;
-  }>> {
+  /**
+   * Returns all weight values and corresponding cell IDs for
+   * the given species and time
+   * @param speciesId The species ID
+   * @param time The time in minutes (e.g. 2h = 120) rounded to 2 hours
+   */
+  async getSpeciesWeightDataForTime(speciesId: number, time: number): Promise<{
+    [cellId: number]: number;
+  }> {
     const con = await this.databaseService.getConnection();
     try {
       const cellsData = await con.getRepository(AnimalCellWeight).find({
@@ -135,22 +145,26 @@ export class MapCellDataService {
         relations: ['species', 'cell'],
       });
 
-      const normalizedWeights = Normalize.normalize(cellsData.map(cd => cd[`time${time}Weight`]))
+      const weights = cellsData.map(cd => cd[`time${time}Weight`]);
+      const normalizedWeights = IQRIfy.runOn(weights);
 
-      return cellsData.map((cell, cellIndex) => ({
-        id: cell.cell.id,
-        weight: normalizedWeights[cellIndex],
-      }));
+      return cellsData.reduce((ob, cell, cellIndex) => {
+        ob[cell.cell.id] = normalizedWeights[cellIndex];
+        return ob;
+      }, {});
     } catch (error) {
       console.error('error');
       return undefined;
     }
   }
 
-  async getCellPoachingWeight(): Promise<Array<{
-    id: number;
-    weight: number;
-  }>> {
+  /**
+   * Returns all poaching cell weights with thier corresponding
+   * cell id.
+   */
+  async getCellPoachingWeight(): Promise<{
+    [cellId: number]: number;
+  }> {
     const con = await this.databaseService.getConnection();
     try {
       console.log('Getting cell data');
@@ -159,55 +173,16 @@ export class MapCellDataService {
       });
       console.log('Got cell data', cellsData.length);
 
-      const normalizedWeights = Normalize.normalize(cellsData.map(cw => cw.weight));
+      const weights = cellsData.map(cw => cw.weight);
+      const standardizedWeights = IQRIfy.runOn(weights);
 
-      return cellsData.map((cd, cdIdx) => ({
-        id: cd.cell.id,
-        weight: normalizedWeights[cdIdx],
-      }));
+      return cellsData.reduce((ob, cd, cdIdx) => {
+        ob[cd.cell.id] = standardizedWeights[cdIdx];
+        return ob;
+      }, {});
     } catch (error) {
       console.error(error);
       return undefined;
     }
   }
-
-  // async getMapCells(): Promise<Array<{
-  //   id: number;
-  //   lon: number;
-  //   lat: number;
-  //   poachingWeight: number;
-  //   animalWeights: Array<{
-  //     speciesId: number;
-  //     weights: number[];
-  //   }>;
-  // }>> 
-  // {
-  //   const con = await this.databaseService.getConnection();
-
-  //   try {    
-  //     const cellsData = await con.getRepository(MapCellData).find({
-  //       loadEagerRelations: true,
-  //       relations: ["animalCell","poachingCell", "animalCell.species"]
-
-  //     });// .createQueryBuilder('data')
-  //     // return cellsData
-
-  //     return cellsData.map(cell => ({
-  //       id: cell.id,
-  //       lon: cell.cellMidLongitude,
-  //       lat: cell.cellMidLatitude,
-  //       poachingWeight: (cell.poachingCell[0] ? cell.poachingCell[0].weight : undefined),
-  //       animalWeights: (cell.animalCell.length ? cell.animalCell.map(animalCell => ({
-  //         speciesId: animalCell.species.id,
-  //         weights: Array.from({ length: 12 }, (v, k) => k * 120)
-  //                       .map(minute => animalCell[`time${minute}Weight`]),
-  //       })) : []),
-  //     }));
-  //   } catch (error) {
-  //     console.log(error);
-  //     console.log('Cells data not retrieved');
-  //     //return JSON.parse('false');
-  //     return undefined;
-  //   }
-  // }
 }
