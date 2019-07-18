@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Storage } from '@ionic/storage';
 import { BehaviorSubject } from 'rxjs';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 
 const TOKEN_KEY = 'accessToken';
 const EMAIL_KEY = 'email';
@@ -10,7 +10,7 @@ const EMAIL_KEY = 'email';
   providedIn: 'root'
 })
 export class AuthenticationService {
-  authenticationState = new BehaviorSubject(false);
+  authenticationState = new BehaviorSubject(true); // assume logged in by default
   private readonly url = 'http://localhost:3000';
 
   constructor(
@@ -37,7 +37,18 @@ export class AuthenticationService {
       }),
     };
 
-    return await this.http.post(`${this.url}/${endpointName}`, body, httpOptions).toPromise();
+    try {
+      return await this.http.post(`${this.url}/${endpointName}`, body, httpOptions).toPromise();
+    } catch (err) {
+      if (err.status === 401) {
+        // authentication error
+        console.error('Not authenticated');
+        this.authenticationState.next(false);
+      } else {
+        // some other error occurred
+        throw err;
+      }
+    }
   }
 
   /**
@@ -57,7 +68,18 @@ export class AuthenticationService {
       .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`)
       .join('&');
 
-    return await this.http.get(`${this.url}/${endpointName}?${paramsString}`, httpOptions).toPromise();
+    try {
+      return await this.http.get(`${this.url}/${endpointName}?${paramsString}`, httpOptions).toPromise();
+    } catch (err) {
+      if (err.status === 401) {
+        // authentication error
+        console.error('Not authenticated');
+        this.authenticationState.next(false);
+      } else {
+        // some other error occurred
+        throw err;
+      }
+    }
   }
 
   /** 
@@ -84,11 +106,23 @@ export class AuthenticationService {
    * @param email The user's email
    * @param password The user's password
    */
-  async login(email: string, password: string) {
+  async login(email: string, password: string): Promise<boolean> {
+    // need to get custom token
+    // Save email
+    let res: any;
+    try {
+      res = await this.post('login', {
+        email,
+        password,
+      });
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
 
-    var reqTest = this.passRequirements(password);
-    console.log("Password requirements test result : " + reqTest);
-    if (reqTest == false) {
+    if (!res || !res.accessToken || res.accessToken === '') {
+      console.log('User does not exist');
+      this.authenticationState.next(false);
       return false;
     }
     else {
@@ -116,10 +150,8 @@ export class AuthenticationService {
       await this.storage.set(TOKEN_KEY, token);
       await this.storage.set(EMAIL_KEY, email);
 
-      this.authenticationState.next(true);
-
-      console.log('Token received from server side ', token);
-    }
+    console.log('Token received from server side ', token);
+    return true;
   }
 
   /**
@@ -142,9 +174,17 @@ export class AuthenticationService {
 
   private async validateToken() {
     console.log('validating token');
+    const token = await this.getToken();
+    if (!token) {
+      // token doesn't exist - don't bother checking validity
+      console.log('token not set');
+      this.authenticationState.next(false);
+      return;
+    }
+
     const res: any = await this.post('vToken', {
       email: await this.getEmail(),
-      token: await this.getToken(),
+      token,
     });
     console.log('validate token res:', res);
 

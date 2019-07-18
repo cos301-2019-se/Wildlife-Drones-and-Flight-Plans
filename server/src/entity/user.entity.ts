@@ -1,5 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, Column, BeforeInsert } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  BeforeInsert,
+  OneToOne,
+} from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { Ranger } from './ranger.entity';
 
 @Entity()
 export class User {
@@ -17,6 +24,9 @@ export class User {
 
   @Column('text')
   email: string;
+
+  @OneToOne(type => Ranger, ranger => ranger.ranger)
+  ranger: Ranger;
 
   @BeforeInsert()
   hashPassword() {

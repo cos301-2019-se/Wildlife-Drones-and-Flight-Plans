@@ -1,16 +1,35 @@
-ion-item{
-    --background: #3880ff;
-    --color: #777;
+.header-container {
+  padding-bottom: 0;
 }
 
-ion-button{
-    --background: #062f77;
+h1 {
+  font-weight: 700;
+  font-size: 36px;
+  letter-spacing: -2px;
+  margin-bottom: 0;
 }
 
-ion-item ion-label{
-    color: white;
+.header-image {
+  display: block;
+  margin: 0 auto;
+  width: 160px;
+  max-width: 80%;
 }
 
-ion-input{
-    color: white;
+.button-container {
+  padding-top: 0;
+}
+
+.error {
+  &.failure {
+    color: var(--ion-color-danger);
+  }
+}
+
+ion-item {
+  --highlight-background: var(--ion-color-primary);
+}
+
+ion-button {
+  
 }
