@@ -28,7 +28,7 @@ describe('Authorization service', () => {
         job: 'Pilot',
         email: 'gst@gmail.com',
       })
-      .expect('true');
+      .expect('false');
   });
 
   it('/login (POST)', async () => {
@@ -45,6 +45,18 @@ describe('Authorization service', () => {
       });
   });
 
+  it('/addUser (POST)', async () => {
+    await request(app.getHttpServer())
+      .post('/addUser')
+      .send({
+        name: 'Anne',
+        username: 'jm',
+        password: 'Jannie@3412',
+        job: 'Ranger',
+        email: 'gst@gmail.com',
+      })
+      .expect('true');
+  });
 
   it('/getUsers)', () => {
     return request(app.getHttpServer())

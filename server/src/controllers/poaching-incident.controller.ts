@@ -2,6 +2,7 @@ import { Controller, Get, Query, Post, Body, UseGuards } from '@nestjs/common';
 import { PoachingIncidentService } from '../services/poaching-incident.service';
 import { PoachingIncident } from 'src/entity/poaching-incident.entity';
 import { AuthGuard } from '@nestjs/passport';
+import { PoachingCellWeight } from 'src/entity/poaching-cell-weight.entity';
 
 @UseGuards(AuthGuard('jwt'))
 @Controller()
@@ -39,6 +40,11 @@ export class PoachingIncidentController {
   @Post('getIncidents')
   async getPoachingIncidents(): Promise<PoachingIncident[]> {
     return await this.poachingIncidentService.getPoachingIncidents();
+  }
+
+  @Post('getPoachingWeights')
+  async getPoachingWeights(): Promise<PoachingIncident[]> {
+    return await this.poachingIncidentService.getPoachingWeights();
   }
 
 }

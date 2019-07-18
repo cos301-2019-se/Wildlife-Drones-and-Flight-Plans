@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Classifier } from './animal-classifier.service';
+import { Classifier } from '../services/classification-model.service';
 import { AnimalLocationService } from '../services/animal-location.service';
 //  Need to fetch the data
 //  Need to train the classifier with the data

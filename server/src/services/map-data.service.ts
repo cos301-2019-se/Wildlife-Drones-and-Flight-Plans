@@ -2,10 +2,14 @@
 import { Injectable, RequestTimeoutException } from '@nestjs/common';
 import { DatabaseService } from './db.service';
 import { MapData } from '../entity/map-data.entity';
+import { ConfigService } from './config.service';
 
 @Injectable()
 export class MapDataService {
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(
+    private readonly databaseService: DatabaseService,
+    private readonly config: ConfigService,
+  ) {}
 
   /**
    * Adds map data to the system used for caching 
@@ -50,5 +54,13 @@ export class MapDataService {
     }
 
     return JSON.parse(feature.properties);
+  }
+
+  /**
+   * Gets the size of cells in the map from the database
+   */
+  async getCellSize(): Promise<number> {
+    const config = await this.config.getConfig();
+    return config.cellSize;
   }
 }

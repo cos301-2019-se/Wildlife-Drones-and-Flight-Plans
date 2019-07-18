@@ -257,9 +257,9 @@ export class AnimalLocationService {
 
       const rowDate = new Date(row.timestamp);
 
-      //console.log('row: ' + JSON.stringify(row) );
+      // console.log('row: ' + JSON.stringify(row) );
 
-      //console.log('row species: ' + await row['species'])
+      // console.log('row species: ' + await row['species'])
 
       let species;
       let leng = animalSpeciesType.length;
@@ -365,32 +365,25 @@ export class AnimalLocationService {
       ),
     );
   }
-  
-  /**
+
+/**
    * Returns information species and their location
    * Returns a value of true if the function executed sucessfully
    * The information is retrieved from the database
    * @param animalId The identification number of the animal in the system
    */
-  async getSpeciesLocationTableData(animalSpecies): Promise<JSON> {
+  async getSpeciesLocationTableData(animalSpecies: string): Promise<AnimalLocation[]> {
     const con = await this.databaseService.getConnection();
 
-    const animalSpeciseType = await JSON.parse(
-      JSON.stringify(
-        await con.getRepository(Species).find({ species: animalSpecies }),
-      ),
-    );
+    const animalSpeciesType = await con.getRepository(Species).findOne({ species: animalSpecies });
 
     try {
-      return JSON.parse(
-        JSON.stringify(
-          await con
-            .getRepository(AnimalLocation)
-            .find({ species: animalSpeciseType[0]['id'] }),
-        ),
-      );
+      return await con
+        .getRepository(AnimalLocation)
+        .find({ species: animalSpeciesType });
     } catch (error) {
-      return JSON.parse('false');
+      console.error(error);
+      return undefined;
     }
   }
   

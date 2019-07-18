@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Query, Body } from '@nestjs/common';
 import { SpeciesService } from '../services/species.service';
+import { Species } from 'src/entity/animal-species.entity';
 
 @Controller()
 export class SpeciesController {
@@ -12,7 +13,12 @@ export class SpeciesController {
    * @param speciesType The type of species being added
    */
   @Post('addSpeciesData')
-  async addSpecies(@Body() body) :Promise<boolean>{
-  return await this.speciesService.addSpecies(body.speciesType);
+  async addSpecies(@Body() body): Promise<boolean> {
+    return await this.speciesService.addSpecies(body.speciesType);
+  }
+
+  @Post('getSpecies')
+  async getSpecies(): Promise<Species[]> {
+    return await this.speciesService.getSpecies();
   }
 }
