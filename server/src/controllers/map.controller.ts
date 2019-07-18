@@ -83,6 +83,18 @@ export class MapController {
     return this.mapCellDataService.getMapCells();
   }
 
+  @Post('getSpeciesWeightDataForTime')
+  async getSpeciesWeightDataForTime(@Body() body) {    
+    console.log('calling');
+    return await this.mapCellDataService.getSpeciesWeightDataForTime(body.species, body.time);
+  }
+
+  @Post('getCellPoachingWeight')
+  async getCellPoachingWeight() {    
+    console.log('calling');
+    return await this.mapCellDataService.getCellPoachingWeight();
+  }
+
   /**
    * Gets the size of a map cell from the database
    */

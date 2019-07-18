@@ -23,11 +23,24 @@ describe('MapController (e2e)', () => {
       .send({
         name: 'Anne',
         username: 'jm',
+        password: 'Reddbull@1',
+        job: 'ranger',
+        email: 'gst@gmail.com',
+      })
+      .expect('true');
+  });
+
+  it('/addUser (POST)', async () => {
+    await request(app.getHttpServer())
+      .post('/addUser')
+      .send({
+        name: 'Anne',
+        username: 'jm',
         password: '123',
         job: 'Pilot',
         email: 'gst@gmail.com',
       })
-      .expect('true');
+      .expect('false');
   });
 
   it('/login (POST)', async () => {
@@ -35,7 +48,7 @@ describe('MapController (e2e)', () => {
       .post('/login')
       .send({
         email: 'gst@gmail.com',
-        password: '123',
+        password: 'Reddbull@1',
       })
       .then(response => {
         // console.log("The token that is given back " + response.body.accessToken)

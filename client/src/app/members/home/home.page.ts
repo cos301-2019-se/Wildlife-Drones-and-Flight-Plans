@@ -30,7 +30,7 @@ import LineString from 'ol/geom/LineString';
 import { modulo } from 'ol/math';
 import center from '@turf/center';
 import { IncidentsService } from '../../services/incidents.service';
-import { DronesService } from 'src/app/services/drones.service';
+import { DronesService } from '../../services/drones.service';
 import { Drone } from '../../services/drones.service';
 import { HeatmapService, MapCell } from '../../services/heatmap.service';
 

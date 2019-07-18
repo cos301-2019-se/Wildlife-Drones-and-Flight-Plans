@@ -2,27 +2,14 @@
  * A class that allows you to normalize an array
  */
 export class Normalize {
-    private min = null;
-    private max = null;
-    private dataArray = null;
-    private normalizedData = [];
-    constructor(dataArray) {
-        this.dataArray = dataArray;
-        this.min = Math.min(...this.dataArray);
-        this.max = Math.max(...this.dataArray);
+    private constructor() {
     }
 
-    public getNormalizedData() {
-        this.normalize();
-        return this.normalizedData;
+    public static normalize(dataArray) {
+        const min = 0;
+        const max = Math.max(...dataArray);
+        const alpha = (max - min);
+        return dataArray.map(value =>
+            1 - ((value - min) / alpha));
     }
-
-    private normalize() {
-        const alpha = (this.max - this.min);
-        this.dataArray.forEach(value => {
-            // (this.max - this.min)/(max-min)*(value-min)+min
-        this.normalizedData.push((value - this.min)/alpha);
-        });
-    }
-
 }
