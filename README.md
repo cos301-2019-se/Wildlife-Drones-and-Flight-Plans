@@ -47,7 +47,7 @@ User Manual: [Latest](User%20Manual.pdf)
 - __Attitudes__: Hardworking and dedicated
 
 ### Reinhardt Eiselen (14043302)
-- __Interests__: Music ,the outdoors and Technoloy
+- __Interests__: Music ,the outdoors and Technology
 - __Skills__:  Java, C++ , JavaScript, Assembler (x86) and 64 bit,PHP,SQL,Android,Nodejs, Angular,Web development and App development.
 - __Previous work experience__: network administartor at IC Health from 2014-2017
 - __Attitudes__: Always Up for a challenge and Curious about the unkown and I&#39;m a hardwoker.
