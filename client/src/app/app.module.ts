@@ -7,8 +7,8 @@ import { providers } from './app.providers';
 @NgModule({
   declarations: [AppComponent],
   entryComponents: [],
-  imports,
-  providers,
+  imports: imports,
+  providers: providers,
   bootstrap: [AppComponent]
 })
 export class AppModule {}
