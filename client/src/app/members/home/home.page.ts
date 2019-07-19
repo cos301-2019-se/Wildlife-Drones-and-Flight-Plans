@@ -339,7 +339,7 @@ export class HomePage implements AfterViewInit, OnDestroy {
           style: cell => {
             return new Style({
               fill: new Fill({
-                color: [...rgb, cell.getProperties().weight * OPACITY]
+                color: [...rgb, Math.pow(cell.getProperties().weight, 2) * OPACITY]
               }),
             });
           },
