@@ -58,6 +58,7 @@ interface MapState {
 export class HomePage implements AfterViewInit, OnDestroy {
   @ViewChild('map') mapElement: ElementRef;
   private map: Map;
+  private mapUpdateInterval;
 
   private geolocationSubscription: Subscription;
   public coordinates: Coordinates;
@@ -376,6 +377,10 @@ export class HomePage implements AfterViewInit, OnDestroy {
     if (!!this.timePoller) {
       clearInterval(this.timePoller);
     }
+
+    if (!!this.mapUpdateInterval) {
+      clearInterval(this.mapUpdateInterval);
+    }
   }
 
   ngAfterViewInit() {
@@ -390,6 +395,13 @@ export class HomePage implements AfterViewInit, OnDestroy {
     this.timePoller = setInterval(() => {
       this.states.options.showAnimalHeatmap(this.states.options);
     }, 60000);
+
+    // update the map size on an interval
+    this.mapUpdateInterval = setInterval(() => {
+      if (this.map) {
+        this.map.updateSize();
+      }
+    }, 1000);
   }
 
   /**

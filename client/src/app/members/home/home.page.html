@@ -116,6 +116,14 @@
 
   <!-- fab bottom left buttons -->
   <ion-fab slot="fixed" vertical="bottom" horizontal="start">
+    <!-- settings fab -->
+    <ion-fab-button size="small" color="dark"
+      *ngIf="state === states.default"
+      (click)="setState(states.options)" @button-animation
+    >
+      <ion-icon name="settings"></ion-icon>
+    </ion-fab-button>
+
     <!-- set up route fab -->
     <ion-fab-button size="small" @button-animation color="dark"
       *ngIf="state == states.default"
@@ -160,15 +168,6 @@
       [disabled]="state === states.addMarker && !withinReserve"
     >
       <ion-icon name="checkmark"></ion-icon>
-    </ion-fab-button>
-  </ion-fab>
-
-  <!-- fab top right settings button -->
-  <ion-fab slot="fixed" vertical="top" horizontal="end">
-    <ion-fab-button size="small" color="dark"
-      (click)="setState(states.options)"
-    >
-      <ion-icon name="settings"></ion-icon>
     </ion-fab-button>
   </ion-fab>
   

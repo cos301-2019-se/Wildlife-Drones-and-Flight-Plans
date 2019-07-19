@@ -75,6 +75,10 @@ $tooltip-margin: 10px;
   align-items: center;
   transform: translateX(-50%);
 
+  @supports (top: env(safe-area-inset-top)) {
+    top: calc(env(safe-area-inset-top) + #{$tooltip-margin});
+  }
+
   ion-icon {
     display: inline-block;
     font-size: 28px;
