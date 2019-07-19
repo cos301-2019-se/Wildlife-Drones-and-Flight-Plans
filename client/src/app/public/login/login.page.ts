@@ -8,6 +8,9 @@ import { AuthenticationService } from './../../services/authentication.service';
 export class LoginPage implements OnInit {
   enteredPassword: string;
   enteredEmail: string;
+  error;
+  loggingIn = false;
+
   constructor(
     private authService: AuthenticationService,
   ) {
@@ -16,7 +19,19 @@ export class LoginPage implements OnInit {
   ngOnInit() {
   }
 
-  login() {
-    this.authService.login(this.enteredEmail, this.enteredPassword);
+  async login() {
+    this.loggingIn = true;
+    this.error = 'Checking credentials...';
+
+    try {
+      const res = await this.authService.login(this.enteredEmail, this.enteredPassword);
+      if (!res) {
+        this.error = 'Incorrect credentials';
+      }
+    } catch (err) {
+      this.error = 'An unknown error occurred';
+    }
+
+    this.loggingIn = false;
   }
 }

@@ -1,54 +1,101 @@
-import { Controller, Get, Param, Query, Post, Body, UseGuards } from '@nestjs/common';
-import { ShortestPathService } from '../providers/shortest-path.service';
-import { MapUpdaterService } from '../providers/map-updater.service';
+import { Controller, Get, Query, Post, Body, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
-// jest.setTimeout(-1);
-// jest.useFakeTimers();
+import { ShortestPathService } from '../services/shortest-path.service';
+import { MapUpdaterService } from '../services/map-updater.service';
+import { MapDataService } from '../services/map-data.service';
+import { MapCellDataService } from '../services/map-cell-data.service';
 
 @Controller('map')
 @UseGuards(AuthGuard('jwt'))
 export class MapController {
+  constructor(
+    private shortestPathService: ShortestPathService,
+    private mapUpdaterService: MapUpdaterService,
+    private mapDataService: MapDataService,
+    private mapCellDataService: MapCellDataService,
+  ) {}
 
-    constructor(
-        private shortestPathService: ShortestPathService,
-        private mapUpdaterService: MapUpdaterService,
-    ) {}
+  @Get('random-path')
+  getRandomPath(
+    @Query('top') top: number,
+    @Query('left') left: number,
+    @Query('bottom') bottom: number,
+    @Query('right') right: number,
+    @Query('startX') startX: number,
+    @Query('startY') startY: number,
+  ) {
+    const NUM_POINTS = 5;
+    const points = new Array(NUM_POINTS)
+      .fill(undefined)
+      .map(() => [
+        Math.random() * (right - left) + Number(left),
+        Math.random() * (top - bottom) + Number(bottom),
+      ]);
 
-    @Get('random-path')
-    getRandomPath(@Query('top') top: number,
-                  @Query('left') left: number,
-                  @Query('bottom') bottom: number,
-                  @Query('right') right: number,
-                  @Query('startX') startX: number,
-                  @Query('startY') startY: number) {
-        const NUM_POINTS = 5;
-        const points = new Array(NUM_POINTS).fill(undefined)
-          .map(() => [
-                (Math.random() * (right - left)) + Number(left),
-                (Math.random() * (top - bottom)) + Number(bottom)
-            ]);
+    points.unshift([startX, startY]);
 
-        points.unshift([startX, startY]);
+    return this.shortestPathService.getShortestPath(points);
+  }
 
-        return this.shortestPathService.getShortestPath(points);
-    }
+  @Post('shortest-path')
+  shortestPath(@Body('points') points) {
+    return this.shortestPathService.getShortestPath(points);
+  }
 
-    @Post('shortest-path')
-    shortestPath(@Body('points') points) {
-        return this.shortestPathService.getShortestPath(points);
-    }
+  @Post('find-reserves')
+  async findReserves(
+    @Body('top') top,
+    @Body('left') left,
+    @Body('bottom') bottom,
+    @Body('right') right,
+  ) {
+    // tslint:disable-next-line:no-console
+    console.log(left, bottom, right, top);
+    return await this.mapUpdaterService.findReservesInArea(
+      left,
+      bottom,
+      right,
+      top,
+    );
+  }
 
-    @Post('find-reserves')
-    async findReserves(@Body('top') top, @Body('left') left, @Body('bottom') bottom, @Body('right') right) {
-        // tslint:disable-next-line:no-console
-        console.log(left, bottom, right, top);
-        return await this.mapUpdaterService.findReservesInArea(left, bottom, right, top);
-    }
+  @Post('update')
+  async update(@Body('name') name) {
+    return await this.mapUpdaterService.updateMap(name);
+  }
 
-    @Post('update')
-    async update(@Body('name') name) {
-        // console.log(mapFeatures);
-        return await this.mapUpdaterService.updateMap(name);
-    }
+  @Post('reserve')
+  async getReserve() {
+    return await this.mapDataService.getMapFeature('reserve');
+  }
+
+  @Post('getMapCells')
+  getMapCells() {
+    console.log('calling');
+    return this.mapCellDataService.getMapCells();
+  }
+
+  @Post('getSpeciesWeightDataForTime')
+  async getSpeciesWeightDataForTime(@Body() body) {
+    console.log('calling');
+    return await this.mapCellDataService.getSpeciesWeightDataForTime(
+      body.species,
+      body.time,
+    );
+  }
+
+  @Post('getCellPoachingWeight')
+  async getCellPoachingWeight() {
+    console.log('calling');
+    return await this.mapCellDataService.getCellPoachingWeight();
+  }
+
+  /**
+   * Gets the size of a map cell from the database
+   */
+  @Post('getCellSize')
+  async getCellSize(): Promise<number> {
+    return await this.mapDataService.getCellSize();
+  }
 }
