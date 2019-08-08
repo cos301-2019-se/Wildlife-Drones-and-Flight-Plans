@@ -4,29 +4,41 @@ import {
   Column,
   BeforeInsert,
   OneToOne,
+  Timestamp,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { Ranger } from './ranger.entity';
 
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column('text')
+  @Column()
   name: string;
 
-  @Column('text')
+  @Column({ nullable: true })
+  surname: string;
+
+  @Column()
   password: string;
 
-  @Column('text')
-  jobType: 'manager' | 'pilot' | 'ranger';
+  @Column()
+  jobType: 'administrator' | 'pilot';
 
-  @Column('text')
+  @Column()
   email: string;
 
-  @OneToOne(type => Ranger, ranger => ranger.ranger)
-  ranger: Ranger;
+  @Column({ nullable: true })
+  code: string;
+
+  @Column({ nullable: true })
+  codeExpires: Date;
+
+  @Column({ nullable: true })
+  loginAttemptsRemaining: number;
+
+  @Column({ nullable: true })
+  active: boolean;
 
   @BeforeInsert()
   hashPassword() {

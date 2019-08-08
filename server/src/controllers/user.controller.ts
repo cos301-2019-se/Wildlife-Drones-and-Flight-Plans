@@ -39,6 +39,7 @@ export class UserController {
       body.email,
       body.password,
       body.job,
+      body.surname,
     );
   }
 

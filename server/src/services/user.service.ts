@@ -114,8 +114,8 @@ export class UserService {
 
 
 
-  async addUser(name, email, password, job): Promise<boolean> {
-
+  async addUser(name, email, password, job, surname): Promise<boolean> {
+       
     if(this.passRequirements(password)) {
       const con = await this.databaseService.getConnection();
 
@@ -124,6 +124,9 @@ export class UserService {
       user.email = email;
       user.password = password;
       user.jobType = job;
+      user.surname = surname;
+      user.loginAttemptsRemaining = 3;
+      user.active = true;   
 
       const insertedUser = await con.getRepository(User).save(user);
 
