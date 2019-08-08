@@ -25,7 +25,8 @@ import { MapPartitionerService } from './services/map-partitioner.service';
 import { PoachingIncidentService } from './services/poaching-incident.service';
 import { AuthService } from './auth/auth.service';
 import { ModelSaving } from './services/model-saving.service';
-
+import { CacheInterceptor  } from '@nestjs/common';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 export const providers = [
   MapUpdaterService,
   ShortestPathService,
@@ -53,4 +54,8 @@ export const providers = [
   ConfigService,
   MapDataService,
   ModelSaving,
+  {
+    provide: APP_INTERCEPTOR,
+    useClass: CacheInterceptor,
+  },
 ];

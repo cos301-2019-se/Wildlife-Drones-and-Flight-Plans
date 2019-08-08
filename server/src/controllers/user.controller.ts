@@ -24,6 +24,13 @@ export class UserController {
       return await this.authService.createToken(body.email);
     }
   }
+  
+  @Post('resetPassword')
+  async resetPass(@Body() body): Promise<boolean> {
+   return await this.userService.reset(body.email);
+    console.log("it sees the endpoint")
+    
+  }
 
   @Post('addUser')
   async addUser(@Body() body): Promise<boolean> {

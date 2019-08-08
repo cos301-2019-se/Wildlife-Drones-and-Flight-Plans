@@ -136,6 +136,22 @@ export class AuthenticationService {
     return true;
   }
 
+  async resetPasword (email :string ) :Promise <boolean> {
+
+    let res :any;
+    try {
+        res = await this.post('/resetPassword',{
+          email
+        });
+      }catch(err){
+      console.log(err);
+      throw err;
+    }
+
+
+    return ;
+  }
+
   /**
    * Clear the user's token and log out.
    */

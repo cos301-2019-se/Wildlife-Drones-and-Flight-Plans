@@ -58,21 +58,21 @@ export class AnimalController {
   //   return await this.animalLocationService.getAllAnimalsLocationTableData();
   // }
 
-  // @Get('getIndividualAnimalLocationTableData')
-  // getIndividualAnimalLocationData(
-  //   @Query('animalID') animalID: string,
-  // ): Promise<JSON> {
-  //   return this.animalLocationService.getIndividualAnimalLocationTableData(
-  //     animalID,
-  //   );
-  // }
-
-  @Post('getIndividualAnimalLocationTableData')
-  async getIndividualAnimalLocationData(@Body() body ) : Promise<JSON> {
-    return await this.animalLocationService.getIndividualAnimalLocationTableData(
-        body.animalId,
-         );
+  @Get('getIndividualAnimalLocationTableData')
+  getIndividualAnimalLocationData(
+    @Query('animalID') animalID: string,
+  ): Promise<JSON> {
+    return this.animalLocationService.getIndividualAnimalLocationTableData(
+      animalID,
+    );
   }
+
+  // @Post('getIndividualAnimalLocationTableData')
+  // async getIndividualAnimalLocationData(@Body() body ) : Promise<JSON> {
+  //   return await this.animalLocationService.getIndividualAnimalLocationTableData(
+  //       body.animalId,
+  //        );
+  // }
 
   // @Get('getSpeciesLocationTableData')
   // getSpeciesLocationTableData(
