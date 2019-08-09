@@ -105,12 +105,43 @@ export class AuthenticationService {
    * @param email The user's email
    * @param password The user's password
    */
-  async login(email: string, password: string): Promise<boolean> {
+  async loginEmail(email: string): Promise<boolean> {
     // need to get custom token
     // Save email
     let res: any;
     try {
-      res = await this.post('login', {
+      res = await this.post('loginEmail', {
+        email,
+      });
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
+
+    if (!res ) {
+      console.log('User does not exist');
+      this.authenticationState.next(false);
+      return false;
+    }
+
+    //const token = res.accessToken;
+
+    //await this.storage.set(TOKEN_KEY, token);
+    await this.storage.set(EMAIL_KEY, email);
+
+    //this.authenticationState.next(true);
+
+   // console.log('Token received from server side ', token);
+    return true;
+  }
+
+  async loginPin(password: string, otp: string, email :string): Promise<boolean> {
+    // need to get custom token
+    // Save email
+    let res: any;
+    try {
+      res = await this.post('loginPin', {
+        otp,
         email,
         password,
       });
@@ -128,13 +159,14 @@ export class AuthenticationService {
     const token = res.accessToken;
 
     await this.storage.set(TOKEN_KEY, token);
-    await this.storage.set(EMAIL_KEY, email);
+    //await this.storage.set(EMAIL_KEY, email);
 
     this.authenticationState.next(true);
 
     console.log('Token received from server side ', token);
     return true;
   }
+
 
   async resetPasword (email :string ) :Promise <boolean> {
 

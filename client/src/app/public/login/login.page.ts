@@ -6,9 +6,13 @@ import { Router } from '@angular/router';
   templateUrl: './login.page.html',
   styleUrls: ['./login.page.scss'],
 })
+
 export class LoginPage implements OnInit {
+  enteringEmail = true;
+
   enteredPassword: string;
   enteredEmail: string;
+  enteredOTP : string
   error;
   loggingIn = false;
   resetting = false;
@@ -22,12 +26,29 @@ export class LoginPage implements OnInit {
   ngOnInit() {
   }
 
-  async login() {
+  async loginEmail() {
+    this.loggingIn = true;
+    this.error = 'Validating email';
+
+    try {
+      const res = await this.authService.loginEmail(this.enteredEmail);
+      if (!res) {
+        //this.error = 'Incorrect credentials';
+      }
+    } catch (err) {
+      //this.error = 'An unknown error occurred';
+    }
+  
+    this.loggingIn = false;
+    this.enteringEmail = false;
+  }
+
+  async loginPin() {
     this.loggingIn = true;
     this.error = 'Checking credentials...';
 
     try {
-      const res = await this.authService.login(this.enteredEmail, this.enteredPassword);
+      const res = await this.authService.loginPin(this.enteredPassword,this.enteredOTP,this.enteredEmail);
       if (!res) {
         this.error = 'Incorrect credentials';
       }

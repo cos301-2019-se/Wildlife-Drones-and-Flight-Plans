@@ -17,11 +17,20 @@ export class UserController {
     return await this.userService.getAllUsers();
   }
 
-  @Post('login')
+  @Post('loginPin')
   async loginUser(@Body() body): Promise<JSON> {
-    const status = await this.userService.login(body.email, body.password);
+    const status = await this.userService.loginPin(body.email, body.password, body.otp);
     if (status) {
+      console.log("Status " + status)
       return await this.authService.createToken(body.email);
+    }
+  }
+
+  @Post('loginEmail')
+  async loginUserEmail(@Body() body): Promise<boolean> {
+    const status = await this.userService.loginEmail(body.email);
+    if (status) {
+      return true;
     }
   }
   
@@ -39,7 +48,6 @@ export class UserController {
       body.email,
       body.password,
       body.job,
-      body.surname,
     );
   }
 
