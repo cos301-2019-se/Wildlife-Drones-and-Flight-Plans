@@ -3,6 +3,7 @@ import { UserService } from '../services/user.service';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from '../auth/auth.service';
 import { User } from '../entity/user.entity';
+import { addUserDTO, updateUserDTO, deleteUserDTO } from '../dto/validation';
 
 @Controller()
 export class UserController {
@@ -11,7 +12,7 @@ export class UserController {
     private readonly authService: AuthService,
   ) {}
 
-  @Get('getUsers')
+  @Post('getUsers')
   @UseGuards(AuthGuard('jwt'))
   async getAllUsers(): Promise<User[]> {
     return await this.userService.getAllUsers();
@@ -42,12 +43,36 @@ export class UserController {
   }
 
   @Post('addUser')
-  async addUser(@Body() body): Promise<boolean> {
+  async addUser(@Body() createUserDto: addUserDTO): Promise<boolean> {
     return await this.userService.addUser(
-      body.name,
-      body.email,
-      body.password,
-      body.job,
+      createUserDto.name,
+      createUserDto.email,
+      createUserDto.password,
+      createUserDto.job,
+      createUserDto.surname,
+    );
+  }
+
+  @Post('updateUser')
+  async updateUser(@Body() updateUserDto: updateUserDTO): Promise<boolean> {
+ //  return true;
+    return await this.userService.updateUser(
+      updateUserDto.id,
+      updateUserDto.name,
+      updateUserDto.surname,
+      updateUserDto.email,
+      updateUserDto.job,
+      updateUserDto.password,     
+      updateUserDto.loginAttemptsRemaining,        
+      updateUserDto.code
+    );
+  }
+
+  @Post('deactivateUser')
+  async deactivate(@Body() deleteUserDto: deleteUserDTO): Promise<boolean> {
+ //  return true;
+    return await this.userService.deactivateUser(
+      deleteUserDto.id,
     );
   }
 
