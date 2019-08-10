@@ -206,11 +206,8 @@ export class UserService {
  * @param surname 
  * @param email 
  * @param jobType 
- * @param password 
- * @param loginAttemptsRemaining 
- * @param code 
  */
-async updateUser(id,name,surname,email,jobType,password,loginAttemptsRemaining,code)
+async updateUser(id,name,surname,email,jobType)
 {
   const con = await this.databaseService.getConnection();
   const user = await con.getRepository(User).findOne({ id: id });
@@ -224,10 +221,7 @@ async updateUser(id,name,surname,email,jobType,password,loginAttemptsRemaining,c
     user.name = name;
     user.surname = surname;
     user.email = email;
-    user.email = password;
     user.jobType = jobType;
-    user.loginAttemptsRemaining = loginAttemptsRemaining;
-    user.code = code;
     // tslint:disable-next-line:no-console
     const updatedDrone = await con.getRepository(User).save(user);
     console.log('User was updated with id: ' + user.id);

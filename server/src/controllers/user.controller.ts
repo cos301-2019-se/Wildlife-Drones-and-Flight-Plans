@@ -62,9 +62,6 @@ export class UserController {
       updateUserDto.surname,
       updateUserDto.email,
       updateUserDto.job,
-      updateUserDto.password,     
-      updateUserDto.loginAttemptsRemaining,        
-      updateUserDto.code
     );
   }
 
