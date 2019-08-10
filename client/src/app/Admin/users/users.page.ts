@@ -6,12 +6,19 @@ import { UsersService } from '../../services/users.service';
   styleUrls: ['./users.page.scss'],
 })
 export class UsersPage implements OnInit {
-
+  users:any;
   constructor(private userService:UsersService) { }
 
   async ngOnInit() {
-    const res = await this.userService.getUsers();
-    console.log(JSON.stringify(res));
+    this.users = await this.userService.getUsers();
+    console.log(JSON.stringify(this.users));
+  }
+
+  selectUser(index:number)
+  {
+    //Get selected user then need to open up a new page
+    const selectedUser = this.users[index];
+
   }
 
 }
