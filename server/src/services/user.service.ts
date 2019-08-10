@@ -9,9 +9,14 @@ import * as mailer from 'nodemailer';
 export class UserService {
   constructor(private readonly databaseService: DatabaseService) {}
 
+  /**
+   * gets all users that are active, returns the users id,name,surname,email and job title
+   */
   async getAllUsers(): Promise<User[]> {
     const con = await this.databaseService.getConnection();
-    return await con.getRepository(User).find({active: true});
+    return await con.getRepository(User).createQueryBuilder('user')
+    .select(['user.id','user.name','user.surname','user.email','user.jobType'])
+    .where('user.active = true').getMany();
   }
 
   async loginEmail(email): Promise<boolean> {
