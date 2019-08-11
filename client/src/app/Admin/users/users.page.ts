@@ -39,6 +39,11 @@ export class UsersPage implements OnInit {
     this.router.navigate(['edit-user'],{ state: { user:selectedUser } });
   }
 
+  addUser()
+  {
+    this.router.navigate(['add-user'],{});
+  }
+
 
 
 }

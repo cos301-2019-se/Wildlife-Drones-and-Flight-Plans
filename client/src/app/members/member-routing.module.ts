@@ -8,6 +8,7 @@ const routes: Routes = [
   { path: 'routes', loadChildren: './routes/routes.module#RoutesPageModule' },
   { path: 'users', loadChildren: '../Admin/users/users.module#UsersPageModule' },
   { path: 'edit-user', loadChildren: '../Admin/edit-user/edit-user.module#EditUserPageModule' },
+  { path: 'add-user', loadChildren: './Admin/add-user/add-user.module#AddUserPageModule' },
 ];
 @NgModule({
   imports: [RouterModule.forChild(routes)],

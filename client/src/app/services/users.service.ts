@@ -26,6 +26,18 @@ export class UsersService {
     return res as Boolean;//await this.authService.post('getUsers', {});
   }
 
+  async addUser(user:Users,pass:string):Promise<Boolean> {
+    const name = user.name;
+    const surname = user.surname;
+    const email = user.email;
+    const job = user.job;
+    const password = pass;
+    const res = await this.authService.post('addUser', {
+      name,surname,email,job,password
+    });
+    return res as Boolean;//await this.authService.post('getUsers', {});
+  }
+
   async updateUser(user:Users):Promise<Boolean> {
     const id = user.id;
     const name = user.name;
