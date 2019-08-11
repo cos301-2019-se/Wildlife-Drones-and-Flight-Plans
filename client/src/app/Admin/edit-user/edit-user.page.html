@@ -1,0 +1,31 @@
+<ion-header>
+  <ion-toolbar>
+      <ion-buttons slot="start">
+          <ion-button (click)="goBack()">
+              <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+    <ion-item>
+        <ion-label position="floating">Name</ion-label>
+        <ion-input [(ngModel)]="user.name"></ion-input>
+      </ion-item>
+      <ion-item>
+          <ion-label position="floating">Surname</ion-label>
+          <ion-input [(ngModel)]="user.surname"></ion-input>
+        </ion-item>
+        <ion-item>
+            <ion-label position="floating">Email</ion-label>
+            <ion-input [(ngModel)]="user.email"></ion-input>
+          </ion-item>
+          <ion-item>
+              <ion-label>Job Type</ion-label>
+              <ion-select [(ngModel)]="user.jobType" okText="Okay" cancelText="Dismiss">
+                <ion-select-option value="pilot">pilot</ion-select-option>
+                <ion-select-option value="administrator">administrator</ion-select-option>
+              </ion-select>
+            </ion-item>
+</ion-content>

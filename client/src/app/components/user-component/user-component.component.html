@@ -1,12 +1,17 @@
-<ion-list>
-<ion-item lines="none">
-  <ion-label>
-    Name: {{this.name}} {{this.surname}}
-  </ion-label>
-</ion-item>
-<ion-item lines="none">
-  <ion-label>
-   Job Type: {{this.job}}
-  </ion-label>
-</ion-item>
-</ion-list>
+<ion-grid>
+  <ion-row>
+    <ion-col size="8">
+        Name: {{this.name}} {{this.surname}}
+    </ion-col>
+    <ion-col class="delete">
+        <ion-button (click)="deleteUser()">
+            <ion-icon slot="icon-only" name="trash"></ion-icon>
+          </ion-button>
+    </ion-col>
+  </ion-row>
+  <ion-row>
+    <ion-col>
+        Job Type: {{this.job}}
+    </ion-col>
+  </ion-row>
+</ion-grid>

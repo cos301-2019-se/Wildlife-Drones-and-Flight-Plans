@@ -7,6 +7,7 @@ const routes: Routes = [
   { path: 'home', loadChildren: './home/home.module#HomePageModule' },
   { path: 'routes', loadChildren: './routes/routes.module#RoutesPageModule' },
   { path: 'users', loadChildren: '../Admin/users/users.module#UsersPageModule' },
+  { path: 'edit-user', loadChildren: './Admin/edit-user/edit-user.module#EditUserPageModule' },
 ];
 @NgModule({
   imports: [RouterModule.forChild(routes)],

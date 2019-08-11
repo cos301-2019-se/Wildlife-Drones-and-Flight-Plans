@@ -61,7 +61,7 @@ export class LoginPage implements OnInit {
 
   
   async reset() {
-    this.router.navigate(['reset-password'])
+    this.router.navigate(['reset-password']);
     console.log("it is being called");
     
   // this.resetting = true;

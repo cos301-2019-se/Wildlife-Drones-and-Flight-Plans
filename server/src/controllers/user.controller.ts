@@ -56,6 +56,7 @@ export class UserController {
   @Post('updateUser')
   async updateUser(@Body() updateUserDto: updateUserDTO): Promise<boolean> {
  //  return true;
+ console.log(JSON.stringify(updateUserDto));
     return await this.userService.updateUser(
       updateUserDto.id,
       updateUserDto.name,

@@ -7,7 +7,7 @@
 <ion-content>
   <ion-list>
     <ion-item *ngFor="let user of this.users;let i = index" (click)="selectUser(i)">
-      <app-user-component [name]="user.name" [surname] = "user.surname" [job]="user.jobType">
+      <app-user-component [name]="user.name" [surname] = "user.surname" [job]="user.jobType" [id]="user.id">
 
       </app-user-component>
     </ion-item>
