@@ -9,7 +9,6 @@ import { ModelTraining } from './services/model-training.service';
 import { AnimalInterestPointService } from './services/animal-interest-point.service';
 import { CsvReader } from './services/csv-reader.service';
 import { SRTMService } from './services/srtm.service';
-import { RangerService } from './services/ranger.service';
 import { PoachingIncidentTypeService } from './services/poaching-incident-type.service';
 import { DroneService } from './services/drone.service';
 import { DroneRouteService } from './services/drone-route.service';
@@ -42,7 +41,6 @@ export const providers = [
   ModelTraining,
   AuthService,
   JwtStrategy,
-  RangerService,
   PoachingIncidentService,
   PoachingIncidentTypeService,
   SpeciesService,

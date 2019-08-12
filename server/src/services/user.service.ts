@@ -11,7 +11,7 @@ export class UserService {
 
   async getAllUsers(): Promise<User[]> {
     const con = await this.databaseService.getConnection();
-    return await con.getRepository(User).find();
+    return await con.getRepository(User).find({active: true});
   }
 
   async loginEmail(email): Promise<boolean> {
@@ -215,17 +215,25 @@ export class UserService {
 }
 
 
-
-  async addUser(name, email, password, job): Promise<boolean> {
-
+  /**
+   * Adds user give name,surname,email,password and job (administrator or pilot)
+   * @param name 
+   * @param email 
+   * @param password 
+   * @param job 
+   * @param surname 
+   */
+  async addUser(name, email, password, job, surname): Promise<boolean> {
     if(this.passRequirements(password)) {
       const con = await this.databaseService.getConnection();
-
       const user = new User();
       user.name = name;
       user.email = email;
       user.password = password;
       user.jobType = job;
+      user.surname = surname;
+      user.loginAttemptsRemaining = 3;
+      user.active = true;   
 
       const insertedUser = await con.getRepository(User).save(user);
 
@@ -233,8 +241,73 @@ export class UserService {
     }
     else {
       return false;
-    }
+    }        
   }
+
+  /**
+ * updates user given a user id and any parameter, not all parameters have to be sent
+ * @param id 
+ * @param name 
+ * @param surname 
+ * @param email 
+ * @param jobType 
+ * @param password 
+ * @param loginAttemptsRemaining 
+ * @param code 
+ */
+async updateUser(id,name,surname,email,jobType,password,loginAttemptsRemaining,code)
+{
+  const con = await this.databaseService.getConnection();
+  const user = await con.getRepository(User).findOne({ id: id });
+
+  if (!user) {
+    console.log('User ' + id + ' was not found');
+    return false;
+  }
+
+  try {
+    user.name = name;
+    user.surname = surname;
+    user.email = email;
+    user.email = password;
+    user.jobType = jobType;
+    user.loginAttemptsRemaining = loginAttemptsRemaining;
+    user.code = code;
+    // tslint:disable-next-line:no-console
+    const updatedDrone = await con.getRepository(User).save(user);
+    console.log('User was updated with id: ' + user.id);
+    return updatedDrone != null;
+  } catch (error) {
+    console.log('User was not updated');
+    return false;
+  }
+}
+
+/**
+ * Deactivates user given the user id
+ * @param id 
+ */
+async deactivateUser(id)
+{
+  const con = await this.databaseService.getConnection();
+  const user = await con.getRepository(User).findOne({ id: id });
+
+  if (!user) {
+    console.log('User ' + id + ' was not found');
+    return false;
+  }
+
+  try {
+    user.active = false;
+    // tslint:disable-next-line:no-console
+    const updatedDrone = await con.getRepository(User).save(user);
+    console.log('User was deactivated with id: ' + user.id);
+    return updatedDrone != null;
+  } catch (error) {
+    console.log('User was not deactivated');
+    return false;
+  }
+}
 
   async validateUser(payload: JwtPayload) {
     const con = await this.databaseService.getConnection();
