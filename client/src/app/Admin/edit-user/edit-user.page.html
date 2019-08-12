@@ -28,4 +28,17 @@
                 <ion-select-option value="administrator">administrator</ion-select-option>
               </ion-select>
             </ion-item>
+
+            <ion-grid>
+            <ion-row>
+            <ion-col class="delete">
+              <ion-button (click)="deleteUser()">
+                  <ion-icon slot="icon-only" name="trash"></ion-icon>
+                </ion-button>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+      <div padding class="error" [class.failure]="error" *ngIf="error">
+        {{ error }}
+      </div>
 </ion-content>

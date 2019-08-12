@@ -8,6 +8,7 @@ import { UsersService } from '../../services/users.service';
 })
 export class EditUserPage implements OnInit {
   user:any;
+  error;
   constructor(private userService:UsersService,private router: Router) { }
 
   ngOnInit() {
@@ -25,6 +26,21 @@ export class EditUserPage implements OnInit {
     }   
     await this.userService.updateUser(editUser);
     this.router.navigate(['users']);
+  }
+
+  
+  async deleteUser()
+  {
+    const result  = await this.userService.deleteUser(this.user.id);
+    console.log("Deleted User:",result);
+    if(result)
+    {
+      this.router.navigate(['users']);
+    }
+    else
+    {
+      this.error = 'Failed to delete user';
+    }
   }
 
 }
