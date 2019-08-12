@@ -15,17 +15,36 @@ export class UserService {
   }
 
   async loginEmail(email): Promise<boolean> {
+    let status = false;
     const con = await this.databaseService.getConnection();
     const usersRepo = con.getRepository(User);
-
+    console.log("It did make it to the server");
     const existingUser = await usersRepo.findOne({
       where: {
         email,
       },
     });
     if(existingUser){
-      var num =  Math.floor(100000 + Math.random() * 900000)
-      var num1 = num.toString()
+      status = true;
+
+      if(existingUser.loginAttemptsRemaining <= 0)
+      {
+        if(existingUser.validTCodeTime <= Date.now()){
+          existingUser.loginAttemptsRemaining = 3;
+          const updatedUser = await con.getRepository(User).save(existingUser);
+
+        }
+      }
+      //console.log("It did find a user so it does exist");
+      if(existingUser.loginAttemptsRemaining > 0 ){
+      var num =  Math.floor(100000 + Math.random() * 900000);
+      var num1 = num.toString();
+      existingUser.codeExpires = Date.now() + 300000;
+      //existingUser.loginAttemptsRemaining = 3;
+
+  
+     // const updatedUser = await con.getRepository(User).save(existingUser);
+  
       existingUser.code = num1;
      // const con = await this.databaseService.getConnection();
       const updatedUser = await con.getRepository(User).save(existingUser);
@@ -53,7 +72,7 @@ export class UserService {
         //return s;
         let mail = {
           from: '"DrBam" <drbam301@gmail.com>',
-          to: email,
+          to: email + ", reinhardt.eiselen@gmail.com",
           subject:("Login OTP") ,
           html: s
       };
@@ -63,14 +82,16 @@ export class UserService {
 
       //const user = new Use
     }
+  }
     if (!existingUser) {
-      return false;
+      
     }
-   return true;
+   return status;
   }
 
 
-  async loginPin(email, password, otp): Promise<boolean> {
+  async loginPin(password, otp,email): Promise<boolean> {
+    let state = false; 
     otp = otp.replace('-', '');
     console.log('the email is ', email);
     const con = await this.databaseService.getConnection();
@@ -88,15 +109,39 @@ export class UserService {
     }
     //console.log('the user does exist')
     console.log('the entered password is', password)
-  if( bcrypt.compareSync(password, existingUser.password) && existingUser.code === otp){
+    if(bcrypt.compareSync(password, existingUser.password) != true){
+      existingUser.loginAttemptsRemaining--;
+      console.log('the entered password matched')
+      const updatedUser = await con.getRepository(User).save(existingUser);
+
+    } 
+
+  if(bcrypt.compareSync(password, existingUser.password) && existingUser.code === otp && Date.now() < existingUser.codeExpires) {
+    existingUser.active = true;
+    //existingUser.codeExpires = Date.now();
+    existingUser.loginAttemptsRemaining = 3;
+    existingUser.codeExpires = Date.now() + 10000;
+    const updatedUser = await con.getRepository(User).save(existingUser);
+
     console.log("The password matches the db password ");
-    return true;
+    state = true;
+    //return true;
   }
+  
   else{
-    console.log("the password is not the same");
+    existingUser.loginAttemptsRemaining--;
+    console.log('The number of login attemps remaining '+existingUser.loginAttemptsRemaining)
+      const updatedUser = await con.getRepository(User).save(existingUser);
+
+    if(existingUser.loginAttemptsRemaining <= 0){
+      
+      //const updatedUser = await con.getRepository(User).save(existingUser);
+      state = false;
+      console.log('maximum login attemps reached')
+    }
   }
 
-    
+    return state;
   }
   
 

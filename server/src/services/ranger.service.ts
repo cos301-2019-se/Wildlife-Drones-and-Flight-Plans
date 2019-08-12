@@ -20,7 +20,7 @@ export class RangerService {
     try {
       let rangerUser = await con
         .getRepository(User)
-        .findOne({ id: rangerID, jobType: 'ranger' });
+        .findOne({ id: rangerID, jobType: 'pilot' });
 
       if (rangerUser != undefined) {
         ranger.time = new Date();
@@ -55,7 +55,7 @@ export class RangerService {
     try {
       let rangerUser = await con
         .getRepository(User)
-        .findOne({ id: rangerID, jobType: 'ranger' });
+        .findOne({ id: rangerID, jobType: 'pilot' });
       let updateRanger = await con
         .getRepository(Ranger)
         .findOne({ ranger: rangerUser });

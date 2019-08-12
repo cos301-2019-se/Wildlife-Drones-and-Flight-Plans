@@ -113,6 +113,7 @@ export class AuthenticationService {
       res = await this.post('loginEmail', {
         email,
       });
+      console.log("the reaponse from EmailLogin : " + res)
     } catch (err) {
       console.error(err);
       throw err;
