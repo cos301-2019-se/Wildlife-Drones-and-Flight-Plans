@@ -159,7 +159,6 @@ export class AuthenticationService {
     const token = res.accessToken;
 
     await this.storage.set(TOKEN_KEY, token);
-    //await this.storage.set(EMAIL_KEY, email);
 
     this.authenticationState.next(true);
 
@@ -216,10 +215,10 @@ export class AuthenticationService {
       email: await this.getEmail(),
       token,
     });
-    console.log('validate token res:', res);
-
-    this.authenticationState.next(res);
-    return res;
+    console.log('validate token res:', res.status);
+    await this.storage.set(TOKEN_KEY, res.token);
+    this.authenticationState.next(res.status);
+    return res.status;
   }
 
 

@@ -75,7 +75,22 @@ export class UserController {
   }
 
   @Post('vToken')
-  vToken(@Body() body): boolean {
-    return this.authService.validateToken(body.token);
+  async vToken(@Body() body): Promise<{
+    status: boolean;
+    token: string;
+  }> {
+    const valid = this.authService.validateToken(body.token);
+
+    if (!valid) {
+      return {
+        status: false,
+        token: body.token,
+      }
+    }
+
+    return {
+      status: true,
+      token: await this.authService.createToken(body.email),
+    };
   }
 }

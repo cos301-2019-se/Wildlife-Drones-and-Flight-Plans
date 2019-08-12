@@ -50,7 +50,10 @@ export class UserService {
               secure: true, // use SSL
               auth: {
                   user: 'drbam301@gmail.com',
-                  pass: 'drbamisawesome'
+                  pass: 'please stop looking at our passwords',
+              },
+              tls: {
+                rejectUnauthorized:false,
               }
           
             // proxy: "socks5://u16009917:Viper3489753489@vpn.up.ac.za:"
@@ -139,7 +142,10 @@ export class UserService {
           auth: {
               user: 'drbam301@gmail.com',
               pass: 'drbamisawesome'
-          }
+          },
+              tls: {
+                rejectUnauthorized:false,
+              }
       
         // proxy: "socks5://u16009917:Viper3489753489@vpn.up.ac.za:"
     });
