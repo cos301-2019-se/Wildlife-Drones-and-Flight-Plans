@@ -24,8 +24,15 @@ export class AppComponent {
       this.statusBar.styleDefault();
       this.splashScreen.hide();
       this.authenticationService.authenticationState.subscribe(state => {
-        if (state) {
-          this.router.navigate(['users']);
+        if (state.status) {
+          if(state.jobType == "administrator")
+          {
+            this.router.navigate(['users']);
+          }
+          else
+          {
+            this.router.navigate(['home']);
+          }
         } else {
           this.router.navigate(['login']);
         }

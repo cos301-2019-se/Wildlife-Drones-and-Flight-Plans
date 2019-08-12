@@ -13,7 +13,7 @@ export class UserController {
   ) {}
 
   @Post('getUsers')
-  @UseGuards(AuthGuard('jwt'))
+  //@UseGuards(AuthGuard('jwt'))
   async getAllUsers(): Promise<User[]> {
     return await this.userService.getAllUsers();
   }
@@ -76,21 +76,26 @@ export class UserController {
 
   @Post('vToken')
   async vToken(@Body() body): Promise<{
+    jobType:string;
     status: boolean;
     token: string;
   }> {
     const valid = this.authService.validateToken(body.token);
-
+    console.log('Token status of function vToken is:',valid);
     if (!valid) {
       return {
+        jobType:null,
         status: false,
         token: body.token,
       }
     }
 
+    const job = await this.userService.getJobType(body.email);
+    console.log('The job is',job);
     return {
+      jobType:job,
       status: true,
-      token: await this.authService.createToken(body.email),
+      token: body.token,
     };
   }
 }

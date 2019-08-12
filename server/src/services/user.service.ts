@@ -50,7 +50,7 @@ export class UserService {
               secure: true, // use SSL
               auth: {
                   user: 'drbam301@gmail.com',
-                  pass: 'please stop looking at our passwords',
+                  pass: 'drbamisawesome',
               },
               tls: {
                 rejectUnauthorized:false,
@@ -243,6 +243,14 @@ async updateUser(id,name,surname,email,jobType)
   }
 }
 
+async getJobType(email)
+{
+  const con = await this.databaseService.getConnection();
+  const user = await con.getRepository(User).findOne({ email:email });
+
+  return user.jobType;
+}
+
 /**
  * Deactivates user given the user id
  * @param id 
@@ -270,6 +278,7 @@ async deactivateUser(id)
 }
 
   async validateUser(payload: JwtPayload) {
+    console.log(JSON.stringify(payload));
     const con = await this.databaseService.getConnection();
     return await con.getRepository(User).findOne({
       where: {
