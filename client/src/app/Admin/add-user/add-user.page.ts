@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { UsersService } from '../../services/users.service';
+import { AuthenticationService } from './../../services/authentication.service';
 import { Router } from '@angular/router';
 @Component({
   selector: 'app-add-user',
@@ -14,7 +15,7 @@ export class AddUserPage implements OnInit {
   password:string = "";
   confirmPassword:string = "";
   error;
-  constructor(private userService:UsersService,private router: Router) { }
+  constructor(private userService:UsersService,private router: Router,private auth:AuthenticationService) { }
 
   ngOnInit() {
   }
@@ -31,6 +32,10 @@ export class AddUserPage implements OnInit {
     {
       //Password dont match
       this.error = "Password do not match";
+    }
+    else if(!this.auth.passRequirements(this.password))
+    {
+      this.error = "Password must be 8 characters and contain atleast 1 uppercase,1 lowercase,special character and a digit";
     }
     else{
       //Insert
