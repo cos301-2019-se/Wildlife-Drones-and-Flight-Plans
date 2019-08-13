@@ -10,7 +10,6 @@ import { CsvReaderService } from './services/csv-reader.service';
 import { SRTMService } from './services/srtm.service';
 import { PoachingIncidentTypeService } from './services/poaching-incident-type.service';
 import { DroneService } from './services/drone.service';
-import { DroneRouteService } from './services/drone-route.service';
 import { AnimalCellWeightService } from './services/animal-cell-weight.service';
 import { PoachingCellWeightService } from './services/poaching-cell-weight.service';
 import { JwtStrategy } from './auth/jwt.strategy';
@@ -43,7 +42,6 @@ export const providers = [
   PoachingIncidentTypeService,
   SpeciesService,
   DroneService,
-  DroneRouteService,
   AnimalCellWeightService,
   PoachingCellWeightService,
   ConfigService,
