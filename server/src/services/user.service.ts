@@ -6,12 +6,17 @@ import { JwtPayload } from '../auth/jwt-payload.interface';
 import * as mailer from 'nodemailer';
 import { ConfigService } from './config.service';
 import { MailService } from './mail.service';
+import * as RandExp from 'randexp';
 
 @Injectable()
 export class UserService {
+  private readonly NUM_LOGIN_ATTEMPTS = this.config.getConfig().auth.otp.attempts;
+  private readonly EXPIRY_TIME = this.config.getConfig().auth.otp.expiryTime;
+
   constructor(
     private readonly databaseService: DatabaseService,
     private readonly mailService: MailService,
+    private readonly config: ConfigService,
   ) {}
 
   /**
@@ -33,6 +38,14 @@ export class UserService {
       .getMany();
   }
 
+  /**
+   * Sends a one-time PIN to the user for 2FA.
+   * If the user's token has already been set, and the epiry time of the
+   * token has not yet passed, the set token is re-sent.
+   * Otherwise, the number of login attempts is reset, and a new pin
+   * is generated and sent.
+   * @param email The user's email address
+   */
   async loginEmail(email): Promise<boolean> {
     const con = await this.databaseService.getConnection();
     const usersRepo = con.getRepository(User);
@@ -43,36 +56,58 @@ export class UserService {
       },
     });
 
+    // if the email does not match a user, return false
     if (!existingUser) {
       return false;
     }
 
+    // check that the user is within their number of login attempts
+    // if the epiry date of the code has passed, we can create a new OTP
+    // otherwise, we re-send the assigned OTP
+    let reSending = true;
+    if (existingUser.codeExpires <= new Date()) {
+      existingUser.loginAttemptsRemaining = this.NUM_LOGIN_ATTEMPTS;
+      reSending = false;
+    }
+
     // generate an OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpPattern = new RandExp(this.config.getConfig().auth.otp.pattern);
+    const otp = reSending
+      ? existingUser.code
+      : otpPattern.gen();
 
     // set the user's OTP in the database
     existingUser.code = otp;
-    await con.getRepository(User).save(existingUser);
-
-    // more readable version of OTP (XXX-XXX)
-    const otpString = `${otp.substring(0, 3)}-${otp.substring(3, 6)}`;
 
     // send th email out
     await this.mailService.send({
-      subject: `Your one time PIN is: ${otpString}`,
+      subject: `Your one time PIN is: ${otp}`,
       template: 'otp.twig',
       templateParams: {
-        otp: otpString,
+        otp: otp,
       },
       to: email,
     });
 
+    existingUser.codeExpires = new Date(new Date().getTime() + this.EXPIRY_TIME);
+
+    await usersRepo.save(existingUser);
+
     return true;
   }
 
-  async loginPin(email, password, otp): Promise<boolean> {
-    // remove hyphen from otp
-    otp = otp.replace('-', '');
+  /**
+   * Attempts to verify an OTP with the given username and password.
+   * If the OTP does not match, it decrements the number of login attempts
+   * remaining. If the number of login attempts is <= 0, the use will not be
+   * permitted to log in until a new OTP is generated.
+   * @param email The user's email address
+   * @param password The user's password
+   * @param otp The One Time PIN sent to the user
+   */
+  async loginPin(email: string, password: string, otp: string): Promise<boolean> {
+    // remove all hyphens from otp in case user entered them
+    otp = otp.replace(/\-/g, '');
 
     const con = await this.databaseService.getConnection();
     const usersRepo = con.getRepository(User);
@@ -84,18 +119,34 @@ export class UserService {
     });
 
     if (!existingUser) {
-      console.log('the user actually does not exist');
+      console.log('the user does not exist');
       return false;
     }
 
+    // if the expiry time has passed, send the OTP again
+    if (existingUser.codeExpires <= new Date()) {
+      this.loginEmail(email); // re-send the One Time Pin
+      return false;
+    }
+
+    // if the user has run out of login attempts
+    // they must wait for the pin to expire
+    if (existingUser.loginAttemptsRemaining <= 0) {
+      return false;
+    }
+
+    // check that the password and OTP both match
+    // if they do not, decrement the number of login attempts
     if (
       bcrypt.compareSync(password, existingUser.password) &&
-      existingUser.code === otp
+      existingUser.code.replace(/\-/g, '') === otp
     ) {
       console.log('The password matches the db password ');
       return true;
     } else {
       console.log('the password is not the same');
+      existingUser.loginAttemptsRemaining--;
+      await usersRepo.save(existingUser);
     }
   }
 

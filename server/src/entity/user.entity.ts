@@ -32,10 +32,13 @@ export class User {
   code: string;
 
   @Column({ nullable: true })
-  codeExpires: Date;
+  validTCodeTime: number;
 
   @Column({ nullable: true })
-  loginAttemptsRemaining: number;
+  codeExpires: number;
+
+  @Column({ nullable: true })
+  loginAttemptsRemaining: 3;
 
   @Column({ nullable: true })
   active: boolean;

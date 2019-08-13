@@ -20,7 +20,7 @@ export class UserController {
 
   @Post('loginPin')
   async loginUser(@Body() body): Promise<JSON> {
-    const status = await this.userService.loginPin(body.email, body.password, body.otp);
+    const status = await this.userService.loginPin(body.password, body.otp,body.email);
     if (status) {
       console.log("Status " + status)
       return await this.authService.createToken(body.email);
