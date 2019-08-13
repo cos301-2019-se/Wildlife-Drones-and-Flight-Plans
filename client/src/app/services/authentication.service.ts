@@ -115,19 +115,22 @@ export class AuthenticationService {
    * @param password The user's password
    */
   async loginEmail(email: string): Promise<boolean> {
-    // need to get custom token
-    // Save email
+    console.log('call loginEmail');
     let res: any;
     try {
+      console.log('make request');
       res = await this.post('loginEmail', {
         email,
       });
+      console.log('made request');
+      console.log('posted res', res);
     } catch (err) {
+      console.log('there was an error');
       console.error(err);
       throw err;
     }
 
-    if (!res ) {
+    if (!res) {
       console.log('User does not exist');
       this.authenticationState.next({status:false,jobType:null});
       return false;

@@ -12,7 +12,7 @@ export class LoginPage implements OnInit {
 
   enteredPassword: string;
   enteredEmail: string;
-  enteredOTP : string
+  enteredOTP: string;
   error;
   loggingIn = false;
   resetting = false;
@@ -28,19 +28,25 @@ export class LoginPage implements OnInit {
 
   async loginEmail() {
     this.loggingIn = true;
-    this.error = 'Validating email';
+    this.error = 'Validating email...';
 
     try {
       const res = await this.authService.loginEmail(this.enteredEmail);
+      console.log(res);
       if (!res) {
-        //this.error = 'Incorrect credentials';
+        this.error = 'Incorrect credentials';
+        return;
       }
+
+      this.error = 'A one time pin has been sent to your email';
+      this.enteringEmail = false;
     } catch (err) {
-      //this.error = 'An unknown error occurred';
+      console.error(err);
+      this.error = 'An unknown error occurred';
+      return;
+    } finally {
+      this.loggingIn = false;
     }
-  
-    this.loggingIn = false;
-    this.enteringEmail = false;
   }
 
   async loginPin() {

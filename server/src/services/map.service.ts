@@ -50,7 +50,7 @@ export class MapService {
    * Gets the size of cells in the map from the database
    */
   async getCellSize(): Promise<number> {
-    const config = await this.config.getConfig();
+    const config = this.config.getConfig();
     return config.cellSize;
   }
 
@@ -58,7 +58,7 @@ export class MapService {
    * Update the map
    */
   private async downloadMapFeatures() {
-    const name = (await this.config.getConfig()).reserveName;
+    const name = this.config.getConfig().reserveName;
 
     const reserves = await this.overpass.query(`relation["name"="${name}"];
       (._;>;);
@@ -230,7 +230,7 @@ export class MapService {
     const conn = await this.databaseService.getConnection();
     const cellsRepo = conn.getRepository(MapCellData);
 
-    const config = await this.config.getConfig();
+    const config = this.config.getConfig();
     const cellSizeKm = config.cellSize;
 
     await this.downloadMapFeatures();

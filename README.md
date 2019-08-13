@@ -66,11 +66,21 @@ Development configuration can be made in the .env file.
 
 Example:
 ```
-SECRET=my_secret_code
+APP_NAME=Wildlife Drones
+SECRET=secretKey
 RESERVE_NAME=Kruger National Park
 CELL_SIZE=500
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=465
+MAIL_USERNAME=drbam301@gmail.com
+MAIL_PASSWORD=your top secret password
 ```
 
+- APP_NAME - the name of the application that will be shown to the user in emails
 - SECRET - a random string used as a private key for jwt tokens. This should be sufficiently long (e.g 256 or 512 characters) and random.
 - RESERVE_NAME - the name of the reserve as per OpenStreetMaps
 - CELL_SIZE - the size (width and height) of a cell in metres
+- MAIL_HOST - the SMTP mail host (e.g. smtp.gmail.com)
+- MAIL_PORT - the mail server port (465 is recommended as TLS is always enabled)
+- MAIL_USERNAME - the email address used to log into the mail server
+- MAIL_PASSWORD - the password used to log into the mail server

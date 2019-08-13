@@ -10,10 +10,10 @@
       <ion-row justify-content-center>
         <ion-col align-self-center size-md="6" size-lg="5" size-xs="12">
           <div padding class="header-container">
-            <h1>Send OTP</h1>
+            <h1>Log In</h1>
           </div>
           <div padding>
-            <ion-item no-padding [style.display]="enteringPin ? 'none' : 'block'">
+            <ion-item no-padding>
               <ion-label position="floating">Email</ion-label>
               <ion-input name="email" type="email" placeholder="email@example.com" [(ngModel)]='enteredEmail' required></ion-input>
             </ion-item>
@@ -23,7 +23,7 @@
           </div>
           <div padding text-right class="button-container">
             <ion-button type="submit" size="medium" color="dark" [disabled]="form.invalid || loggingIn">
-              Send OTP
+              Next
             </ion-button>
           </div>
         </ion-col>

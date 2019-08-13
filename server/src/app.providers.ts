@@ -23,6 +23,7 @@ import { MapService } from './services/map.service';
 import { RegressionService } from './services/regression.service';
 import { CacheInterceptor  } from '@nestjs/common';
 import { APP_INTERCEPTOR } from '@nestjs/core';
+import { MailService } from './services/mail.service';
 
 export const providers = [
   MapService,
@@ -47,6 +48,7 @@ export const providers = [
   PoachingCellWeightService,
   ConfigService,
   RegressionService,
+  MailService,
   {
     provide: APP_INTERCEPTOR,
     useClass: CacheInterceptor,

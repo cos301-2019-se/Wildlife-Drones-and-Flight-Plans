@@ -13,7 +13,7 @@ const routes: Routes = [
     component: AdminTabsPage,
     children:[
       { path: 'users', loadChildren: '../users/users.module#UsersPageModule' },
-      { path: 'home', loadChildren: './home/home.module#HomePageModule' },
+      { path: 'home', loadChildren: '../members/home/home.module#HomePageModule' },
     ]
   },
   {
