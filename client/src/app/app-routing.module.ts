@@ -12,7 +12,6 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     loadChildren: './members/member-routing.module#MemberRoutingModule'
   },
-
 ];
 
 @NgModule({

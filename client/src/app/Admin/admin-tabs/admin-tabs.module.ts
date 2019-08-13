@@ -6,19 +6,19 @@ import { Routes, RouterModule } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 
 import { AdminTabsPage } from './admin-tabs.page';
-
 const routes: Routes = [
   {
     path: 'admin-tabs',
     component: AdminTabsPage,
     children:[
       { path: 'users', loadChildren: '../users/users.module#UsersPageModule' },
-      { path: 'home', loadChildren: '../members/home/home.module#HomePageModule' },
+      { path: 'admin-home', loadChildren: '../admin-home/admin-home.module#AdminHomePageModule'},
+     // { path: 'home', loadChildren: '../members/home/home.module#HomePageModule' },
     ]
   },
   {
     path: '',
-    redirectTo: 'admin-tabs/home',
+    redirectTo: 'admin-tabs/admin-home',
     pathMatch: 'full'
   }
 ];
