@@ -27,7 +27,7 @@ export class AppComponent {
         if (state.status) {
           if(state.jobType == "administrator")
           {
-            this.router.navigate(['users']);
+            this.router.navigate(['admin-tabs']);
           }
           else
           {
