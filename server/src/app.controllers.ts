@@ -3,7 +3,6 @@ import { UserController } from './controllers/user.controller';
 import { AnimalController } from './controllers/animal-location.controller';
 import { AnimalInterestPointController } from './controllers/animal-interest-point.controller';
 import { ModelPrediction } from './controllers/model-prediction.controller';
-import { RangerController } from './controllers/ranger.controller';
 import { PoachingIncidentTypeController } from './controllers/poaching-incident-type.controller';
 import { PoachingIncidentController } from './controllers/poaching-incident.controller';
 import { DroneController } from './controllers/drone.controller';
@@ -16,7 +15,6 @@ export const controllers = [
   AnimalController,
   AnimalInterestPointController,
   ModelPrediction,
-  RangerController,
   PoachingIncidentController,
   PoachingIncidentTypeController,
   SpeciesController,

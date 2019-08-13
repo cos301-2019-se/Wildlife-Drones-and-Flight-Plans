@@ -1,0 +1,48 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Add User</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button>
+      </ion-back-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-item>
+    <ion-label position="floating">Name</ion-label>
+    <ion-input [(ngModel)]="name"></ion-input>
+  </ion-item>
+  <ion-item>
+      <ion-label position="floating">Surname</ion-label>
+      <ion-input [(ngModel)]="surname"></ion-input>
+    </ion-item>
+    <ion-item>
+        <ion-label position="floating">Email</ion-label>
+        <ion-input [(ngModel)]="email"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="floating">Password</ion-label>
+        <ion-input type="password" [(ngModel)]="password"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="floating"> Confirm Password</ion-label>
+        <ion-input type="password" [(ngModel)]="confirmPassword"></ion-input>
+      </ion-item>
+      <ion-item>
+          <ion-label>Job Type</ion-label>
+          <ion-select [(ngModel)]="jobType" okText="Okay" cancelText="Dismiss">
+            <ion-select-option value="pilot">pilot</ion-select-option>
+            <ion-select-option value="administrator">administrator</ion-select-option>
+          </ion-select>
+        </ion-item>
+        <ion-item>
+          <ion-button (click)='addUser()'>
+            Add User
+            <ion-icon name="person-add"></ion-icon>
+          </ion-button>
+        </ion-item>
+        <div padding class="error" [class.failure]="error" *ngIf="error">
+          {{ error }}
+        </div>
+</ion-content>

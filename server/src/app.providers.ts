@@ -8,7 +8,6 @@ import { ModelTraining } from './services/model-training.service';
 import { AnimalInterestPointService } from './services/animal-interest-point.service';
 import { CsvReaderService } from './services/csv-reader.service';
 import { SRTMService } from './services/srtm.service';
-import { RangerService } from './services/ranger.service';
 import { PoachingIncidentTypeService } from './services/poaching-incident-type.service';
 import { DroneService } from './services/drone.service';
 import { DroneRouteService } from './services/drone-route.service';
@@ -22,6 +21,8 @@ import { PoachingIncidentService } from './services/poaching-incident.service';
 import { AuthService } from './auth/auth.service';
 import { MapService } from './services/map.service';
 import { RegressionService } from './services/regression.service';
+import { CacheInterceptor  } from '@nestjs/common';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 
 export const providers = [
   MapService,
@@ -37,7 +38,6 @@ export const providers = [
   ModelTraining,
   AuthService,
   JwtStrategy,
-  RangerService,
   PoachingIncidentService,
   PoachingIncidentTypeService,
   SpeciesService,
@@ -47,4 +47,8 @@ export const providers = [
   PoachingCellWeightService,
   ConfigService,
   RegressionService,
+  {
+    provide: APP_INTERCEPTOR,
+    useClass: CacheInterceptor,
+  },
 ];
