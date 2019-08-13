@@ -42,3 +42,6 @@ node_modules/
 client/\.travis\.yml
 
 *.blend1
+
+*.env
+/server/database.sqlite

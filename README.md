@@ -58,3 +58,19 @@ Mobile application/website code. Uses Ionic Framework.
 
 ### /server
 Server code. Uses Nest.js.
+
+
+
+## Envirnoment Configuration
+Development configuration can be made in the .env file.
+
+Example:
+```
+SECRET=my_secret_code
+RESERVE_NAME=Kruger National Park
+CELL_SIZE=500
+```
+
+- SECRET - a random string used as a private key for jwt tokens. This should be sufficiently long (e.g 256 or 512 characters) and random.
+- RESERVE_NAME - the name of the reserve as per OpenStreetMaps
+- CELL_SIZE - the size (width and height) of a cell in metres

@@ -1,7 +1,7 @@
 import { AnimalLocationService } from './animal-location.service';
 import { DatabaseService } from './db.service';
 
-import { CsvReader } from './csv-reader.service';
+import { CsvReaderService } from './csv-reader.service';
 import { MapUpdaterService } from './map-updater.service';
 import { GeoService } from './geo.service';
 import { SRTMService } from './srtm.service';

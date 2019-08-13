@@ -1,15 +1,15 @@
-import { Entity, Column, PrimaryColumn ,PrimaryGeneratedColumn, OneToMany, JoinColumn } from 'typeorm';
-import { AnimalLocation } from "./animal-location.entity";
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, JoinColumn } from 'typeorm';
+import { AnimalLocation } from './animal-location.entity';
 import { AnimalCellWeight } from './animal-cell-weight.entity';
 
 @Entity()
 export class Species {
 
     @PrimaryGeneratedColumn()
-    id : number;
+    id: number;
 
     @Column()
-    species : string
+    species: string;
 
     @OneToMany(type => AnimalLocation, animal => animal.species)
     @JoinColumn()

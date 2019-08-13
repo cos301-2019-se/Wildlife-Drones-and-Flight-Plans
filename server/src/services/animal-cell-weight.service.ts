@@ -28,13 +28,16 @@ export class AnimalCellWeightService {
     const mapCellIdExist = await con
       .getRepository(MapCellData)
       .findOne({ id: cellData.cellId });
+    if (!mapCellIdExist) {
+      console.error('map cell does not exist for id', cellData.cellId);
+      return false;
+    }
 
     const speciesIdExist = await con
       .getRepository(Species)
       .findOne({ id: cellData.speciesId });
-
-    if (mapCellIdExist == undefined || speciesIdExist == undefined) {
-      console.log('animal species or map cell does not exist');
+    if (!speciesIdExist) {
+      console.error('animal species does not exist for id', cellData.speciesId);
       return false;
     }
 

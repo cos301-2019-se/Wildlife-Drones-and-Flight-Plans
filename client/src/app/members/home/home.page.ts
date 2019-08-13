@@ -96,6 +96,7 @@ export class HomePage implements AfterViewInit, OnDestroy {
       tooltip: 'Set incident information',
       setup: async self => {
         self.data.incidentTypes = await this.incidentsService.getIncidentTypes();
+        console.log(self.data.incidentTypes);
         self.data.typeId = self.data.incidentTypes[0].id;
       },
       confirmations: {

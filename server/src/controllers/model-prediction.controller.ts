@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Query } from '@nestjs/common';
+import { Controller, Get, Post, Query, Param } from '@nestjs/common';
 import { ModelTraining } from '../services/model-training.service';
 @Controller()
 export class ModelPrediction {
@@ -45,17 +45,13 @@ export class ModelPrediction {
         slopiness: 5.169230769
       }
      ];
-    return this.modelTraining.predictRegressor('Elephant', json);
-  }
-
-  @Get('trainElephantModel')
-  trainElephantModel(): Promise<boolean> {
-    return this.modelTraining.trainRegressorModel('Elephant');
+    return this.modelTraining.predictAnimalRegressor(1, json);
   }
 
   @Get('trainClassificationModel')
-  trainClassificationModel(): Promise<boolean> {
-    return this.modelTraining.trainAnimalClassifierModel('Elephant');
+  trainClassificationModel(@Query('species') species: number): Promise<boolean> {
+    console.log('the species id is ', species);
+    return this.modelTraining.trainAnimalClassifierModel(species);
   }
 
     @Get('trainClassificationModelPoaching')

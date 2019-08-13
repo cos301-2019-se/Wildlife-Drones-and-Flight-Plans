@@ -6,5 +6,5 @@ export class ModelData {
   name: string;
 
   @Column('blob')
-  properties: string;
+  data: string;
 }

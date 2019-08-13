@@ -2,18 +2,15 @@ import { Controller, Get, Query, Post, Body, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
 import { ShortestPathService } from '../services/shortest-path.service';
-import { MapUpdaterService } from '../services/map-updater.service';
-import { MapDataService } from '../services/map-data.service';
-import { MapCellDataService } from '../services/map-cell-data.service';
+import { MapService } from '../services/map.service';
+import { MapFeatureType } from '../entity/map-data.entity';
 
 @Controller('map')
 @UseGuards(AuthGuard('jwt'))
 export class MapController {
   constructor(
     private shortestPathService: ShortestPathService,
-    private mapUpdaterService: MapUpdaterService,
-    private mapDataService: MapDataService,
-    private mapCellDataService: MapCellDataService,
+    private mapService: MapService,
   ) {}
 
   @Get('random-path')
@@ -52,7 +49,7 @@ export class MapController {
   ) {
     // tslint:disable-next-line:no-console
     console.log(left, bottom, right, top);
-    return await this.mapUpdaterService.findReservesInArea(
+    return await this.mapService.findReservesInArea(
       left,
       bottom,
       right,
@@ -61,25 +58,25 @@ export class MapController {
   }
 
   @Post('update')
-  async update(@Body('name') name) {
-    return await this.mapUpdaterService.updateMap(name);
+  async update() {
+    return await this.mapService.updateMap();
   }
 
   @Post('reserve')
   async getReserve() {
-    return await this.mapDataService.getMapFeature('reserve');
+    return await this.mapService.getMapFeature(MapFeatureType.reserve);
   }
 
   @Post('getMapCells')
   getMapCells() {
     console.log('calling');
-    return this.mapCellDataService.getMapCells();
+    return this.mapService.getMapCells();
   }
 
   @Post('getSpeciesWeightDataForTime')
   async getSpeciesWeightDataForTime(@Body() body) {
     console.log('calling');
-    return await this.mapCellDataService.getSpeciesWeightDataForTime(
+    return await this.mapService.getSpeciesWeightDataForTime(
       body.species,
       body.time,
     );
@@ -88,7 +85,7 @@ export class MapController {
   @Post('getCellPoachingWeight')
   async getCellPoachingWeight() {
     console.log('calling');
-    return await this.mapCellDataService.getCellPoachingWeight();
+    return await this.mapService.getCellPoachingWeight();
   }
 
   /**
@@ -96,6 +93,6 @@ export class MapController {
    */
   @Post('getCellSize')
   async getCellSize(): Promise<number> {
-    return await this.mapDataService.getCellSize();
+    return await this.mapService.getCellSize();
   }
 }

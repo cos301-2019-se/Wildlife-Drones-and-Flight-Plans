@@ -1,37 +1,38 @@
 import { Injectable } from '@nestjs/common';
 import * as fs from 'fs';
 import csv = require('csv-parser');
+import * as readlines from 'n-readlines';
 
 @Injectable()
-export class CsvReader {
-  readCSV(csvFileName: string): CsvReaderStream {
-    return new CsvReaderStream(csvFileName);
+export class CsvReaderService {
+  readCSV(csvFileName: string): CsvReader {
+    return new CsvReader(csvFileName);
   }
 }
 
-export class CsvReaderStream {
-  private handle: fs.ReadStream;
+export class CsvReader {
+  private handle;
+  private headers;
 
-  constructor(filename) {
-    this.handle = fs.createReadStream(filename);
+  constructor(filename: string) {
+    this.handle = new readlines(filename);
+
+    this.headers = this.handle.next().toString().split(',');
   }
 
-  public onData(mapper) {
-    this.handle
-      .pipe(csv())
-      .on('data', row => {
-        mapper(row);
-      })
-      .on('end', () => {
-        mapper(undefined);
-      });
-  }
+  next() {
+    const line = this.handle.next();
 
-  public resume() {
-    this.handle.resume();
-  }
+    if (!line) {
+      return undefined;
+    }
 
-  public pause() {
-    this.handle.pause();
+    return line
+      .toString()
+      .split(',')
+      .reduce((ob, cell, cellIndex) => {
+        ob[this.headers[cellIndex]] = cell;
+        return ob;
+      }, {});
   }
 }

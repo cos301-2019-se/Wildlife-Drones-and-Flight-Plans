@@ -1,6 +1,21 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { Species } from './animal-species.entity';
 
+export interface AnimalLocationProperties {
+  distanceToDams: number;
+  bearingToDams: number;
+  distanceToRivers: number;
+  bearingToRivers: number;
+  distanceToRoads: number;
+  bearingToRoads: number;
+  distanceToResidences: number;
+  bearingToResidences: number;
+  distanceToIntermittentWater: number;
+  bearingToIntermittentWater: number;
+  altitude: number;
+  slopiness: number;
+}
+
 @Entity()
 export class AnimalLocation {
   @PrimaryGeneratedColumn()
@@ -34,28 +49,15 @@ export class AnimalLocation {
   habitat: string;
 
   @Column()
-  distanceToRivers: number;
+  propertiesData: string;
 
-  @Column()
-  distanceToDams: number;
+  get properties(): AnimalLocationProperties {
+    return JSON.parse(this.propertiesData);
+  }
 
-  @Column()
-  distanceToRoads: number;
-
-  @Column()
-  distanceToResidences: number;
-
-  @Column()
-  distanceToIntermittentWater: number;
-
-  @Column({ nullable: true })
-  distanceStreams: number;
-
-  @Column()
-  altitude: number;
-
-  @Column()
-  slopiness: number;
+  set properties(data: AnimalLocationProperties) {
+    this.propertiesData = JSON.stringify(data);
+  }
 
   @Column({ nullable: true })
   active: boolean;
