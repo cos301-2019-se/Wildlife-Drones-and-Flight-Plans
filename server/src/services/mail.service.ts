@@ -58,7 +58,6 @@ export class MailService {
           ...defaultTemplateParams as any,
         },
         (err, html) => {
-          console.log(err, html);
           if (err) {
             reject(err);
           } else {
@@ -67,8 +66,6 @@ export class MailService {
         }
       );
     });
-
-    console.log('body', body);
 
     const message = {
       from: `"${config.applicationName}" <${config.mail.user}>`,

@@ -10,6 +10,13 @@ export interface Configuration {
     user: string;
     pass: string;
   };
+  auth: {
+    otp: {
+      pattern: string;
+      expiryTime: number;
+      attempts: number;
+    }
+  };
 }
 
 @Injectable()
@@ -24,6 +31,13 @@ export class ConfigService {
         port: parseInt(process.env.MAIL_PORT, 10),
         user: process.env.MAIL_USERNAME,
         pass: process.env.MAIL_PASSWORD,
+      },
+      auth: {
+        otp: {
+          pattern: process.env.OTP_PATTERN,
+          expiryTime: parseInt(process.env.OTP_EXPIRES, 10) * 1000,
+          attempts: parseInt(process.env.OTP_ATTEMPTS, 10),
+        }
       },
     };
   }

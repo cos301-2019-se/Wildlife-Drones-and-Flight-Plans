@@ -3,8 +3,6 @@ import {
   PrimaryGeneratedColumn,
   Column,
   BeforeInsert,
-  OneToOne,
-  Timestamp,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
@@ -32,13 +30,10 @@ export class User {
   code: string;
 
   @Column({ nullable: true })
-  validTCodeTime: number;
+  codeExpires: Date;
 
   @Column({ nullable: true })
-  codeExpires: number;
-
-  @Column({ nullable: true })
-  loginAttemptsRemaining: 3;
+  loginAttemptsRemaining: number;
 
   @Column({ nullable: true })
   active: boolean;
