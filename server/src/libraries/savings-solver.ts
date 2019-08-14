@@ -1,3 +1,4 @@
+import getDistance from '@turf/distance';
 /**
  * Weights used for heuristics in the Clarke Wright algorithm
  */
@@ -33,9 +34,7 @@ export class Point {
    * @param point
    */
   getDistanceTo(point: Point): number {
-    const dX = point.x - this.x;
-    const dY = point.y - this.y;
-    return Math.sqrt(dX * dX + dY * dY);
+    return getDistance([point.x, point.y], [this.x, this.y], { units: 'degrees' });
   }
 }
 
@@ -80,17 +79,6 @@ class Route {
 
     cost += prev.getDistanceTo(this.depot);
 
-    return cost;
-  }
-
-  /**
-   * Cost of all the points excluding distances to the depot
-   * (not a circuit)
-   */
-  public distanceExcludingDepots(): number {
-    const cost = this.totalDistance() -
-      this.getStart().getDistanceTo(this.depot) -
-      this.getEnd().getDistanceTo(this.depot);
     return cost;
   }
 
@@ -172,7 +160,6 @@ export class ClarkeWrightProblem {
         // if neither route has been joined, join them
         if (!this.joinedRoutes[routeA.id] && !this.joinedRoutes[routeB.id]) {
           this.joinRoutes(routeA, routeB);
-          break;
         } else if (!this.joinedRoutes[routeA.id]) {
           if (this.solutions.length && this.solutions[0].getStart() === routeB.getStart()) {
             this.joinRoutes(routeA, this.solutions[0]);
@@ -189,7 +176,9 @@ export class ClarkeWrightProblem {
     }
 
     // sort the routes by their demand served
-    return this.solutions.sort((a, b) => b.totalDemand() / b.totalDistance() - a.totalDemand() / a.totalDistance());
+    return this.solutions
+      .filter(route => route.totalDistance() < this.maxDistance) // some routes might be too long for outlier points
+      .sort((a, b) => b.totalDemand() / b.totalDistance() - a.totalDemand() / a.totalDistance());
   }
 
   /**
@@ -292,12 +281,13 @@ export class ClarkeWrightProblem {
    * @param routeB
    */
   private verifyRouteJoin(routeA: Route, routeB: Route) {
-    const distance = routeA.getStart().getDistanceTo(this.depot) + // depot to start of A
-      routeA.distanceExcludingDepots() + // total of A
+    const distance = routeA.totalDistance() - // total of A
+      routeA.getEnd().getDistanceTo(this.depot) + // minus end of A to depot
       routeA.getEnd().getDistanceTo(routeB.getStart()) + // end of A and start of B
-      routeB.distanceExcludingDepots() + // total of B
-      routeB.getEnd().getDistanceTo(this.depot); // end of B back to depot
-    return distance <= this.maxDistance;
+      routeB.totalDistance() - // total of B
+      routeB.getStart().getDistanceTo(this.depot); // minus depot to start of B
+
+    return distance < this.maxDistance;
   }
 
   /**

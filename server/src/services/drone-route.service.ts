@@ -40,15 +40,18 @@ export class DroneRouteService {
     const incidents = await this.poachingIncidentService.getAllPoachingIncidentTableData();
     const incidentPoints: Point[] = incidents
       // all incidents within maximum range
-      // .filter(incident => distance(
-      //   [depot.x, depot.y],
-      //   [incident.longitude, incident.latitude],
-      //   'degrees') <= maxPointDistanceDegrees
-      // )
+      .filter(incident => distance(
+        [depot.x, depot.y],
+        [incident.longitude, incident.latitude],
+        { units: 'degrees' }) <= maxPointDistanceDegrees
+      )
       .sort((a, b) => a.timestamp > b.timestamp ? 1 : -1) // sort incidents by their time stamp
-      .map((incident, incidentIndex, arr) => new Point(incident.longitude, incident.latitude, incidentIndex / arr.length));
+      .map((incident, incidentIndex, arr) => new Point(incident.longitude, incident.latitude, 0.5 + incidentIndex / arr.length));
 
-    console.log('incident points', incidents.length, incidentPoints.length);
+    // if no points can possibly be reached, return an empty route
+    if (!incidentPoints.length) {
+      return [];
+    }
 
     // create the problem
     const problem = new ClarkeWrightProblem(incidentPoints, depot, maxFlightDistanceDegrees);
@@ -60,8 +63,6 @@ export class DroneRouteService {
       demand: 0.4,
       minSavings: 0.1,
     });
-
-    console.log(routes);
 
     return [routes[0].depot, ...routes[0].points, routes[0].depot]
       .map(point => [point.x, point.y]);
