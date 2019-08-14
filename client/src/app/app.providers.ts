@@ -17,7 +17,7 @@ export const providers = [
   MapService,
   AuthenticationService,
   { provide: GeolocationService, useClass: environment.production ? GeolocationService : GeolocationMockService },
-  { provide: DroneRouteService, useClass: environment.production ? DroneRouteService : DroneRouteMockService },
+  DroneRouteService,
   IncidentsService,
   DronesService,
   HeatmapService,

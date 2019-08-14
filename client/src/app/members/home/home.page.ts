@@ -133,9 +133,8 @@ export class HomePage implements AfterViewInit, OnDestroy {
       tooltip: 'Configure drone flight options',
       confirmations: {
         cancel: () => this.setState(this.states.default),
-        done: () => {
-          this.dronesService.updateDrones(this.states.setUpRoute.data.drones);
-          // TODO: Get the flight route
+        done: async () => {
+          await this.dronesService.updateDrones(this.states.setUpRoute.data.drones);
           this.setState(this.states.viewRoute);
         },
         add: async () => {
@@ -162,7 +161,7 @@ export class HomePage implements AfterViewInit, OnDestroy {
         const startingCoords = this.coordinates;
         const drone = this.states.setUpRoute.data.selectedDrone;
 
-        const route = await this.droneRouteService.generateRoute(drone.id, startingCoords);
+        const route = await this.droneRouteService.generateIncidentRoute(drone.id, startingCoords);
 
         // line style
         const lineStyle = new Style({

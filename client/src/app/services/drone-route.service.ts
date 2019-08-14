@@ -7,15 +7,21 @@ export class DroneRouteService {
     private authService: AuthenticationService,
   ) {}
 
-  async generateRoute(droneId: number, coords: Coordinates): Promise<Array<[number, number]>> {
-    // TODO: fetch generated route from the server
-    return [];
+  async generateIncidentRoute(droneId: number, coords: Coordinates): Promise<any[]> {
+    const points = await this.authService.post('drone-route/create-incident-route', {
+      droneId,
+      lon: coords.longitude,
+      lat: coords.latitude,
+    });
+
+    console.log('got points', points);
+    return points as any[];
   }
 }
 
 @Injectable()
 export class DroneRouteMockService extends DroneRouteService {
-  async generateRoute(droneId: number, coords: Coordinates): Promise<Array<[number, number]>> {
+  async generateIncidentRoute(droneId: number, coords: Coordinates): Promise<Array<[number, number]>> {
     await new Promise(resolve => setTimeout(resolve, 500)); // artificial delay
     return [
       [
