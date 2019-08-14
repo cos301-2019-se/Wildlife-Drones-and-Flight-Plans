@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { Events } from '@ionic/angular';
 import { UsersService } from '../../services/users.service';
 @Component({
   selector: 'app-edit-user',
@@ -9,7 +10,7 @@ import { UsersService } from '../../services/users.service';
 export class EditUserPage implements OnInit {
   user:any;
   error;
-  constructor(private userService:UsersService,private router: Router) { }
+  constructor(private userService:UsersService,public events: Events,private router: Router) { }
 
   ngOnInit() {
     this.user = this.router.getCurrentNavigation().extras.state.user;
@@ -25,17 +26,18 @@ export class EditUserPage implements OnInit {
       job:this.user.jobType
     }   
     await this.userService.updateUser(editUser);
-    this.router.navigate(['users']);
+    this.events.publish('user:updated');
+    this.router.navigate(['admin-tabs/users']);
   }
 
   
   async deleteUser()
   {
     const result  = await this.userService.deleteUser(this.user.id);
-    console.log("Deleted User:",result);
     if(result)
     {
-      this.router.navigate(['users']);
+      this.events.publish('user:updated');
+      this.router.navigate(['admin-tabs/users']);
     }
     else
     {

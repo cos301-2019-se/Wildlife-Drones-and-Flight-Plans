@@ -20,6 +20,11 @@ const routes: Routes = [
     path: '',
     redirectTo: 'admin-tabs/admin-home',
     pathMatch: 'full'
+  },
+  {
+    path: 'users',
+    redirectTo: 'admin-tabs/users',
+    pathMatch: 'full'
   }
 ];
 

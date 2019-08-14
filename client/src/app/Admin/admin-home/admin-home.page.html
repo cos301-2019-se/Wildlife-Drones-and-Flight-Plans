@@ -82,6 +82,12 @@
           [(ngModel)]="states.options.data.enableAnimalHeatmap"
         ></ion-checkbox>
       </ion-item>
+      <ion-item no-padding>
+        <ion-label>Show all active drones</ion-label>
+        <ion-checkbox slot="end"
+          [(ngModel)]="states.options.data.enableActiveDrones"
+        ></ion-checkbox>
+      </ion-item>
       <ng-container *ngIf="states.options.data.enableAnimalHeatmap">
         <ion-item no-padding>
           <ion-label position="stacked">Animal species</ion-label>
