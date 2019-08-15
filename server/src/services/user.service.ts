@@ -53,7 +53,7 @@ export class UserService {
     const existingUser = await usersRepo.findOne({
       where: {
         email,
-        active : 'true',
+        //active : 'true',
       },
     });
 
