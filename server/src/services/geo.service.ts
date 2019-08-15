@@ -11,6 +11,7 @@ import flatten from '@turf/flatten';
 import simplify from '@turf/simplify';
 import squareGrid from '@turf/square-grid';
 import explode from '@turf/explode';
+import bearing from '@turf/bearing';
 
 /**
  * Provides helped functions for geometry calculation
@@ -112,10 +113,21 @@ export class GeoService {
    * @param cellSizeKm The length of a cell's edge in kilometres
    */
   public partitionIntoGrid(polygon, cellSizeKm) {
+    // polygon = this.simplifyGeometry(polygon, 0.1);
     const bounds = this.getBoundingBox(polygon);
-    return squareGrid(bounds, cellSizeKm, {
+    let cellsFound = 0;
+    const cells = squareGrid(bounds, cellSizeKm, {
       units: 'kilometers',
-    }).features.filter(feature => this.isInPolygon(feature, polygon));
+    }).features.filter(feature => {
+      const isInPolygon = this.isInPolygon(feature, polygon);
+      if (isInPolygon) {
+        console.log('found', ++cellsFound);
+      }
+      return isInPolygon;
+    });
+
+    console.log('num cells: ', cells.length);
+    return cells;
   }
 
   public flattenGeo(geoJSON) {
@@ -160,9 +172,12 @@ export class GeoSearchSet {
       };
     }
 
+    const nearestPoint = nearest[0];
+
     return {
-      point: nearest[0][0],
-      distance: convertLength(nearest[0][1], 'degrees', 'kilometers'),
+      point: nearestPoint[0],
+      distance: convertLength(nearestPoint[1], 'degrees', 'kilometers'),
+      getBearing: () => bearing([xLng, yLat], [nearestPoint[0].x, nearestPoint[0].y]),
     };
   }
 }

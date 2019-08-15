@@ -58,6 +58,7 @@ interface MapState {
 export class HomePage implements AfterViewInit, OnDestroy {
   @ViewChild('map') mapElement: ElementRef;
   private map: Map;
+  private mapUpdateInterval;
 
   private geolocationSubscription: Subscription;
   public coordinates: Coordinates;
@@ -95,6 +96,7 @@ export class HomePage implements AfterViewInit, OnDestroy {
       tooltip: 'Set incident information',
       setup: async self => {
         self.data.incidentTypes = await this.incidentsService.getIncidentTypes();
+        console.log(self.data.incidentTypes);
         self.data.typeId = self.data.incidentTypes[0].id;
       },
       confirmations: {
@@ -143,6 +145,8 @@ export class HomePage implements AfterViewInit, OnDestroy {
             avgSpeed: 30,
             avgFlightTime: 100,
             active: true,
+            longitude: null,
+            latitude: null,
           };
           this.states.setUpRoute.data.drones.push(newDrone);
           this.states.setUpRoute.data.selectedDrone = newDrone;
@@ -376,6 +380,10 @@ export class HomePage implements AfterViewInit, OnDestroy {
     if (!!this.timePoller) {
       clearInterval(this.timePoller);
     }
+
+    if (!!this.mapUpdateInterval) {
+      clearInterval(this.mapUpdateInterval);
+    }
   }
 
   ngAfterViewInit() {
@@ -390,6 +398,13 @@ export class HomePage implements AfterViewInit, OnDestroy {
     this.timePoller = setInterval(() => {
       this.states.options.showAnimalHeatmap(this.states.options);
     }, 60000);
+
+    // update the map size on an interval
+    this.mapUpdateInterval = setInterval(() => {
+      if (this.map) {
+        this.map.updateSize();
+      }
+    }, 1000);
   }
 
   /**

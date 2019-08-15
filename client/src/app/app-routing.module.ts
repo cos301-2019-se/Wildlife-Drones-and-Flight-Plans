@@ -4,10 +4,14 @@ import { AuthGuard } from './guards/auth.guard';
 const routes: Routes = [
   { path: 'login', loadChildren: './public/login/login.module#LoginPageModule' },
   {
+    path: 'reset-password',
+    loadChildren: './public/password-reset/password-reset.module#passwordResetPageModule'
+  },
+  {
     path: '',
     canActivate: [AuthGuard],
     loadChildren: './members/member-routing.module#MemberRoutingModule'
-  }
+  },
 ];
 
 @NgModule({

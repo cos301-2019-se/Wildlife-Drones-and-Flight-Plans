@@ -6,11 +6,19 @@ import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http
 const TOKEN_KEY = 'accessToken';
 const EMAIL_KEY = 'email';
 
+export interface TokenStatus {
+  status: boolean;
+  jobType: 'pilot' | 'administrator' | null;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class AuthenticationService {
-  authenticationState = new BehaviorSubject(true); // assume logged in by default
+  authenticationState = new BehaviorSubject<TokenStatus>({
+    status: true,
+    jobType: 'pilot',
+  }); // assume logged in by default
   private readonly url = 'http://localhost:3000';
 
   constructor(
@@ -43,7 +51,7 @@ export class AuthenticationService {
       if (err.status === 401) {
         // authentication error
         console.error('Not authenticated');
-        this.authenticationState.next(false);
+        this.authenticationState.next({status:false,jobType:null});
       } else {
         // some other error occurred
         throw err;
@@ -74,7 +82,7 @@ export class AuthenticationService {
       if (err.status === 401) {
         // authentication error
         console.error('Not authenticated');
-        this.authenticationState.next(false);
+        this.authenticationState.next({status:false,jobType:null});
       } else {
         // some other error occurred
         throw err;
@@ -95,7 +103,6 @@ export class AuthenticationService {
   passRequirements(password) {
     const re = /(?=^.{8,}$)(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\s)[0-9a-zA-Z!@#$%^&*()]*$/;
     // Test returns true of false
-    console.log(re.test(password))
     return re.test(password);
   }
 
@@ -105,12 +112,43 @@ export class AuthenticationService {
    * @param email The user's email
    * @param password The user's password
    */
-  async login(email: string, password: string): Promise<boolean> {
+  async loginEmail(email: string): Promise<boolean> {
+    let res: any;
+    try {
+      res = await this.post('loginEmail', {
+        email,
+      });
+    } catch (err) {
+      console.log('there was an error');
+      console.error(err);
+      throw err;
+    }
+
+    if (!res) {
+      console.log('User does not exist');
+      this.authenticationState.next({status:false,jobType:null});
+      return false;
+    }
+
+    //const token = res.accessToken;
+
+    //await this.storage.set(TOKEN_KEY, token);
+    await this.storage.set(EMAIL_KEY, email);
+
+    //this.authenticationState.next(true);
+
+   // console.log('Token received from server side ', token);
+    return true;
+  }
+
+  async loginPin(password: string, otp: string, email :string): Promise<boolean> {
     // need to get custom token
     // Save email
     let res: any;
+    console.log('Login pin called');
     try {
-      res = await this.post('login', {
+      res = await this.post('loginPin', {
+        otp,
         email,
         password,
       });
@@ -121,19 +159,34 @@ export class AuthenticationService {
 
     if (!res || !res.accessToken || res.accessToken === '') {
       console.log('User does not exist');
-      this.authenticationState.next(false);
+      this.authenticationState.next({status:false,jobType:null});
       return false;
     }
 
     const token = res.accessToken;
 
     await this.storage.set(TOKEN_KEY, token);
-    await this.storage.set(EMAIL_KEY, email);
 
-    this.authenticationState.next(true);
+    await this.validateToken();
 
-    console.log('Token received from server side ', token);
     return true;
+  }
+
+
+  async resetPasword (email :string ) :Promise <boolean> {
+
+    let res :any;
+    try {
+        res = await this.post('/resetPassword',{
+          email
+        });
+      }catch(err){
+      console.log(err);
+      throw err;
+    }
+
+
+    return ;
   }
 
   /**
@@ -146,12 +199,12 @@ export class AuthenticationService {
     await this.storage.remove(EMAIL_KEY);
     console.log('Removed Email');
 
-    this.authenticationState.next(false);
+    this.authenticationState.next({status:false,jobType:null});
   }
 
   /// Check if authenticated by viewing state of token key
   isAuthenticated() {
-    return this.authenticationState.value;
+    return this.authenticationState.value.status;
   }
 
   private async validateToken() {
@@ -160,18 +213,16 @@ export class AuthenticationService {
     if (!token) {
       // token doesn't exist - don't bother checking validity
       console.log('token not set');
-      this.authenticationState.next(false);
+      this.authenticationState.next({status:false,jobType:null});
       return;
     }
-
     const res: any = await this.post('vToken', {
       email: await this.getEmail(),
       token,
     });
-    console.log('validate token res:', res);
-
-    this.authenticationState.next(res);
-    return res;
+    await this.storage.set(TOKEN_KEY, res.token);
+    this.authenticationState.next({status:res.status,jobType:res.jobType});
+    return res.status;
   }
 
 

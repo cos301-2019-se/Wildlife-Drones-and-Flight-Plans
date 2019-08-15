@@ -5,15 +5,17 @@ DR BAM
 
 To aid ERP rangers in anti-poaching patrolling, a system is being developed to automatically create and optimise drone flight plans based on animal tracking information and reserve features. The project aims to increase the probability of drones covering key areas with endangered wildlife, while being random enough to prevent poachers identifying patrol routes. Rangers and drone pilots will be empowered with useful information through this dynamic application.
 
-[Drone Flight Plans](Drone%20Flight%20Plans%20SRS.pdf)
+SRS: [Latest](Drone_Flight_Plans_SRS.pdf), [Demo 1](Drone_Flight_Plans_SRS(1).pdf), [Demo 2](Drone%20Flight%20Plans%20SRS(2).pdf)
 
-[Architectural Designs](./Architectural%20Designs.pdf)
+Architectural design: [Latest](Architectural%20Designs.pdf), [Demo 2](Architectural%20Designs(1).pdf)
 
-[Coding Standards](Coding%20Standards.pdf)
+Coding Standards: [Latest](CodingStandards.pdf), [Demo 2](Coding%20Standards(1).pdf)
 
-[Testing Policy Document](Testing%20policy%20document.pdf)
+Testing Policy Document: [Latest](Testing%20policy%20document.pdf), [Demo 2](Testing%20policy%20document(1).pdf)
 
-[User Manual](User%20Manual.pdf)
+User Manual: [Latest](userManual.pdf), [Demo 2](User%20Manual(1).pdf)
+
+[Trello Board](https://trello.com/b/GWit5JXi/capstone)
 
 ## Group members
 ![image](https://lh4.googleusercontent.com/sYkeIXRCdnU5gPxCxJOXc_I6xD2D_OMxqu9-eRN1WwPWEg5bAW_7SZ86O5U863usmgKeCJeqAwN-Ay0bMkrIqJnZelcAtLnpRAeiHbHnukEjuPdsahIV_iJfkl8ATyYRKPP_e5_N)
@@ -45,9 +47,9 @@ To aid ERP rangers in anti-poaching patrolling, a system is being developed to a
 - __Attitudes__: Hardworking and dedicated
 
 ### Reinhardt Eiselen (14043302)
-- __Interests__: Music ,the outdoors and Technoloy
+- __Interests__: Music ,the outdoors and Technology
 - __Skills__:  Java, C++ , JavaScript, Assembler (x86) and 64 bit,PHP,SQL,Android,Nodejs, Angular,Web development and App development.
-- __Previous work experience__: network administartor at IC Health from 2014-2017
+- __Previous work experience__: no formal work experience 
 - __Attitudes__: Always Up for a challenge and Curious about the unkown and I&#39;m a hardwoker.
 
 ## Project Structure
@@ -56,3 +58,35 @@ Mobile application/website code. Uses Ionic Framework.
 
 ### /server
 Server code. Uses Nest.js.
+
+
+
+## Envirnoment Configuration
+Development configuration can be made in the .env file.
+
+Example:
+```
+APP_NAME=Wildlife Drones
+SECRET=secretKey
+RESERVE_NAME=Kruger National Park
+CELL_SIZE=500
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=465
+MAIL_USERNAME=drbam301@gmail.com
+MAIL_PASSWORD=your top secret password
+OTP_PATTERN=[A-Z\d]{3}\-[A-Z\d]{3}
+OTP_EXPIRES=120
+OTP_ATTEMPTS=3
+```
+
+- APP_NAME - the name of the application that will be shown to the user in emails
+- SECRET - a random string used as a private key for jwt tokens. This should be sufficiently long (e.g 256 or 512 characters) and random.
+- RESERVE_NAME - the name of the reserve as per OpenStreetMaps
+- CELL_SIZE - the size (width and height) of a cell in metres
+- MAIL_HOST - the SMTP mail host (e.g. smtp.gmail.com)
+- MAIL_PORT - the mail server port (465 is recommended as TLS is always enabled)
+- MAIL_USERNAME - the email address used to log into the mail server
+- MAIL_PASSWORD - the password used to log into the mail server
+- OTP_PATTERN - A regular expression pattern to generate a random one-time-pin from
+- OTP_EXPIRES - How long (in seconds) an OTP lasts. This is also the time the user has to wait before login attempts reset.
+- OTP_ATTEMPTS - The number of login attempts the user gets before being locked out until the one time pin expires.

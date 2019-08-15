@@ -42,7 +42,7 @@ export class AnimalCellWeight {
 
   @Column()
   time1080Weight: number;
- 
+
   @Column()
   time1200Weight: number;
 

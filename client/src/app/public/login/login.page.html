@@ -1,6 +1,6 @@
 <!--Login page content-->
 <ion-content padding>
-  <form #form="ngForm" (ngSubmit)="login()">
+  <form #form="ngForm" (ngSubmit)="loginEmail()" *ngIf="enteringEmail">
     <ion-grid>
       <ion-row>
         <ion-col>
@@ -10,16 +10,42 @@
       <ion-row justify-content-center>
         <ion-col align-self-center size-md="6" size-lg="5" size-xs="12">
           <div padding class="header-container">
-            <h1>Log in</h1>
+            <h1>Log In</h1>
           </div>
           <div padding>
             <ion-item no-padding>
               <ion-label position="floating">Email</ion-label>
               <ion-input name="email" type="email" placeholder="email@example.com" [(ngModel)]='enteredEmail' required></ion-input>
             </ion-item>
+          </div>
+          <div padding class="error" [class.failure]="error && !loggingIn" *ngIf="error">
+            {{ error }}
+          </div>
+          <div padding text-right class="button-container">
+            <ion-button type="submit" size="medium" color="dark" [disabled]="form.invalid || loggingIn">
+              Next
+            </ion-button>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </form>
+
+  <form #form="ngForm" (ngSubmit)="loginPin()" *ngIf="!enteringEmail">
+    <ion-grid>
+      <ion-row justify-content-center>
+        <ion-col align-self-center size-md="6" size-lg="5" size-xs="12">
+          <div padding class="header-container">
+            <h1>Log in</h1>
+          </div>
+          <div padding>
             <ion-item no-padding>
               <ion-label position="floating">Password</ion-label>
               <ion-input name="password" type="password" placeholder="Password" [(ngModel)]='enteredPassword' required></ion-input>
+            </ion-item>
+            <ion-item no-padding>
+              <ion-label position="floating">OTP</ion-label>
+              <ion-input name="OTP" type="text" placeholder="OTP" [(ngModel)]='enteredOTP' required></ion-input>
             </ion-item>
           </div>
           <div padding class="error" [class.failure]="error && !loggingIn" *ngIf="error">
@@ -30,6 +56,13 @@
               Log in
             </ion-button>
           </div>
+          <div padding text-right class="button-container">
+            <ion-button type="button" size="medium" color="dark" (click) = "reset()" >
+              Reset Password
+            </ion-button>
+          </div>
+
+
         </ion-col>
       </ion-row>
     </ion-grid>
