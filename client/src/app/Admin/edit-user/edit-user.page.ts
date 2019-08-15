@@ -98,7 +98,7 @@ async displayAlert(editUser)
   
   async deleteUser()
   {
-    const result  = await this.userService.deleteUser(this.user.id);
+    const result  = await this.userService.deleteUser(parseInt(this.user.id,10));
     if(result)
     {
       this.events.publish('user:updated');
