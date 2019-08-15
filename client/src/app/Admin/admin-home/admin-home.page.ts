@@ -64,8 +64,8 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
   public coordinates: Coordinates;
   public isFollowingGeolocation = false;
 
-  incidentsLayer = null;
-  private incidentsPoller = null;
+  private dronesPoller = null;
+  dronesLayer = null;
 
   poachingHeatmapLayer = null;
   animalHeatmapLayer = null;
@@ -76,166 +76,86 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
   readonly states = {
     // Default state
     default: {},
-    // Add marker state
-    addMarker: {
-      tooltip: 'Pan the map to change incident location',
-      confirmations: {
-        cancel: () => this.setState(this.states.default),
-        done: () => {
-          this.states.addMarker.data.markerPosition = toLonLat(this.map.getView().getCenter());
-          // TODO: add the marker to the map via the server
-          this.setState(this.states.addMarkerDetails);
-        }
-      },
-      data: {
-        markerPosition: null,
-      },
-    },
-    // Add marker details state (after add marker)
-    addMarkerDetails: {
-      tooltip: 'Set incident information',
-      setup: async self => {
-        self.data.incidentTypes = await this.incidentsService.getIncidentTypes();
-        console.log(self.data.incidentTypes);
-        self.data.typeId = self.data.incidentTypes[0].id;
-      },
-      confirmations: {
-        cancel: () => {
-          this.setState(this.states.addMarker);
-        },
-        done: () => {
-          const { typeId, description } = this.states.addMarkerDetails.data;
-          const [lon, lat] = this.states.addMarker.data.markerPosition;
-          this.incidentsService.addIncident(typeId, description, lon, lat).then(() => {
-            this.getIncidents();
-          });
-          this.setState(this.states.default);
-        }
-      },
-      data: {
-        incidentTypes: [],
-        typeId: null,
-        description: '',
-      },
-    },
-    // Set up route state
-    setUpRoute: {
-      setup: async (self) => {
-        const drones = await this.dronesService.getDrones();
-        if (!drones.length) {
-          await self.confirmations.add();
-        } else {
-          self.data.drones = drones;
-        }
-        // set the first drone in the list as the active drone
-        self.data.selectedDrone = self.data.drones[0];
-      },
-      tooltip: 'Configure drone flight options',
-      confirmations: {
-        cancel: () => this.setState(this.states.default),
-        done: () => {
-          this.dronesService.updateDrones(this.states.setUpRoute.data.drones);
-          // TODO: Get the flight route
-          this.setState(this.states.viewRoute);
-        },
-        add: async () => {
-          // TODO: Add a new drone to the list
-          const newDrone: Drone = {
-            name: 'New Drone',
-            avgSpeed: 30,
-            avgFlightTime: 100,
-            active: true,
-          };
-          this.states.setUpRoute.data.drones.push(newDrone);
-          this.states.setUpRoute.data.selectedDrone = newDrone;
-        },
-      },
-      data: {
-        selectedDrone: null,
-        drones: [],
-      },
-    },
-    // View route state
-    viewRoute: {
-      setup: async (self) => {
-        self.data.antPathUpdate = true;
-        const startingCoords = this.coordinates;
-        const drone = this.states.setUpRoute.data.selectedDrone;
+    // View route state - currently does nothing*
+    // viewRoute: {
+    //   setup: async (self) => {
+    //     self.data.antPathUpdate = true;
+    //     const startingCoords = this.coordinates;
 
-        const route = await this.droneRouteService.generateRoute(drone.id, startingCoords);
+    //     const route = await this.droneRouteService.generateRoute(drone.id, startingCoords);
 
-        // line style
-        const lineStyle = new Style({
-          stroke: new Stroke({
-            color: '#39c',
-            width: 5,
-          }),
-        });
-        // an path inner style
-        const dashStyle = new Style({
-          stroke: new Stroke({
-            color: '#fff',
-            width: 5,
-            lineDash: [4, 10],
-          }),
-        });
+    //     // line style
+    //     const lineStyle = new Style({
+    //       stroke: new Stroke({
+    //         color: '#39c',
+    //         width: 5,
+    //       }),
+    //     });
+    //     // an path inner style
+    //     const dashStyle = new Style({
+    //       stroke: new Stroke({
+    //         color: '#fff',
+    //         width: 5,
+    //         lineDash: [4, 10],
+    //       }),
+    //     });
 
-        const vector = new VectorSource({
-          features: [
-            new Feature(new LineString(route).transform('EPSG:4326', 'EPSG:3857')),
-          ],
-        });
+    //     const vector = new VectorSource({
+    //       features: [
+    //         new Feature(new LineString(route).transform('EPSG:4326', 'EPSG:3857')),
+    //       ],
+    //     });
 
-        self.data.routeLayer = new VectorLayer({
-          source: vector,
-          style: [
-            lineStyle,
-            dashStyle,
-          ],
-          updateWhileAnimating: true,
-          updateWhileInteracting: true,
-        });
+    //     self.data.routeLayer = new VectorLayer({
+    //       source: vector,
+    //       style: [
+    //         lineStyle,
+    //         dashStyle,
+    //       ],
+    //       updateWhileAnimating: true,
+    //       updateWhileInteracting: true,
+    //     });
 
-        const stroke = dashStyle.getStroke();
-        const dash = stroke.getLineDash();
-        let length = dash.reduce((a, b) => a + b, 0);
-        length = dash.length % 2 === 1 ? length * 2 : length;
+    //     const stroke = dashStyle.getStroke();
+    //     const dash = stroke.getLineDash();
+    //     let length = dash.reduce((a, b) => a + b, 0);
+    //     length = dash.length % 2 === 1 ? length * 2 : length;
 
-        const update = () => {
-          const offset = stroke.getLineDashOffset() || 0;
-          stroke.setLineDashOffset(modulo(offset + 0.25, length));
-          vector.refresh();
+    //     const update = () => {
+    //       const offset = stroke.getLineDashOffset() || 0;
+    //       stroke.setLineDashOffset(modulo(offset + 0.25, length));
+    //       vector.refresh();
 
-          if (self.data.antPathUpdate) {
-            requestAnimationFrame(update);
-          }
-        };
+    //       if (self.data.antPathUpdate) {
+    //         requestAnimationFrame(update);
+    //       }
+    //     };
 
-        update();
+    //     update();
 
-        this.map.addLayer(self.data.routeLayer);
-      },
-      tooltip: 'Viewing route',
-      confirmations: {
-        done: async () => {
-          // TODO: tell the server that the drone is no longer en route
-          this.setState(this.states.default);
-        },
-      },
-      data: {
-        routeLayer: null,
-        antPathUpdate: true,
-      },
-      destruct: async () => {
-        // remove the map layer from the map
-        this.states.viewRoute.data.antPathUpdate = false;
-        this.map.removeLayer(this.states.viewRoute.data.routeLayer);
-        // encourage garbage collection on the layer data
-        this.states.viewRoute.data.routeLayer = null;
-        // track to the current user's location
-        this.goToGeolocation();
-      },
-    },
+    //     this.map.addLayer(self.data.routeLayer);
+    //   },
+    //   tooltip: 'Viewing route',
+    //   confirmations: {
+    //     done: async () => {
+    //       // TODO: tell the server that the drone is no longer en route
+    //       this.setState(this.states.default);
+    //     },
+    //   },
+    //   data: {
+    //     routeLayer: null,
+    //     antPathUpdate: true,
+    //   },
+    //   destruct: async () => {
+    //     // remove the map layer from the map
+    //     this.states.viewRoute.data.antPathUpdate = false;
+    //     this.map.removeLayer(this.states.viewRoute.data.routeLayer);
+    //     // encourage garbage collection on the layer data
+    //     this.states.viewRoute.data.routeLayer = null;
+    //     // track to the current user's location
+    //     this.goToGeolocation();
+    //   },
+    // },
     // map options state
     options: {
       setup: async (self) => {
@@ -254,6 +174,7 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
         done: async (self) => {
           self.showPoachingHeatmap(self);
           self.showAnimalHeatmap(self);
+          this.getDrones();
           this.setState(this.states.default);
         },
       },
@@ -262,6 +183,7 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
         species: [],
         enablePoachingHeatmap: false,
         enableAnimalHeatmap: false,
+        enableActiveDrones: true,
         animalHeatmapSpecies: null,
         useCurrentTime: true,
         time: 0,
@@ -371,8 +293,8 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
       await this.state.destruct(this.state);
     }
 
-    if (!!this.incidentsPoller) {
-      clearInterval(this.incidentsPoller);
+    if (!!this.dronesPoller) {
+      clearInterval(this.dronesPoller);
     }
 
     if (!!this.timePoller) {
@@ -388,8 +310,8 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
     this.initialiseMap();
 
     // get incidents every minute
-    this.incidentsPoller = setInterval(() => {
-      this.getIncidents();
+    this.dronesPoller = setInterval(() => {
+      this.getDrones();
     }, 60000);
 
     // get the time every few minutes
@@ -456,7 +378,7 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
     });
 
     this.geolocationListen();
-    this.getIncidents();
+    this.getDrones();
 
     // get the reserve data
     const reserve: any = await this.mapService.getMap();
@@ -622,13 +544,24 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
   /**
    * Updates the incidents layer to show incident markers
    */
-  async getIncidents() {
-    const incidents = await this.incidentsService.getIncidents();
+  async getDrones() {
+    // if showing active drones has been disabled, hide from the map
+    if (!this.states.options.data.enableActiveDrones) {
+      if (this.dronesLayer) {
+        this.map.removeLayer(this.dronesLayer);
+        this.dronesLayer = null;
+      }
+      return;
+    }
+
+    const drones = await this.dronesService.getDrones();
+
+    console.log('got drones', drones);
 
     const layer = new VectorLayer({
       source: new VectorSource({
-        features: incidents.map(incident => new Feature({
-          geometry: new Point(fromLonLat([incident.longitude, incident.latitude])),
+        features: drones.map(drone => new Feature({
+          geometry: new Point(fromLonLat([drone.longitude, drone.latitude])),
         })),
       }),
       style: new Style({
@@ -641,12 +574,14 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
       }),
     });
 
-    if (this.incidentsLayer) {
-      this.map.removeLayer(this.incidentsLayer);
+    console.log(layer);
+
+    if (this.dronesLayer) {
+      this.map.removeLayer(this.dronesLayer);
     }
 
-    this.incidentsLayer = layer;
-    this.map.addLayer(this.incidentsLayer);
+    this.dronesLayer = layer;
+    this.map.addLayer(this.dronesLayer);
   }
 
   refresh() {

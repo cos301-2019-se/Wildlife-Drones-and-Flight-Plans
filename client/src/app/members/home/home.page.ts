@@ -145,6 +145,8 @@ export class HomePage implements AfterViewInit, OnDestroy {
             avgSpeed: 30,
             avgFlightTime: 100,
             active: true,
+            longitude: null,
+            latitude: null,
           };
           this.states.setUpRoute.data.drones.push(newDrone);
           this.states.setUpRoute.data.selectedDrone = newDrone;

@@ -23,51 +23,9 @@
 
   <!-- set up flight overlay -->
   <div class="form-overlay"
-    *ngIf="state === states.setUpRoute || state === states.addMarkerDetails || state === states.options"
-    @form-animation>
-    <!-- drone information form -->
-    <ng-container *ngIf="state === states.setUpRoute">
-      <ion-item no-padding>
-        <ion-label position="stacked">Drone name</ion-label>
-        <ion-select [(ngModel)]="states.setUpRoute.data.selectedDrone" interface="popover">
-          <ion-select-option *ngFor="let drone of states.setUpRoute.data.drones" [value]="drone">{{ drone.name }}</ion-select-option>
-        </ion-select>
-      </ion-item>
-
-      <ion-item no-padding>
-        <ion-label position="stacked">Drone name</ion-label>
-        <ion-input type="text" [(ngModel)]="states.setUpRoute.data.selectedDrone.name" (ionChange)="refresh()"></ion-input>
-      </ion-item>
-
-      <ion-item no-padding>
-        <ion-label position="stacked">Average flight time (minutes)</ion-label>
-        <ion-input type="number" min="5" step="5" [(ngModel)]="states.setUpRoute.data.selectedDrone.avgFlightTime"></ion-input>
-      </ion-item>
-
-      <ion-item no-padding>
-        <ion-label position="stacked">Average speed (km/h)</ion-label>
-        <ion-input type="number" min="5" step="5" [(ngModel)]="states.setUpRoute.data.selectedDrone.avgSpeed"></ion-input>
-      </ion-item>
-    </ng-container>
-
-    <!-- poaching incident form -->
-    <ng-container *ngIf="state === states.addMarkerDetails">
-      <ion-item no-padding>
-        <ion-label position="stacked">Incident type</ion-label>
-        <ion-select [(ngModel)]="states.addMarkerDetails.data.typeId" interface="popover">
-          <ion-select-option
-            *ngFor="let incidentType of states.addMarkerDetails.data.incidentTypes"
-            [value]="incidentType.id"
-          >{{ incidentType.type }}</ion-select-option>
-        </ion-select>
-      </ion-item>
-
-      <ion-item no-padding>
-        <ion-label position="stacked">Description</ion-label>
-        <ion-textarea [(ngModel)]="states.addMarkerDetails.data.description"></ion-textarea>
-      </ion-item>
-    </ng-container>
-
+    *ngIf="state === states.options"
+    @form-animation
+  >
     <!-- options form -->
     <ng-container *ngIf="state === states.options">
       <ion-item no-padding>
@@ -128,22 +86,6 @@
       (click)="setState(states.options)" @button-animation
     >
       <ion-icon name="settings"></ion-icon>
-    </ion-fab-button>
-
-    <!-- set up route fab -->
-    <ion-fab-button size="small" @button-animation color="dark"
-      *ngIf="state == states.default"
-      (click)="setState(states.setUpRoute)"
-    >
-      <ion-icon name="ios-send"></ion-icon>
-    </ion-fab-button>
-    
-    <!-- add marker fab -->
-    <ion-fab-button size="small" color="dark"
-      *ngIf="state === states.default"
-      (click)="setState(states.addMarker)" @button-animation
-    >
-      <ion-icon name="ios-pin"></ion-icon>
     </ion-fab-button>
   </ion-fab>
   

@@ -7,6 +7,8 @@ export interface Drone {
   avgFlightTime: number;
   avgSpeed: number;
   active: boolean;
+  longitude: number;
+  latitude: number;
 }
 
 @Injectable()
@@ -35,6 +37,8 @@ export class DronesMockService extends DronesService {
       avgFlightTime: 110,
       avgSpeed: 45,
       active: true,
+      longitude:0,
+      latitude:0,
     },
     {
       id: 1,
@@ -42,6 +46,8 @@ export class DronesMockService extends DronesService {
       avgFlightTime: 130,
       avgSpeed: 25,
       active: true,
+      longitude:0,
+      latitude:0,
     },
   ];
 
