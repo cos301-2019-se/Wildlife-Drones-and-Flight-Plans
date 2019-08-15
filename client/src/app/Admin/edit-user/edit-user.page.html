@@ -9,19 +9,19 @@
 </ion-header>
 
 <ion-content>
-    <ion-item>
+    <ion-item *ngIf="this.tempUser != null">
         <ion-label position="floating">Name</ion-label>
         <ion-input [(ngModel)]="tempUser.name"></ion-input>
       </ion-item>
-      <ion-item>
+      <ion-item *ngIf="this.tempUser != null">
           <ion-label position="floating">Surname</ion-label>
           <ion-input [(ngModel)]="tempUser.surname"></ion-input>
         </ion-item>
-        <ion-item>
+        <ion-item *ngIf="this.tempUser != null">
             <ion-label position="floating">Email</ion-label>
             <ion-input [(ngModel)]="tempUser.email"></ion-input>
           </ion-item>
-          <ion-item>
+          <ion-item *ngIf="this.tempUser != null">
               <ion-label>Job Type</ion-label>
               <ion-select [(ngModel)]="tempUser.jobType" okText="Okay" cancelText="Dismiss">
                 <ion-select-option value="pilot">pilot</ion-select-option>

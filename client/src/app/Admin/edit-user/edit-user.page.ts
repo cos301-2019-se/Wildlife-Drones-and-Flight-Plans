@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute,Router } from '@angular/router';
 import { Events } from '@ionic/angular';
 import { UsersService } from '../../services/users.service';
 import { AlertController } from '@ionic/angular';
@@ -10,13 +10,15 @@ import { AlertController } from '@ionic/angular';
 })
 export class EditUserPage implements OnInit {
   user:any;
-  tempUser:any;
+  tempUser:any = null;
   error;
-  constructor(private alertCtrl:AlertController,private userService:UsersService,public events: Events,private router: Router) { }
+  constructor(private alertCtrl:AlertController,private userService:UsersService,public events: Events,private router: Router,private activatedRoute:ActivatedRoute) { }
 
   ngOnInit() {
-    this.user = this.router.getCurrentNavigation().extras.state.user;
-    this.tempUser = JSON.parse(JSON.stringify(this.user));
+    this.activatedRoute.params.subscribe(params => {
+      this.user = params;
+      this.tempUser = this.user;
+    });
   }
 async displayAlert(editUser)
 {
@@ -67,6 +69,8 @@ async displayAlert(editUser)
 
   async goBack()
   {
+    if(this.tempUser != null)
+    {
     const editUser = {
       id:this.tempUser.id,
       name:this.tempUser.name,
@@ -84,6 +88,11 @@ async displayAlert(editUser)
       //this.events.publish('user:updated');
       this.router.navigate(['admin-tabs/users']);
     }
+  }
+  else
+  {
+    this.router.navigate(['admin-tabs/users']);
+  }
   }
 
   

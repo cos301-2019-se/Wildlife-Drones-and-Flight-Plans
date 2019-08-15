@@ -30,7 +30,8 @@ export class UsersPage implements OnInit {
   {
     //Get selected user then need to open up a new page
     const selectedUser = this.users[index];
-    this.router.navigate(['edit-user'],{ state: { user:selectedUser } });
+    console.log(JSON.stringify(selectedUser));
+    this.router.navigate(['edit-user',selectedUser]);
   }
 
   addUser()
