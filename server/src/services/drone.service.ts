@@ -50,50 +50,25 @@ export class DroneService {
   }
 
   /**
-   * updates drone information with given id, not all parameters needed
-   * @param id 
-   * @param name 
-   * @param avgSpeed 
-   * @param avgFlightTime 
-   * @param speed 
-   * @param flightTime 
-   * @param lon 
-   * @param lat 
+   * Update a drone's geolocation. Only upates longitude and latitude
+   * @param droneId The drone's id
+   * @param longitude The longitude of the drone
+   * @param latitude The latitude of the drone
    */
-  async updateInfo(
-    id: number,
-    name: string,
-    avgSpeed: number,
-    avgFlightTime: number,
-    speed: number,
-    flightTime: number,
-    lon: number,
-    lat: number,
-  ): Promise<boolean> {
-    const con = await this.databaseService.getConnection();
-    const drone = await con.getRepository(Drone).findOne({ id: id });
+  async updateDronePosition(droneId: number, longitude: number, latitude: number): Promise<boolean> {
+    const conn = await this.databaseService.getConnection();
+    const repo = conn.getRepository(Drone);
+    const drone = await repo.findOne(droneId);
 
-    if (drone == undefined) {
-      console.log('Drone ' + id + ' was not found');
+    if (!drone) {
       return false;
     }
 
-    try {
-      drone.name = name;
-      drone.avgSpeed = avgSpeed;
-      drone.avgFlightTime = avgFlightTime;
-      drone.speed = speed;
-      drone.flightTime = flightTime;
-      drone.longitude = lon;
-      drone.latitude = lat;
-      // tslint:disable-next-line:no-console
-      const updatedDrone = await con.getRepository(Drone).save(drone);
-      console.log('Drone was updated with id: ' + drone.id);
-      return updatedDrone != null;
-    } catch (error) {
-      console.log('Drone was not updated');
-      return false;
-    }
+    drone.longitude = longitude;
+    drone.latitude = latitude;
+
+    await repo.save(drone);
+    return true;
   }
 
   async updateDrones(drones: Drone[]): Promise<boolean> {

@@ -53,6 +53,7 @@ export class UserService {
     const existingUser = await usersRepo.findOne({
       where: {
         email,
+        //active : 'true',
       },
     });
 
@@ -60,6 +61,7 @@ export class UserService {
     if (!existingUser) {
       return false;
     }
+
 
     // check that the user is within their number of login attempts
     // if the epiry date of the code has passed, we can create a new OTP

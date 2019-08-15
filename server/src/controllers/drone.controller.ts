@@ -21,18 +21,10 @@ export class DroneController {
     );
   }
    
-  @Post('updateDrone')
+  @Post('updateDronePosition')
   async updateDrone(@Body() body) : Promise<boolean> {
-    return await this.droneService.updateInfo(
-      body.id,
-      body.name,
-      body.avgSpeed,
-      body.avgFlightSpeed,
-      body.speed,
-      body.flightTime,
-      body.lon,
-      body.lat,
-    );
+    console.log(body);
+    return await this.droneService.updateDronePosition(body.droneId, body.longitude, body.latitude);
   }
   
   @Post('deactivateDrone')

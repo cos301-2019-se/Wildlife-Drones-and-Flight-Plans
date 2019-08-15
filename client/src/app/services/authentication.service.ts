@@ -35,7 +35,6 @@ export class AuthenticationService {
    * @param body The data to send to the api
    */
   async post(endpointName: string, body: any) {
-    console.log('my token is ',await this.getToken());
     const httpOptions = {
       headers: new HttpHeaders({
         Accept: 'application/json',
@@ -104,7 +103,6 @@ export class AuthenticationService {
   passRequirements(password) {
     const re = /(?=^.{8,}$)(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\s)[0-9a-zA-Z!@#$%^&*()]*$/;
     // Test returns true of false
-    console.log(re.test(password))
     return re.test(password);
   }
 
@@ -115,14 +113,11 @@ export class AuthenticationService {
    * @param password The user's password
    */
   async loginEmail(email: string): Promise<boolean> {
-    console.log('call loginEmail');
     let res: any;
     try {
-      console.log('make request');
       res = await this.post('loginEmail', {
         email,
       });
-      console.log('the reaponse from EmailLogin : ' + res);
     } catch (err) {
       console.log('there was an error');
       console.error(err);
@@ -174,7 +169,6 @@ export class AuthenticationService {
 
     await this.validateToken();
 
-    console.log('Token received from server side ', token);
     return true;
   }
 
@@ -222,13 +216,10 @@ export class AuthenticationService {
       this.authenticationState.next({status:false,jobType:null});
       return;
     }
-    console.log('Email',await this.getEmail());
     const res: any = await this.post('vToken', {
       email: await this.getEmail(),
       token,
     });
-    console.log('validate token res:', res.status);
-    console.log('Token',res.token);
     await this.storage.set(TOKEN_KEY, res.token);
     this.authenticationState.next({status:res.status,jobType:res.jobType});
     return res.status;

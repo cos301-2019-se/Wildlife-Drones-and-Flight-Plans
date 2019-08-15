@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { UsersService } from '../../services/users.service';
 import { AuthenticationService } from './../../services/authentication.service';
 import { Router } from '@angular/router';
+import { Events } from '@ionic/angular';
 @Component({
   selector: 'app-add-user',
   templateUrl: './add-user.page.html',
@@ -15,7 +16,7 @@ export class AddUserPage implements OnInit {
   password:string = "";
   confirmPassword:string = "";
   error;
-  constructor(private userService:UsersService,private router: Router,private auth:AuthenticationService) { }
+  constructor(public events: Events,private userService:UsersService,private router: Router,private auth:AuthenticationService) { }
 
   ngOnInit() {
   }
@@ -48,7 +49,8 @@ export class AddUserPage implements OnInit {
       };
 
       await this.userService.addUser(addUser,this.password);
-      this.router.navigate(['users']);
+      this.events.publish('user:updated');
+      this.router.navigate(['admin-tabs/users']);
     }
   }
 

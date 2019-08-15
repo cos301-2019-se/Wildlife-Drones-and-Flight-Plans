@@ -10,7 +10,7 @@ import { Router } from '@angular/router';
 export class UsersPage implements OnInit {
   users:any;
   constructor(private userService:UsersService,public events: Events,private router: Router) { 
-    this.events.subscribe('user:deleted', (id, time) => {
+    this.events.subscribe('user:updated', () => {
       // user and time are the same arguments passed in `events.publish(user, time)`
       this.refresh();
     });
@@ -20,15 +20,9 @@ export class UsersPage implements OnInit {
   {
     this.users = [];
     this.users = await this.userService.getUsers();
-    console.log(JSON.stringify(this.users));
   }
 
   ngOnInit() {
-    this.refresh();
-  }
-
-  ionViewDidEnter()
-  {
     this.refresh();
   }
 
@@ -36,7 +30,8 @@ export class UsersPage implements OnInit {
   {
     //Get selected user then need to open up a new page
     const selectedUser = this.users[index];
-    this.router.navigate(['edit-user'],{ state: { user:selectedUser } });
+    console.log(JSON.stringify(selectedUser));
+    this.router.navigate(['edit-user',selectedUser]);
   }
 
   addUser()
