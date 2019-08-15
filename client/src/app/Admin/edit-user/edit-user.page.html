@@ -11,19 +11,19 @@
 <ion-content>
     <ion-item>
         <ion-label position="floating">Name</ion-label>
-        <ion-input [(ngModel)]="user.name"></ion-input>
+        <ion-input [(ngModel)]="tempUser.name"></ion-input>
       </ion-item>
       <ion-item>
           <ion-label position="floating">Surname</ion-label>
-          <ion-input [(ngModel)]="user.surname"></ion-input>
+          <ion-input [(ngModel)]="tempUser.surname"></ion-input>
         </ion-item>
         <ion-item>
             <ion-label position="floating">Email</ion-label>
-            <ion-input [(ngModel)]="user.email"></ion-input>
+            <ion-input [(ngModel)]="tempUser.email"></ion-input>
           </ion-item>
           <ion-item>
               <ion-label>Job Type</ion-label>
-              <ion-select [(ngModel)]="user.jobType" okText="Okay" cancelText="Dismiss">
+              <ion-select [(ngModel)]="tempUser.jobType" okText="Okay" cancelText="Dismiss">
                 <ion-select-option value="pilot">pilot</ion-select-option>
                 <ion-select-option value="administrator">administrator</ion-select-option>
               </ion-select>
@@ -36,6 +36,11 @@
                   <ion-icon slot="icon-only" name="trash"></ion-icon>
                 </ion-button>
           </ion-col>
+          <ion-col class="edit">
+            <ion-button (click)="goBack()">
+              Done   
+            </ion-button>
+        </ion-col>
         </ion-row>
       </ion-grid>
       <div padding class="error" [class.failure]="error" *ngIf="error">
