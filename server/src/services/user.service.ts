@@ -7,6 +7,7 @@ import * as mailer from 'nodemailer';
 import { ConfigService } from './config.service';
 import { MailService } from './mail.service';
 import * as RandExp from 'randexp';
+import { adminPayload } from 'src/auth/admin-payload.interface';
 
 @Injectable()
 export class UserService {
@@ -330,6 +331,17 @@ export class UserService {
     return await con.getRepository(User).findOne({
       where: {
         email: payload.email,
+      },
+    });
+  }
+
+  async validateAdmin(payload: adminPayload) {
+    console.log(JSON.stringify(payload));
+    const con = await this.databaseService.getConnection();
+    return await con.getRepository(User).findOne({
+      where: {
+        email: payload.email,
+        jobType : payload.jobType,
       },
     });
   }

@@ -4,6 +4,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from '../auth/auth.service';
 import { User } from '../entity/user.entity';
 import { addUserDTO, updateUserDTO, deleteUserDTO } from '../dto/validation';
+import { AdminGuard } from 'src/auth/admin.guard';
 
 @Controller()
 export class UserController {
@@ -13,6 +14,7 @@ export class UserController {
   ) {}
 
   @Post('getUsers')
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   //@UseGuards(AuthGuard('jwt'))
   async getAllUsers(): Promise<User[]> {
     return await this.userService.getAllUsers();
@@ -34,7 +36,7 @@ export class UserController {
       return true;
     }
   }
-  
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   @Post('resetPassword')
   async resetPass(@Body() body): Promise<boolean> {
    return await this.userService.reset(body.email);
@@ -42,6 +44,7 @@ export class UserController {
     
   }
 
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   @Post('addUser')
   async addUser(@Body() createUserDto: addUserDTO): Promise<boolean> {
     return await this.userService.addUser(
@@ -53,6 +56,7 @@ export class UserController {
     );
   }
 
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   @Post('updateUser')
   async updateUser(@Body() updateUserDto: updateUserDTO): Promise<boolean> {
  //  return true;
@@ -66,6 +70,7 @@ export class UserController {
     );
   }
 
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   @Post('deactivateUser')
   async deactivate(@Body() deleteUserDto: deleteUserDTO): Promise<boolean> {
  //  return true;
