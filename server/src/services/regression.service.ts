@@ -53,7 +53,7 @@ export class RegressionService {
       const addedModel = await conn.getRepository(ModelData).save(model);
 
       console.log('Saved model with name: ' + model.name);
-      return addedModel != null;
+      return Boolean(addedModel);
     } catch (error) {
       console.error('Model not saved', error);
       return false;
@@ -67,10 +67,9 @@ export class RegressionService {
   async loadRegressor(name: string): Promise<Regressor> {
     const conn = await this.databaseService.getConnection();
 
-    //will add model if it does not exist and will update it if it does
     try {
       const model = await conn.getRepository(ModelData).findOne({
-        name: `regressor-${name}`,
+        where: { name: `regressor-${name}` },
       });
 
       const regressor = Regressor.fromJSON(model.data);

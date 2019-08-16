@@ -60,13 +60,13 @@ export class ModelTraining {
     ]);
     outputData.shift();
 
-    await this.regressionService.trainRegressor(`species-${speciesId}`, inputData, outputData);
+    await this.regressionService.trainRegressor(this.getAnimalRegressorName(speciesId), inputData, outputData);
   }
 
   /**
    * Finds the next points for an array of points
    * @param speciesId The ID of the species
-   * @param input 
+   * @param input Series of inputs to predict
    */
   async predictAnimalRegressor(speciesId: number, inputs: Array<{
     latitude: number;
@@ -75,6 +75,13 @@ export class ModelTraining {
     time: number;
   }>) {
     const searchSets = await this.mapService.getFeatureSearchSets();
+
+    let regressor = await this.loadAnimalRegressor(speciesId);
+    if (!regressor) {
+      // train a new regressor of the regressor does not exist
+      await this.trainAnimalRegressor(speciesId);
+      regressor = await this.loadAnimalRegressor(speciesId);
+    }
 
     const inputData = [];
     for (const input of inputs) {
@@ -108,7 +115,6 @@ export class ModelTraining {
       ]);
     }
 
-    const regressor = await this.regressionService.loadRegressor(`species-${speciesId}`);
     return regressor.predict(inputData);
   }
 
@@ -116,9 +122,12 @@ export class ModelTraining {
    * Load a previously saved regressor for a given species
    */
   async loadAnimalRegressor(speciesId: number) {
-    return await this.regressionService.loadRegressor(`species-${speciesId}`);
+    return await this.regressionService.loadRegressor(this.getAnimalRegressorName(speciesId));
   }
 
+  private getAnimalRegressorName(speciesId: number) {
+    return `species-${speciesId}`;
+  }
 
   /**
    * Train an animal classifier and predict map cells.
