@@ -7,6 +7,7 @@ import { PoachingIncidentTypeController } from './controllers/poaching-incident-
 import { PoachingIncidentController } from './controllers/poaching-incident.controller';
 import { DroneController } from './controllers/drone.controller';
 import { SpeciesController } from './controllers/animal-species.controller';
+import { DroneRouteController } from './controllers/drone-route.controller';
 
 export const controllers = [
   MapController,
@@ -18,4 +19,5 @@ export const controllers = [
   PoachingIncidentTypeController,
   SpeciesController,
   DroneController,
+  DroneRouteController,
 ];

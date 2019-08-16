@@ -30,7 +30,6 @@ export class DroneService {
     const con = await this.databaseService.getConnection();
     const drone = new Drone();
 
-    
     try {
       drone.name = name;
       drone.avgSpeed = avgSpeed;
@@ -109,6 +108,22 @@ export class DroneService {
       console.log('Drone was not deactivated');
       return false;
     }
+  }
+
+  /**
+   * Returns a single drone for the given id
+   * @param droneId
+   */
+  async getDrone(droneId: number) {
+    const conn = await this.databaseService.getConnection();
+    const rep = conn.getRepository(Drone);
+
+    return await rep.findOne({
+      where: {
+        id: droneId,
+        active: true,
+      }
+    });
   }
 
   /**

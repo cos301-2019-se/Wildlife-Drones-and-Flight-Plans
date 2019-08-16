@@ -1,5 +1,3 @@
-
-import { ShortestPathService } from './services/shortest-path.service';
 import { DatabaseService } from './services/db.service';
 import { UserService } from './services/user.service';
 import { OverpassService } from './services/overpass.service';
@@ -23,10 +21,10 @@ import { RegressionService } from './services/regression.service';
 import { CacheInterceptor  } from '@nestjs/common';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { MailService } from './services/mail.service';
+import { DroneRouteService } from './services/drone-route.service';
 
 export const providers = [
   MapService,
-  ShortestPathService,
   DatabaseService,
   UserService,
   OverpassService,
@@ -51,4 +49,5 @@ export const providers = [
     provide: APP_INTERCEPTOR,
     useClass: CacheInterceptor,
   },
+  DroneRouteService,
 ];

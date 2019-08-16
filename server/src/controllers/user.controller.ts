@@ -2,7 +2,6 @@ import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common';
 import { UserService } from '../services/user.service';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from '../auth/auth.service';
-import { User } from '../entity/user.entity';
 import { addUserDTO, updateUserDTO, deleteUserDTO } from '../dto/validation';
 
 @Controller()
@@ -11,12 +10,6 @@ export class UserController {
     private readonly userService: UserService,
     private readonly authService: AuthService,
   ) {}
-
-  @Post('getUsers')
-  //@UseGuards(AuthGuard('jwt'))
-  async getAllUsers(): Promise<User[]> {
-    return await this.userService.getAllUsers();
-  }
 
   @Post('loginPin')
   async loginUser(@Body() body): Promise<JSON> {
@@ -34,12 +27,10 @@ export class UserController {
       return true;
     }
   }
-  
+
   @Post('resetPassword')
   async resetPass(@Body() body): Promise<boolean> {
    return await this.userService.reset(body.email);
-    console.log("it sees the endpoint")
-    
   }
 
   @Post('addUser')
@@ -55,8 +46,7 @@ export class UserController {
 
   @Post('updateUser')
   async updateUser(@Body() updateUserDto: updateUserDTO): Promise<boolean> {
- //  return true;
- console.log(JSON.stringify(updateUserDto));
+    console.log(JSON.stringify(updateUserDto));
     return await this.userService.updateUser(
       updateUserDto.id,
       updateUserDto.name,

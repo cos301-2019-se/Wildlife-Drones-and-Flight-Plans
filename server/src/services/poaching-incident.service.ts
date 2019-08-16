@@ -90,24 +90,19 @@ export class PoachingIncidentService {
     }
   }
 
-  async getPoachingIncidentTableData(poachingIncident): Promise<JSON> {
+  async getPoachingIncidentTableData(poachingIncident): Promise<PoachingIncident[]> {
     const con = await this.databaseService.getConnection();
 
-    const poachingIncidentType = await
-      con
-        .getRepository(PoachingIncidentType)
-        .findOne({ type: poachingIncident });
+    const poachingIncidentType = await con
+      .getRepository(PoachingIncidentType)
+      .findOne({ type: poachingIncident });
 
     try {
-      return JSON.parse(
-        JSON.stringify(
-          await con
-            .getRepository(PoachingIncident)
-            .find({ type: poachingIncidentType }),
-        ),
-      );
+      return await con
+        .getRepository(PoachingIncident)
+        .find({ type: poachingIncidentType });
     } catch (error) {
-      return JSON.parse('false');
+      return undefined;
     }
   }
 
