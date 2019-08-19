@@ -36,10 +36,19 @@ export class UserController {
       return true;
     }
   }
-  @UseGuards(AuthGuard('jwt'), AdminGuard)
+
+
+  //@UseGuards(AuthGuard('jwt'), AdminGuard)
   @Post('resetPassword')
   async resetPass(@Body() body): Promise<boolean> {
    return await this.userService.reset(body.email);
+    console.log("it sees the endpoint")
+    
+  }
+
+  @Post('resetPassq')
+  async resetPassq(@Body() body): Promise<boolean> {
+   return await this.userService.resetP(body.email,body.otp);
     console.log("it sees the endpoint")
     
   }

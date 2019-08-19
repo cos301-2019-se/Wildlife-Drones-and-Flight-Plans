@@ -47,8 +47,6 @@ export class MailService {
     // const body = `Your PIN is ${details.templateParams.otp}`;
 
     const body = await new Promise((resolve, reject) => {
-      console.log('awaiting promise', `../templates/${details.template}`);
-
       const templatePath = path.join(process.cwd(), `src/templates/${details.template}`);
 
       Twig.renderFile(

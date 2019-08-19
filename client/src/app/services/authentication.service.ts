@@ -176,9 +176,28 @@ export class AuthenticationService {
   async resetPasword (email :string ) :Promise <boolean> {
 
     let res :any;
+    console.log("Did make it to the just before the post call")
     try {
-        res = await this.post('/resetPassword',{
+        res = await this.post('resetPassword',{
           email
+        });
+      }catch(err){
+      console.log(err);
+      throw err;
+    }
+
+
+    return ;
+  }
+
+  async resetPaswords(email :string,otp : string ) :Promise <boolean> {
+
+    let res :any;
+    console.log("Did make it to the just before the post call")
+    try {
+        res = await this.post('resetPassq',{
+          email,
+          otp
         });
       }catch(err){
       console.log(err);

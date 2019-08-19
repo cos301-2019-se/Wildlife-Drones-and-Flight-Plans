@@ -45,7 +45,7 @@
             </ion-item>
             <ion-item no-padding>
               <ion-label position="floating">OTP</ion-label>
-              <ion-input name="OTP" type="text" placeholder="OTP" [(ngModel)]='enteredOTP' required></ion-input>
+              <ion-input name="OTP" type="text" placeholder="OTP" [(ngModel)]='enteredOTP' required  ></ion-input>
             </ion-item>
           </div>
           <div padding class="error" [class.failure]="error && !loggingIn" *ngIf="error">
@@ -57,7 +57,7 @@
             </ion-button>
           </div>
           <div padding text-right class="button-container">
-            <ion-button type="button" size="medium" color="dark" (click) = "reset()" >
+            <ion-button type="button" size="medium" color="dark" (click) = "reset()" [disabled]="form.invalid || loggingIn ">
               Reset Password
             </ion-button>
           </div>

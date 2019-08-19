@@ -37,6 +37,7 @@ export class User {
 
   @Column({ nullable: true })
   active: boolean;
+  existingUser: Number;
 
   @BeforeInsert()
   hashPassword() {
