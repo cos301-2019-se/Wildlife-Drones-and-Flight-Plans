@@ -1,5 +1,5 @@
 <ion-header>
-  <ion-toolbar>
+  <ion-toolbar color="dark">
     <ion-title>Add User</ion-title>
     <ion-buttons slot="start">
       <ion-back-button>
@@ -9,40 +9,63 @@
 </ion-header>
 
 <ion-content>
-  <ion-item>
-    <ion-label position="floating">Name</ion-label>
-    <ion-input [(ngModel)]="name"></ion-input>
-  </ion-item>
-  <ion-item>
-      <ion-label position="floating">Surname</ion-label>
-      <ion-input [(ngModel)]="surname"></ion-input>
-    </ion-item>
-    <ion-item>
-        <ion-label position="floating">Email</ion-label>
-        <ion-input [(ngModel)]="email"></ion-input>
-      </ion-item>
-      <ion-item>
-        <ion-label position="floating">Password</ion-label>
-        <ion-input type="password" [(ngModel)]="password"></ion-input>
-      </ion-item>
-      <ion-item>
-        <ion-label position="floating"> Confirm Password</ion-label>
-        <ion-input type="password" [(ngModel)]="confirmPassword"></ion-input>
-      </ion-item>
-      <ion-item>
+  <form [formGroup]="formGroup">
+    <ion-row>
+      <ion-col>
+        <ion-item>
+          <ion-label position="stacked">Name</ion-label>
+          <ion-input formControlName="name"></ion-input>
+        </ion-item>
+      </ion-col>
+      <ion-col>
+        <ion-item>
+          <ion-label position="stacked">Surname</ion-label>
+          <ion-input formControlName="surname"></ion-input>
+        </ion-item>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col>
+        <ion-item>
+          <ion-label position="stacked">Email</ion-label>
+          <ion-input formControlName="email"></ion-input>
+        </ion-item>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col>
+        <ion-item>
+          <ion-label position="stacked">Password</ion-label>
+          <ion-input type="password" formControlName="password"></ion-input>
+        </ion-item>
+      </ion-col>
+      <ion-col>
+        <ion-item>
+          <ion-label position="stacked"> Confirm Password</ion-label>
+          <ion-input type="password" formControlName="confirmPassword"></ion-input>
+        </ion-item>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col>
+        <ion-item>
           <ion-label>Job Type</ion-label>
-          <ion-select [(ngModel)]="jobType" okText="Okay" cancelText="Dismiss">
+          <ion-select formControlName="jobType" interface="popover">
             <ion-select-option value="pilot">pilot</ion-select-option>
             <ion-select-option value="administrator">administrator</ion-select-option>
           </ion-select>
         </ion-item>
-        <ion-item>
-          <ion-button (click)='addUser()'>
-            Add User
-            <ion-icon name="person-add"></ion-icon>
-          </ion-button>
-        </ion-item>
-        <div padding class="error" [class.failure]="error" *ngIf="error">
-          {{ error }}
-        </div>
+      </ion-col>
+    </ion-row>
+            
+    <div style="display: flex; justify-content: space-between;">
+      <div padding class="error" [class.failure]="error">
+        {{ error }}
+      </div>
+      <ion-button (click)="addUser()" color="dark">
+        Add User
+        <ion-icon name="person-add"></ion-icon>
+      </ion-button>
+    </div>
+  </form>
 </ion-content>
