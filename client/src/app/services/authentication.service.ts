@@ -51,7 +51,7 @@ export class AuthenticationService {
       if (err.status === 401) {
         // authentication error
         console.error('Not authenticated');
-        this.authenticationState.next({status:false,jobType:null});
+        this.authenticationState.next({ status: false, jobType: null });
       } else {
         // some other error occurred
         throw err;
@@ -65,7 +65,7 @@ export class AuthenticationService {
    * @param endpointName The endpoint name excluding '/'
    * @param params The query parameters to be appended to the url
    */
-  async get(endpointName, params: {[key: string]: string}) {
+  async get(endpointName, params: { [key: string]: string }) {
     const httpOptions = {
       headers: new HttpHeaders({
         Authorization: `Bearer ${await this.getToken()}`,
@@ -82,7 +82,7 @@ export class AuthenticationService {
       if (err.status === 401) {
         // authentication error
         console.error('Not authenticated');
-        this.authenticationState.next({status:false,jobType:null});
+        this.authenticationState.next({ status: false, jobType: null });
       } else {
         // some other error occurred
         throw err;
@@ -126,7 +126,7 @@ export class AuthenticationService {
 
     if (!res) {
       console.log('User does not exist');
-      this.authenticationState.next({status:false,jobType:null});
+      this.authenticationState.next({ status: false, jobType: null });
       return false;
     }
 
@@ -137,56 +137,62 @@ export class AuthenticationService {
 
     //this.authenticationState.next(true);
 
-   // console.log('Token received from server side ', token);
+    // console.log('Token received from server side ', token);
     return true;
   }
 
-  async loginPin(password: string, otp: string, email :string): Promise<boolean> {
+  async loginPin(password: string, otp: string, email: string): Promise<{
+    status: boolean;
+    message: string;
+    token: string;
+  }> {
     // need to get custom token
     // Save email
-    let res: any;
-    console.log('Login pin called');
+    let res: {
+      status: boolean;
+      message: string;
+      token: string;
+    };
+
     try {
       res = await this.post('loginPin', {
         otp,
         email,
         password,
-      });
+      }) as any;
     } catch (err) {
       console.error(err);
       throw err;
     }
 
-    if (!res || !res.accessToken || res.accessToken === '') {
-      console.log('User does not exist');
-      this.authenticationState.next({status:false,jobType:null});
-      return false;
+    if (!res.status) {
+      this.authenticationState.next({ status: false, jobType: null });
+      return res;
     }
 
-    const token = res.accessToken;
-
+    const token = res.token;
     await this.storage.set(TOKEN_KEY, token);
 
     await this.validateToken();
 
-    return true;
+    return res;
   }
 
 
-  async resetPasword (email :string ) :Promise <boolean> {
+  async resetPasword(email: string): Promise<boolean> {
 
-    let res :any;
+    let res: any;
     try {
-        res = await this.post('/resetPassword',{
-          email
-        });
-      }catch(err){
+      res = await this.post('/resetPassword', {
+        email
+      });
+    } catch (err) {
       console.log(err);
       throw err;
     }
 
 
-    return ;
+    return;
   }
 
   /**
@@ -199,7 +205,7 @@ export class AuthenticationService {
     await this.storage.remove(EMAIL_KEY);
     console.log('Removed Email');
 
-    this.authenticationState.next({status:false,jobType:null});
+    this.authenticationState.next({ status: false, jobType: null });
   }
 
   /// Check if authenticated by viewing state of token key
@@ -207,21 +213,33 @@ export class AuthenticationService {
     return this.authenticationState.value.status;
   }
 
-  private async validateToken() {
+  /**
+   * Checks that a token is valid, and gets a new token
+   * back, resetting the expiry of the token
+   */
+  public async validateToken() {
     console.log('validating token');
+
     const token = await this.getToken();
     if (!token) {
       // token doesn't exist - don't bother checking validity
       console.log('token not set');
-      this.authenticationState.next({status:false,jobType:null});
+      this.authenticationState.next({ status: false, jobType: null });
       return;
     }
+
+    // check the token with the server
     const res: any = await this.post('vToken', {
       email: await this.getEmail(),
       token,
     });
+    console.log(res);
+
+    // update our token - will be the same token as before if the status was false
     await this.storage.set(TOKEN_KEY, res.token);
-    this.authenticationState.next({status:res.status,jobType:res.jobType});
+
+    this.authenticationState.next({ status: res.status, jobType: res.jobType });
+
     return res.status;
   }
 
