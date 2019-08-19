@@ -52,6 +52,9 @@
             {{ error }}
           </div>
           <div padding text-right class="button-container">
+            <ion-button type="button" (click)="sendOTP()" color="dark" fill="clear">
+              Re-send OTP
+            </ion-button>
             <ion-button type="submit" size="medium" color="dark" [disabled]="form.invalid || loggingIn">
               Log in
             </ion-button>

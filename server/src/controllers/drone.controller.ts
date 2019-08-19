@@ -3,13 +3,13 @@ import { DroneService } from '../services/drone.service';
 import { Drone } from '../entity/drone.entity';
 import { AuthGuard } from '@nestjs/passport';
 import { DroneRoute } from 'src/entity/drone-route.entity';
-@UseGuards(AuthGuard('jwt'))
+// @UseGuards(AuthGuard('jwt'))
 @Controller()
 export class DroneController {
   constructor(private readonly droneService: DroneService) {}
 
   @Post('addDrone')
-  async addDrone(@Body() body) : Promise<boolean> {
+  async addDrone(@Body() body): Promise<boolean> {
     return await this.droneService.addDrone(
       body.name,
       body.avgSpeed,
@@ -20,15 +20,18 @@ export class DroneController {
       body.lat,
     );
   }
-   
+
   @Post('updateDronePosition')
-  async updateDrone(@Body() body) : Promise<boolean> {
-    console.log(body);
-    return await this.droneService.updateDronePosition(body.droneId, body.longitude, body.latitude);
+  async updateDrone(@Body() body): Promise<boolean> {
+    return await this.droneService.updateDronePosition(
+      body.droneId,
+      body.longitude,
+      body.latitude,
+    );
   }
-  
+
   @Post('deactivateDrone')
-  async deactivateDrone(@Body() body ) : Promise<boolean>{
+  async deactivateDrone(@Body() body): Promise<boolean> {
     return await this.droneService.deactivateDrone(body.id);
   }
 
@@ -38,9 +41,7 @@ export class DroneController {
   }
 
   @Post('updateDrones')
-  async updateDrones(@Body() body: {
-    drones: Drone[];
-  }): Promise<boolean> {
+  async updateDrones(@Body() body: { drones: Drone[] }): Promise<boolean> {
     return await this.droneService.updateDrones(body.drones);
   }
 
@@ -51,17 +52,21 @@ export class DroneController {
    * @param body 
    */
   @Post('addDroneRoute')
-  async addDroneRoute(@Body() body): Promise<boolean>{
+  async addDroneRoute(@Body() body): Promise<boolean> {
     return await this.droneService.addDroneRoute(body.id, body.points);
   }
 
   @Post('updateDroneRoute')
-  async updateDroneRoute(@Body() body) : Promise <boolean> {
-    return await this.droneService.updateDroneRoute(body.id, body.points, body.percent);
+  async updateDroneRoute(@Body() body): Promise<boolean> {
+    return await this.droneService.updateDroneRoute(
+      body.id,
+      body.points,
+      body.percent,
+    );
   }
 
   @Post('deactivateDroneRoute')
-  async deactivateDroneRoute(@Body() body) : Promise <boolean> {
+  async deactivateDroneRoute(@Body() body): Promise<boolean> {
     return await this.droneService.deactivateDroneRoute(body.id);
   }
 
@@ -69,5 +74,4 @@ export class DroneController {
   async getDroneRoutes(): Promise<DroneRoute[]> {
     return await this.droneService.getDroneRoutes();
   }
-
 }

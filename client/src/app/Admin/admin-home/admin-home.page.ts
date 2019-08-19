@@ -7,6 +7,7 @@ import XYZ from 'ol/source/XYZ';
 import GeoJSON from 'ol/format/GeoJSON';
 import { Vector as VectorLayer, Tile as TileLayer } from 'ol/layer';
 import VectorSource from 'ol/source/Vector';
+import { Heatmap } from 'ol/layer';
 
 import bbox from '@turf/bbox';
 import contains from '@turf/boolean-contains';
@@ -206,7 +207,16 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
 
         const weights = await this.heatmapService.getPoachingDataCellWeights();
 
-        const heatmap = self.createHeatmap(self, weights, [255, 0, 0]);
+        const heatmap = self.createHeatmap(self, weights, [
+          [2, 2, 15],
+          [43, 16, 96],
+          [99, 26, 127],
+          [162, 49, 126],
+          [237, 90, 95],
+          [254, 186, 129],
+          [252, 249, 187],
+        ]);
+
         if (this.poachingHeatmapLayer) {
           this.map.removeLayer(this.poachingHeatmapLayer);
         }
@@ -229,7 +239,16 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
           self.data.time,
         );
 
-        const heatmap = self.createHeatmap(self, weights, [0, 0, 255]);
+        const heatmap = self.createHeatmap(self, weights, [
+          [71, 16, 100],
+          [60, 81, 138],
+          [45, 116, 142],
+          [33, 147, 140],
+          [54, 184, 120],
+          [109, 206, 89],
+          [175, 221, 48],
+          [245, 229, 33],
+        ]);
 
         if (this.animalHeatmapLayer) {
           this.map.removeLayer(this.animalHeatmapLayer);
@@ -237,7 +256,7 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
         this.animalHeatmapLayer = heatmap;
         this.map.addLayer(this.animalHeatmapLayer);
       },
-      createHeatmap: (self, cellWeights, rgb) => {
+      createHeatmap: (self, cellWeights, gradient) => {
         const OPACITY = 0.8;
 
         const features = self.data.cellData.map((cell: MapCell) => ({
@@ -246,6 +265,11 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
             weight: cellWeights[cell.id],
           },
         }));
+
+        const getGradientColour = (value: number) => {
+          const startIdx = Math.floor(value * (gradient.length - 1));
+          return gradient[startIdx];
+        };
 
         return new VectorLayer({
           source: new VectorSource({
@@ -258,12 +282,15 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
           }),
           updateWhileAnimating: false,
           updateWhileInteracting: false,
-          // preload: Infinity,
           renderMode: 'image',
           style: cell => {
+            const weight = cell.getProperties().weight;
             return new Style({
               fill: new Fill({
-                color: [...rgb, Math.pow(cell.getProperties().weight, 2) * OPACITY]
+                color: [
+                  ...getGradientColour(weight),
+                  (0.3 + 0.7 * weight) * OPACITY,
+                ],
               }),
             });
           },
@@ -309,15 +336,10 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
   ngAfterViewInit() {
     this.initialiseMap();
 
-    // get incidents every minute
+    // poll drone locations
     this.dronesPoller = setInterval(() => {
       this.getDrones();
-    }, 60000);
-
-    // get the time every few minutes
-    this.timePoller = setInterval(() => {
-      this.states.options.showAnimalHeatmap(this.states.options);
-    }, 60000);
+    }, 5000);
 
     // update the map size on an interval
     this.mapUpdateInterval = setInterval(() => {
@@ -364,7 +386,7 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
         new TileLayer({
           preload: Infinity,
           source: new XYZ({
-            url: 'https://mt{0-3}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
+            url: 'https://mt{0-3}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}&hl=en',
           }),
         }),
       ],
@@ -388,7 +410,7 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
 
     // animate zoom to the reserve
     const MAX_ZOOM = 18;
-    const MIN_ZOOM = 11;
+    const MIN_ZOOM = 7;
 
     const view = this.map.getView();
     view.setMaxZoom(MAX_ZOOM);
@@ -556,8 +578,6 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
 
     const drones = await this.dronesService.getDrones();
 
-    console.log('got drones', drones);
-
     const layer = new VectorLayer({
       source: new VectorSource({
         features: drones.map(drone => new Feature({
@@ -573,8 +593,6 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
         }),
       }),
     });
-
-    console.log(layer);
 
     if (this.dronesLayer) {
       this.map.removeLayer(this.dronesLayer);

@@ -97,12 +97,12 @@ export const animations = [
     transition(':enter', [
       style({
         opacity: 0,
-        transform: 'translate(-50%, -50%) scale(0.9) perspective(600px) rotateX(20deg)',
+        transform: 'translateX(-50%) scale(0.9) perspective(600px) rotateX(20deg)',
       }),
       group([
         animate('300ms ease-in', style({
           opacity: 1,
-          transform: 'translate(-50%, -50%) scale(1) perspective(600px) rotateX(0)',
+          transform: 'translateX(-50%) scale(1) perspective(600px) rotateX(0)',
         })),
       ])
     ]),
@@ -110,7 +110,7 @@ export const animations = [
       group([
         animate('300ms ease-out', style({
           opacity: 0,
-          transform: 'translate(-50%, -50%) scale(0.9) perspective(600px) rotateX(20deg)',
+          transform: 'translateX(-50%) scale(0.9) perspective(600px) rotateX(20deg)',
         })),
       ])
     ]),

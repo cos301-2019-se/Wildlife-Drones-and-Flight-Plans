@@ -53,15 +53,16 @@ export class HeatmapService {
 
     const cellSize = await this.getCellSize();
     const halfCellSizeDeg = convertLength(cellSize / 2, 'kilometers', 'degrees');
+    const halfCellSizeDegX = 1.105 * halfCellSizeDeg;
 
     const cells: MapCell[] = (res as any[]).map(cell => ({
       id: cell.id,
       lon: cell.lon, // x
       lat: cell.lat, // y
       geoJSON: bboxPolygon([
-        cell.lon - halfCellSizeDeg, // minX
+        cell.lon - halfCellSizeDegX, // minX
         cell.lat - halfCellSizeDeg, // minY
-        cell.lon + halfCellSizeDeg, // maxX
+        cell.lon + halfCellSizeDegX, // maxX
         cell.lat + halfCellSizeDeg, // maxY
       ]),
     }));

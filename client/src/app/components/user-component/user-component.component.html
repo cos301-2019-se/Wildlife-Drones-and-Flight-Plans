@@ -1,12 +1,14 @@
 <ion-grid>
   <ion-row>
     <ion-col size="8">
-        Name: {{this.name}} {{this.surname}}
+      <b>{{ this.name }} {{ this.surname }}</b><br />
+      {{ this.job | titlecase }}
     </ion-col>
-  </ion-row>
-  <ion-row>
-    <ion-col>
-        Job Type: {{this.job}}
+    <ion-col text-right>
+      <ion-button size="medium" color="dark">
+        <ion-icon name="create"></ion-icon>
+        Edit
+      </ion-button>
     </ion-col>
   </ion-row>
 </ion-grid>

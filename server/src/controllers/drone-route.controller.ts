@@ -11,7 +11,6 @@ export class DroneRouteController {
 
   @Post('create-incident-route')
   async createIncidentRoute(@Body() body) {
-    console.log(body);
-    return await this.droneRouteService.createIncidentRoute(body.droneId, body.lon, body.lat);
+    return await this.droneRouteService.createIncidentRoutes(body.droneId, body.lon, body.lat);
   }
 }
