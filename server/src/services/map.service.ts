@@ -559,4 +559,10 @@ export class MapService {
 
     return hotSpots;
   }
+
+  async updateCellLastVisited(lng: number, lat:number) : Promise<boolean>{
+
+    return true;
+
+  }
 }

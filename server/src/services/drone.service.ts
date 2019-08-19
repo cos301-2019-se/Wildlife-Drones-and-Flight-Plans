@@ -161,11 +161,11 @@ export class DroneService {
     if (!droneIdFromDroneTable) {
       console.log('Drone ' + id + ' was not found');
       return false;
-    }
+    }    
 
     try {
       droneRoute.drone = droneIdFromDroneTable;
-      droneRoute.points = points;
+      droneRoute.points = JSON.stringify(points);
       droneRoute.percentComplete = 0;
       droneRoute.timestamp = new Date();
       droneRoute.active = true;

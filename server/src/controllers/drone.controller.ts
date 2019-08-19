@@ -44,6 +44,12 @@ export class DroneController {
     return await this.droneService.updateDrones(body.drones);
   }
 
+  /**
+   * example of body: {"id":1,"points": [{"1":[{"lng":25.144,"lat":2484}],
+   * "2":[{"lng":25.145,"lat":24.83}],"3":[{"lng":25.146,"lat":24.84}],
+   * "4":[{"lng":25.144,"lat":24.84}]}]}
+   * @param body 
+   */
   @Post('addDroneRoute')
   async addDroneRoute(@Body() body): Promise<boolean>{
     return await this.droneService.addDroneRoute(body.id, body.points);
