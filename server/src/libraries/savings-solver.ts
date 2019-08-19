@@ -16,6 +16,7 @@ export class Point {
   x: number;
   y: number;
   demand: number;
+  private distances = new WeakMap<Point, number>();
 
   /**
    * Instantiates a point
@@ -34,7 +35,11 @@ export class Point {
    * @param point
    */
   getDistanceTo(point: Point): number {
-    return getDistance([point.x, point.y], [this.x, this.y], { units: 'degrees' });
+    return this.distances.get(point);
+  }
+
+  setDistanceTo(point: Point, distance: number) {
+    this.distances.set(point, distance);
   }
 }
 
@@ -88,6 +93,49 @@ class Route {
   public totalDemand() {
     return this.points.reduce((sum, point) => sum + point.demand, 0);
   }
+
+  /**
+   * Attempts to optimise the route using local search.
+   * Runs until no further improvements are made.
+   * @param iterations The number of times to re-run
+   */
+  public optimise(iterations = 10) {
+    for (let i = 0; i < iterations; i++) {
+      let bestDistance = 0;
+      while (bestDistance !== this.twoOpt()) {
+        bestDistance = this.totalDistance();
+      }
+    }
+  }
+
+  /**
+   * Two-opt implementation. Swaps points if the distances
+   * would be improved. Usually gets rid of most intersecting edges
+   */
+  private twoOpt() {
+    for (let i = 0; i < this.points.length - 1; i++) {
+      for (let j = i + 1; j < this.points.length - 1; j++) {
+        if (
+          this.points[i].getDistanceTo(this.points[i + 1]) + this.points[j].getDistanceTo(this.points[j + 1])
+          > this.points[i].getDistanceTo(this.points[j]) + this.points[j + 1].getDistanceTo(this.points[i + 1])
+        ) {
+          this.twoOptSwap(i, j);
+          return this.totalDistance();
+        }
+      }
+    }
+    return this.totalDistance();
+  }
+
+  /**
+   * Swap function for two-opt
+   */
+  private twoOptSwap(i, k) {
+    const route = this.points.slice(0, i + 1);
+    route.push(...this.points.slice(i + 1, k + 1).reverse());
+    route.push(...this.points.slice(k + 1));
+    this.points = route;
+  }
 }
 
 /**
@@ -129,11 +177,16 @@ export class ClarkeWrightProblem {
     this.maxPointDistance = -Infinity;
     for (const point of this.points) {
       for (const otherPoint of this.points) {
-        const distance = point.getDistanceTo(otherPoint);
+        const distance = getDistance([point.x, point.y], [otherPoint.x, otherPoint.y], { units: 'degrees' });
+        point.setDistanceTo(otherPoint, distance);
         if (distance > this.maxPointDistance) {
           this.maxPointDistance = distance;
         }
       }
+
+      const depotDistance = getDistance([point.x, point.y], [depot.x, depot.y], { units: 'degrees' });
+      point.setDistanceTo(this.depot, depotDistance);
+      this.depot.setDistanceTo(point, depotDistance);
     }
 
     this.averageDemand = this.points.reduce((sum, point) => sum + point.demand, 0) / this.points.length;
@@ -170,6 +223,8 @@ export class ClarkeWrightProblem {
           }
         }
       }
+
+      this.solutions.forEach(solution => solution.optimise());
 
       this.joinedRoutes = {}; // clear joined routes
       this.findAllRouteSavingsPairs(weights); // recalculate savings

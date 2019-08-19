@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthenticationService } from './../../services/authentication.service';
 import { Router } from '@angular/router';
+import { ToastController } from '@ionic/angular';
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
-  styleUrls: ['./login.page.scss'],
+  styleUrls: ['./login.page.scss']
 })
-
 export class LoginPage implements OnInit {
   enteringEmail = true;
 
@@ -17,14 +17,15 @@ export class LoginPage implements OnInit {
   loggingIn = false;
   resetting = false;
 
+  numOtpRetries = 3;
+
   constructor(
     private authService: AuthenticationService,
     private router: Router,
-  ) {
-  }
+    private toastCtrl: ToastController,
+  ) {}
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
   async loginEmail() {
     this.loggingIn = true;
@@ -49,14 +50,57 @@ export class LoginPage implements OnInit {
     }
   }
 
+  async sendOTP() {
+    try {
+      await this.authService.loginEmail(this.enteredEmail);
+      this.numOtpRetries--;
+      const sentToast = await this.toastCtrl.create({
+        message: `OTP sent to ${this.enteredEmail}`,
+        duration: 15000,
+      });
+      sentToast.present();
+    } catch (err) {
+      const errorToast = await this.toastCtrl.create({
+        message: 'An unknown error occurred',
+        duration: 15000,
+      });
+      errorToast.present();
+    }
+
+    if (this.numOtpRetries <= 0) {
+      const toast = await this.toastCtrl.create({
+        message: 'OTP not sending?',
+        buttons: [
+          {
+            text: 'Change email',
+            handler: () => this.resetEmail(),
+          }
+        ],
+      });
+
+      toast.present();
+    }
+  }
+
+  resetEmail() {
+    this.enteredEmail = '';
+    this.enteringEmail = true;
+    this.numOtpRetries = 3;
+    this.error = null;
+  }
+
   async loginPin() {
     this.loggingIn = true;
     this.error = 'Checking credentials...';
 
     try {
-      const res = await this.authService.loginPin(this.enteredPassword,this.enteredOTP,this.enteredEmail);
-      if (!res) {
-        this.error = 'Incorrect credentials';
+      const res = await this.authService.loginPin(
+        this.enteredPassword,
+        this.enteredOTP,
+        this.enteredEmail
+      );
+      if (!res.status) {
+        this.error = res.message;
       }
     } catch (err) {
       this.error = 'An unknown error occurred';
@@ -65,24 +109,7 @@ export class LoginPage implements OnInit {
     this.loggingIn = false;
   }
 
-  
   async reset() {
-    this.router.navigate(['reset-password']);
-    console.log("it is being called");
-    
-  // this.resetting = true;
-  // this.error = 'Checking credentials...';
-
-  // try {
-  //   const res = await this.authService.resetPasword(this.enteredEmail);
-  //   if (!res) {
-  //     this.error = 'Incorrect credentials';
-  //   }
-  // } catch (err) {
-  //   this.error = 'An unknown error occurred';
-  // }
-
-  // this.resetting = false;
+    // TODO: implementation
+  }
 }
-}
-

@@ -347,15 +347,22 @@ export class MapService {
   }> {
     const con = await this.databaseService.getConnection();
     try {
+      console.time('get cells from db');
       const cellsData = await con.getRepository(AnimalCellWeight).find({
         where: {
           species: speciesId,
         },
         relations: ['species', 'cell'],
       });
+      console.timeEnd('get cells from db');
 
+      console.time('map fn');
       const weights = cellsData.map(cd => cd[`time${time}Weight`]);
+      console.timeEnd('map fn');
+      console.time('normalized');
       const normalizedWeights = IQRIfy.runOn(weights);
+      console.timeEnd('normalized');
+
 
       return cellsData.reduce((ob, cell, cellIndex) => {
         ob[cell.cell.id] = normalizedWeights[cellIndex];

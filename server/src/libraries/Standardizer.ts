@@ -97,18 +97,24 @@ export class IQRIfy {
 
     return values.map(value => {
       if (value < lower) {
-        return 1;
+        return 7 / 7;
+      }
+      if (value < (lower + lowerQuartile) / 2) {
+        return 6 / 7;
       }
       if (value < lowerQuartile) {
-        return 0.75;
+        return 5 / 7;
+      }
+      if (value < (lowerQuartile + upperQuartile) / 2) {
+        return 4 / 7;
       }
       if (value < upperQuartile) {
-        return 0.5;
+        return 3 / 7;
       }
       if (value < upper) {
-        return 0.1  ;
+        return 2 / 7;
       }
-      return 0;
+      return 1 / 7;
     });
   }
 }

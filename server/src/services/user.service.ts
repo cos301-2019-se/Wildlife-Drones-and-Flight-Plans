@@ -86,7 +86,8 @@ export class UserService {
       subject: `Your one time PIN is: ${otp}`,
       template: 'otp.twig',
       templateParams: {
-        otp: otp,
+        otp,
+        timeout: Math.floor(this.EXPIRY_TIME / 60000),
       },
       to: email,
     });
@@ -107,7 +108,10 @@ export class UserService {
    * @param password The user's password
    * @param otp The One Time PIN sent to the user
    */
-  async loginPin(email: string, password: string, otp: string): Promise<boolean> {
+  async loginPin(email: string, password: string, otp: string): Promise<{
+    status: boolean;
+    message: string;
+  }> {
     // remove all hyphens from otp in case user entered them
     otp = otp.replace(/\-/g, '');
 
@@ -122,34 +126,52 @@ export class UserService {
 
     if (!existingUser) {
       console.log('the user does not exist');
-      return false;
+      return {
+        status: false,
+        message: 'The user does not exist',
+      };
     }
 
     // if the expiry time has passed, send the OTP again
     if (existingUser.codeExpires <= new Date()) {
       this.loginEmail(email); // re-send the One Time Pin
-      return false;
-    }
-
-    // if the user has run out of login attempts
-    // they must wait for the pin to expire
-    if (existingUser.loginAttemptsRemaining <= 0) {
-      return false;
+      return {
+        status: false,
+        message: 'The OTP expired. Please enter new OTP.',
+      };
     }
 
     // check that the password and OTP both match
     // if they do not, decrement the number of login attempts
     if (
+      existingUser.loginAttemptsRemaining > 0 &&
       bcrypt.compareSync(password, existingUser.password) &&
       existingUser.code.replace(/\-/g, '') === otp
     ) {
-      console.log('The password matches the db password ');
-      return true;
-    } else {
-      console.log('the password is not the same');
-      existingUser.loginAttemptsRemaining--;
-      await usersRepo.save(existingUser);
+      return {
+        status: true,
+        message: 'Successfully logged in',
+      };
     }
+
+    // reduce number of login attempts remaining
+    existingUser.loginAttemptsRemaining--;
+    await usersRepo.save(existingUser);
+
+    // if the user has run out of login attempts
+    // they must wait for the pin to expire
+    if (existingUser.loginAttemptsRemaining <= 0) {
+      const timeRemaining = (existingUser.codeExpires.getTime() - Date.now()) / 1000;
+      return {
+        status: false,
+        message: `You have exceeded the number of login attempts. Wait ${Math.round(timeRemaining)} seconds.`,
+      };
+    }
+
+    return {
+      status: false,
+      message: `Incorrect OTP or password. ${existingUser.loginAttemptsRemaining} attempt${existingUser.loginAttemptsRemaining > 1 ? 's' : ''} remaining.`
+    };
   }
 
   async reset(email): Promise<boolean> {

@@ -20,7 +20,7 @@ export class DroneRouteService {
    * @param lat The latitude of the starting position
    * @param since Since when to look at incidents - defaults to a 30 days back
    */
-  async createIncidentRoute(droneId: number, lon: number, lat: number, since: Date = new Date(Date.now() - 30 * 86400000)) {
+  async createIncidentRoutes(droneId: number, lon: number, lat: number, since: Date = new Date(Date.now() - 30 * 86400000)) {
     const drone = await this.droneService.getDrone(droneId);
     if (!drone) {
       throw new Error('The drone could not be found');
@@ -64,7 +64,7 @@ export class DroneRouteService {
       minSavings: 0.1,
     });
 
-    return [routes[0].depot, ...routes[0].points, routes[0].depot]
-      .map(point => [point.x, point.y]);
+    return routes
+      .map(route => [route.depot, ...route.points, route.depot].map(point => [point.x, point.y]));
   }
 }
