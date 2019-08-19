@@ -22,6 +22,7 @@ import { CacheInterceptor  } from '@nestjs/common';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { MailService } from './services/mail.service';
 import { DroneRouteService } from './services/drone-route.service';
+import { CacheService } from './services/cashe.service';
 
 export const providers = [
   MapService,
@@ -50,4 +51,5 @@ export const providers = [
     useClass: CacheInterceptor,
   },
   DroneRouteService,
+  CacheService,
 ];
