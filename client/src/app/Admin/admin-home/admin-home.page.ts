@@ -34,7 +34,7 @@ import { IncidentsService } from '../../services/incidents.service';
 import { DronesService } from '../../services/drones.service';
 import { Drone } from '../../services/drones.service';
 import { HeatmapService, MapCell } from '../../services/heatmap.service';
-
+import { LoadingController, AlertController } from '@ionic/angular';
 interface MapState {
   setup?: (self: MapState) => Promise<any>;
   destruct?: (self: MapState) => Promise<any>;
@@ -42,6 +42,8 @@ interface MapState {
     add?: () => void;
     cancel?: () => void;
     done: () => void;
+    next?: (state: MapState) => void;
+    prev?: (state: MapState) => void;
   };
   tooltip?: string;
   data?: {
@@ -67,6 +69,9 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
 
   private dronesPoller = null;
   dronesLayer = null;
+
+  incidentsLayer = null;
+  private incidentsPoller = null;
 
   poachingHeatmapLayer = null;
   animalHeatmapLayer = null;
@@ -158,6 +163,7 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
     //   },
     // },
     // map options state
+    // View route state
     options: {
       setup: async (self) => {
         if (!self.data.cellData.length) {
@@ -185,6 +191,7 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
         enablePoachingHeatmap: false,
         enableAnimalHeatmap: false,
         enableActiveDrones: true,
+        enablePastFlightPlans:false,
         animalHeatmapSpecies: null,
         useCurrentTime: true,
         time: 0,
@@ -309,6 +316,8 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
     private incidentsService: IncidentsService,
     private dronesService: DronesService,
     private heatmapService: HeatmapService,
+    private loadingCtrl: LoadingController,
+    private alertCtrl: AlertController,
   ) {}
 
   async ngOnDestroy() {
@@ -331,10 +340,19 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
     if (!!this.mapUpdateInterval) {
       clearInterval(this.mapUpdateInterval);
     }
+
+    if (!!this.incidentsPoller) {
+      clearInterval(this.incidentsPoller);
+    }
   }
 
   ngAfterViewInit() {
     this.initialiseMap();
+
+     // get incidents every minute
+     this.incidentsPoller = setInterval(() => {
+      this.getIncidents();
+    }, 5000);
 
     // poll drone locations
     this.dronesPoller = setInterval(() => {
@@ -400,6 +418,7 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
     });
 
     this.geolocationListen();
+    this.getIncidents();
     this.getDrones();
 
     // get the reserve data
@@ -563,6 +582,10 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
     });
   }
 
+  async getPastFlightPlans(){
+  
+  }
+
   /**
    * Updates the incidents layer to show incident markers
    */
@@ -601,7 +624,36 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
     this.dronesLayer = layer;
     this.map.addLayer(this.dronesLayer);
   }
+  /**
+   * Updates the incidents layer to show incident markers
+   */
+  async getIncidents() {
+    const incidents = await this.incidentsService.getIncidents();
 
+    const layer = new VectorLayer({
+      source: new VectorSource({
+        features: incidents.map(incident => new Feature({
+          geometry: new Point(fromLonLat([incident.longitude, incident.latitude])),
+        })),
+      }),
+      style: new Style({
+        image: new CircleStyle({
+          radius: 6,
+          fill: new Fill({
+            color: 'red',
+          }),
+        }),
+      }),
+    });
+
+    const tempLayer = this.incidentsLayer;
+    this.incidentsLayer = layer;
+    this.map.addLayer(this.incidentsLayer);
+
+    if (tempLayer) {
+      this.map.removeLayer(tempLayer);
+    }
+  }
   refresh() {
     this.cdr.detectChanges();
   }

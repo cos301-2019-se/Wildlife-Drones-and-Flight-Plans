@@ -46,6 +46,12 @@
           [(ngModel)]="states.options.data.enableActiveDrones"
         ></ion-checkbox>
       </ion-item>
+      <ion-item no-padding>
+        <ion-label>Show past flight plans</ion-label>
+        <ion-checkbox slot="end"
+          [(ngModel)]="states.options.data.enablePastFlightPlans"
+        ></ion-checkbox>
+      </ion-item>
       <ng-container *ngIf="states.options.data.enableAnimalHeatmap">
         <ion-item no-padding>
           <ion-label position="stacked">Animal species</ion-label>
@@ -94,6 +100,15 @@
   class="confirmation-buttons"
     *ngIf="state.confirmations"
   >
+  <!-- prev button -->
+  <ion-fab-button class="confirmation-button" size="small" color="dark"
+  *ngIf="state.confirmations.prev"
+  (click)="state.confirmations.prev(state)" @button-animation
+  [disabled]="state.isAtStart(state)"
+>
+  <ion-icon name="arrow-back"></ion-icon>
+</ion-fab-button>
+
     <!-- cancel button -->
     <ion-fab-button class="confirmation-button" size="small" color="dark"
     *ngIf="state.confirmations.cancel"
@@ -117,6 +132,14 @@
     >
       <ion-icon name="checkmark"></ion-icon>
     </ion-fab-button>
+     <!-- next button -->
+     <ion-fab-button class="confirmation-button" size="small" color="dark"
+     *ngIf="state.confirmations.next"
+     (click)="state.confirmations.next(state)" @button-animation
+     [disabled]="state.isAtEnd(state)"
+   >
+     <ion-icon name="arrow-forward"></ion-icon>
+   </ion-fab-button>
   </ion-fab>
   
   <!-- fab location button -->
