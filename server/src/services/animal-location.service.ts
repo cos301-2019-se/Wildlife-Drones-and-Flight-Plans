@@ -75,6 +75,15 @@ export class AnimalLocationService {
     }
   }
 
+  async validateAnimalCSV(filename): Promise<boolean>
+  {
+    const csvReader = this.csvReader.readCSV(filename);
+    console.log(csvReader.getHeaders());
+    //Check if headers are valid if so then remove then populate table and remove headers
+    //console.log(JSON.stringify(row));
+    return false;
+  }
+
   async addAnimalLocationDataCSV(filename): Promise<void> {
     const csvFile = filename;
 

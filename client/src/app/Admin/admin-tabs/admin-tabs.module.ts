@@ -13,6 +13,7 @@ const routes: Routes = [
     children:[
       { path: 'users', loadChildren: '../users/users.module#UsersPageModule' },
       { path: 'admin-home', loadChildren: '../admin-home/admin-home.module#AdminHomePageModule'},
+      { path: 'csvreader', loadChildren: '../csvreader/csvreader.module#CSVReaderPageModule' },
      // { path: 'home', loadChildren: '../members/home/home.module#HomePageModule' },
     ]
   },

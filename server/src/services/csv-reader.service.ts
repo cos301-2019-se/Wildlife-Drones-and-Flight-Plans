@@ -19,7 +19,10 @@ export class CsvReader {
 
     this.headers = this.handle.next().toString().split(',');
   }
-
+getHeaders()
+{
+  return this.headers;
+}
   next() {
     const line = this.handle.next();
 

@@ -1,7 +1,7 @@
-import { Controller, Get, Post, Query, Body } from '@nestjs/common';
+import { Controller, Get, Post, Query, Body, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { AnimalLocationService } from '../services/animal-location.service';
 import { AnimalLocation } from '../entity/animal-location.entity';
-
 @Controller()
 export class AnimalController {
   constructor(private readonly animalLocationService: AnimalLocationService) {}
@@ -18,6 +18,17 @@ export class AnimalController {
       body.habitat,
     );
   }
+
+  @Post('csvUploader')
+  @UseInterceptors(FileInterceptor('csvFile'))
+  async csvUploader(@UploadedFile() file): Promise<boolean> {
+    var fs = require('fs');
+    const path = 'temp.csv';
+    fs.writeFileSync(path,file.buffer);
+    const isValid = await this.animalLocationService.validateAnimalCSV(path);
+    return isValid;
+  }
+
   @Post('addAnimalLocationDataCSV')
   async addAnimalLocationDataCSV(@Body() body): Promise<void> {
     return await this.animalLocationService.addAnimalLocationDataCSV(
