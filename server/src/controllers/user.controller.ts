@@ -52,7 +52,8 @@ export class UserController {
 
   @Post('resetPassword')
   async resetPass(@Body() body): Promise<boolean> {
-    return await this.userService.reset(body.email);
+    console.log("made it to the end point")
+    return await this.userService.reset(body.email,body.otp);
   }
 
   @Post('addUser')
