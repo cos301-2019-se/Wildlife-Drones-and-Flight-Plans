@@ -3,7 +3,7 @@ import { DroneService } from '../services/drone.service';
 import { Drone } from '../entity/drone.entity';
 import { AuthGuard } from '@nestjs/passport';
 import { DroneRoute } from 'src/entity/drone-route.entity';
-// @UseGuards(AuthGuard('jwt'))
+ @UseGuards(AuthGuard('jwt'))
 @Controller()
 export class DroneController {
   constructor(private readonly droneService: DroneService) {}
