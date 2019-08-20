@@ -99,6 +99,9 @@ export class ModelPrediction {
       median,
       p75th,
       upper,
+      inputs: inputLocations.map(l => [l.longitude, l.latitude]).slice(1000, 1005),
+      outputs: outputs.map(o => o.reverse()).slice(1000, 1005),
+      actual: correctOutputs.map(l => [l.longitude, l.latitude]).slice(1000, 1005),
     };
   }
 

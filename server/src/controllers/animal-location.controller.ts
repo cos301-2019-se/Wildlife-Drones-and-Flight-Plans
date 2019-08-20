@@ -1,10 +1,14 @@
 import { Controller, Get, Post, Query, Body } from '@nestjs/common';
 import { AnimalLocationService } from '../services/animal-location.service';
 import { AnimalLocation } from '../entity/animal-location.entity';
+import { ModelTraining } from '../services/model-training.service';
 
 @Controller()
 export class AnimalController {
-  constructor(private readonly animalLocationService: AnimalLocationService) {}
+  constructor(
+    private readonly animalLocationService: AnimalLocationService,
+    private readonly modelTrainingService: ModelTraining,
+  ) {}
 
   @Post('addAnimalLocationData')
   async addAnimalLocationData(@Body() body): Promise<boolean> {
@@ -42,5 +46,20 @@ export class AnimalController {
     return await this.animalLocationService.getLocationDataBySpeciesId(
       body.animalSpecies,
     );
+  }
+
+  @Post('getAnimalIds')
+  async getAnimalIds(): Promise<string[]> {
+    return await this.animalLocationService.getAnimalIds();
+  }
+
+  @Post('getAnimalLocations')
+  async getAnimalLocations() {
+    const lastFewLocations = await this.animalLocationService.getLastFewAnimalLocations('AM105');
+
+    this.modelTrainingService.predictFutureAnimalPosition('AM105', 60);
+
+
+    return lastFewLocations;
   }
 }
