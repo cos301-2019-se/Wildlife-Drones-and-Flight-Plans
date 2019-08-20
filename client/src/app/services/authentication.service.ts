@@ -180,7 +180,7 @@ export class AuthenticationService {
 
 
   async resetPassword(email: string, otp : string): Promise<boolean> {
-    console.log("about to send post for reset")
+   // console.log("about to send post for reset")
     let res: any;
     try {
       res = await this.post('resetPassword', {

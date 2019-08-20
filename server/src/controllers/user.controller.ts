@@ -1,9 +1,10 @@
 import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common';
 import { UserService } from '../services/user.service';
-import { AuthGuard } from '@nestjs/passport';
-import { AuthService } from '../auth/auth.service';
 import { addUserDTO, updateUserDTO, deleteUserDTO } from '../dto/validation';
 import { User } from 'src/entity/user.entity';
+import { AdminGuard } from 'src/auth/admin.guard';
+import { AuthGuard } from '@nestjs/passport';
+import { AuthService } from '../auth/auth.service';
 
 @Controller()
 export class UserController {
@@ -12,6 +13,7 @@ export class UserController {
     private readonly authService: AuthService,
   ) {}
 
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   @Post('getUsers')
   async getUsers(): Promise<User[]> {
     return await this.userService.getAllUsers();
@@ -55,7 +57,8 @@ export class UserController {
     console.log("made it to the end point")
     return await this.userService.reset(body.email,body.otp);
   }
-
+ 
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   @Post('addUser')
   async addUser(@Body() createUserDto: addUserDTO): Promise<boolean> {
     return await this.userService.addUser(
@@ -66,7 +69,7 @@ export class UserController {
       createUserDto.surname,
     );
   }
-
+@UseGuards(AuthGuard('jwt'), AdminGuard)
   @Post('updateUser')
   async updateUser(@Body() updateUserDto: updateUserDTO): Promise<boolean> {
     console.log(JSON.stringify(updateUserDto));
@@ -78,7 +81,7 @@ export class UserController {
       updateUserDto.job,
     );
   }
-
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   @Post('deactivateUser')
   async deactivate(@Body() deleteUserDto: deleteUserDTO): Promise<boolean> {
     //  return true;

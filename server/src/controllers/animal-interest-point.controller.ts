@@ -1,5 +1,6 @@
-import { Controller, Get, Post, Body } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common';
 import { AnimalInterestPointService } from '../services/animal-interest-point.service';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller()
 export class AnimalInterestPointController {
@@ -11,7 +12,7 @@ export class AnimalInterestPointController {
   // async addAnimalInterestPoint(): Promise<boolean> {
   //   return this.animalInterestPointService.addAnimalInterestPoint();
   // }
-
+  @UseGuards(AuthGuard('jwt'))
   @Post('addAnimalInterestPoint')
   async addAnimalInterestPoint() :Promise <boolean> {
     return this.animalInterestPointService.addAnimalInterestPoint();
