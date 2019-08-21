@@ -34,6 +34,7 @@ import { IncidentsService } from '../../services/incidents.service';
 import { DronesService } from '../../services/drones.service';
 import { Drone } from '../../services/drones.service';
 import { HeatmapService, MapCell } from '../../services/heatmap.service';
+import Geometry from 'ol/geom/Geometry';
 
 interface MapState {
   setup?: (self: MapState) => Promise<any>;
@@ -70,6 +71,7 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
 
   poachingHeatmapLayer = null;
   animalHeatmapLayer = null;
+  hotHeatmapLayer = null;
   private timePoller = null;
 
   public withinReserve = true;
@@ -250,11 +252,55 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
           [245, 229, 33],
         ]);
 
+        const hotweights = await this.heatmapService.getHotspotsCellWeights(
+        );
+        console.log(hotweights)
+
+        // this.hotHeatmapLayer = new Heatmap({
+        //   source: new VectorSource({
+        //     features: hotweights.map(weight => {
+        //       return new Feature(new Point(fromLonLat([weight.lon, weight.lat])))
+        //     }),
+        //   }),
+        // });
+
+        this.hotHeatmapLayer = new VectorLayer({
+          source: new VectorSource({
+            features: hotweights.map(w => new Feature({
+              geometry: new Point(fromLonLat([w.lon, w.lat])),
+            })),
+          }),
+          style: new Style({
+            image: new CircleStyle({
+              radius: 6,
+              fill: new Fill({
+                color: 'red',
+              }),
+            }),
+          }),
+        });
+
+        console.log('heatmap', this.hotHeatmapLayer);
+
+        // const hotheatmap = self.createHeatmap(self, hotweights, [
+        //   [71, 16, 100],
+        //   [60, 81, 138],
+        //   [45, 116, 142],
+        //   [33, 147, 140],
+        //   [54, 184, 120],
+        //   [109, 206, 89],
+        //   [175, 221, 48],
+        //   [245, 229, 33],
+        // ]);
+
         if (this.animalHeatmapLayer) {
           this.map.removeLayer(this.animalHeatmapLayer);
         }
         this.animalHeatmapLayer = heatmap;
+        // this.hotHeatmapLayer = hotheatmap;
+
         this.map.addLayer(this.animalHeatmapLayer);
+        this.map.addLayer(this.hotHeatmapLayer);
       },
       createHeatmap: (self, cellWeights, gradient) => {
         const OPACITY = 0.8;

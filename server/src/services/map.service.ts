@@ -12,6 +12,7 @@ import { AnimalCellWeight } from '../entity/animal-cell-weight.entity';
 import { IQRIfy, Standardizer } from '../libraries/Standardizer';
 import { PoachingCellWeight } from '../entity/poaching-cell-weight.entity';
 import { CacheService } from './cashe.service'
+import { Species } from 'src/entity/animal-species.entity';
 
 @Injectable()
 export class MapService {
@@ -436,23 +437,64 @@ export class MapService {
     return JSON.parse(feature.properties);
   }
 
+  async speciseWeights(speciesId : number) : Promise<any[]>
+  {
+    const con = await this.databaseService.getConnection();
+
+    const animalData = await con
+    .getRepository(AnimalCellWeight)
+    .find({ relations: ['cell'], where: {species : speciesId}});
+    
+    
+      const mappedAnimalData = animalData.map((element) => (
+          { 
+            cellId: element.cell[0],
+            percentile: -1,
+            weight:
+              (element.time0Weight +
+                element.time120Weight +
+                element.time240Weight +
+                element.time360Weight +
+                element.time480Weight +
+                element.time600Weight +
+                element.time720Weight +
+                element.time840Weight +
+                element.time960Weight +
+                element.time1080Weight +
+                element.time1200Weight +
+                element.time1320Weight) /
+              12,
+          }
+      ));
+          
+      return mappedAnimalData;
+  }
+
   /**
    * gets hotspots according to cells, takes all animal cell weights,
    * poaching cell weights and cell last visited to create an array of 
    * cells that have the highest priority to be visited
    */
-  async getCellHotspots(): Promise<Array<String>> {
+  async getCellHotspots(priority): Promise<Array<String>> {
     const cache = this.cache;
 
+    let percentage:number = 0.4;
+    let timePercentage:number = 0.2;
 
+    if(priority)
+    {
+      percentage = 0.25;
+      timePercentage = 0.5;
+    }
 
-
+    
     return await cache.getKey('hotspots', async () => {      
       console.time('calculating averages');
       const con = await this.databaseService.getConnection();
       //console.time('calculate animal cell averages');
 
-      let cellData = await con.getRepository(MapCellData).find();
+      const cellData = await con.getRepository(MapCellData).find();
+      const speciesData = await con.getRepository(Species).find();
 
       let mappedTimeData = cellData.map(element => ({
         cellId: element.id,
@@ -460,62 +502,109 @@ export class MapService {
           (Date.now() - element.lastVisited.getTime()) * 0.00000001157407,
       }));
 
+      console.log(mappedTimeData);
+
+      const iqrTimeData = IQRIfy.runOn(
+        mappedTimeData.map((time) => (time.timeSinceVisit)),
+        false
+      );
+
+      mappedTimeData = mappedTimeData.map((element,index) =>({
+        cellId : element.cellId,
+        timeSinceVisit: iqrTimeData[index],
+      }));
+
+
+      console.log(mappedTimeData);
+
+
       //console.log(mappedTimeData);
 
-      let animalData = await con
+      let animalData;
+    
+
+      //console.log(animalData);
+
+      let mappedAnimalData = new Array();
+      const speciesSize = speciesData.length;
+
+      //console.log("leng: " + speciesSize);
+
+      for(let i = 0; i < speciesSize; i ++)
+      {
+        animalData = await con
         .getRepository(AnimalCellWeight)
-        .find({ relations: ['cell'] });
+        .find({ relations: ['cell'], where: {species : speciesData[i].id}});
 
-      let mappedAnimalData = animalData.map(element => ({
-        cellId: element.id,
-        percentile: -1,
-        weight:
-          (element.time0Weight +
-            element.time120Weight +
-            element.time240Weight +
-            element.time360Weight +
-            element.time480Weight +
-            element.time600Weight +
-            element.time720Weight +
-            element.time840Weight +
-            element.time960Weight +
-            element.time1080Weight +
-            element.time1200Weight +
-            element.time1320Weight) /
-          12,
-      }));
+        //console.log("id: " + speciesData[i].id);
+        
+        {
+          mappedAnimalData.push({speciesId: speciesData[i].id,
+            data: animalData.map((element) => (
+              { 
+                cellId: element.cell['id'],
+                percentile: -1,
+                weight:
+                  (element.time0Weight +
+                    element.time120Weight +
+                    element.time240Weight +
+                    element.time360Weight +
+                    element.time480Weight +
+                    element.time600Weight +
+                    element.time720Weight +
+                    element.time840Weight +
+                    element.time960Weight +
+                    element.time1080Weight +
+                    element.time1200Weight +
+                    element.time1320Weight) /
+                  12,
+              }
+          ))});
+        }
+             
+      }
 
-      const iqrAnimalData = IQRIfy.runOn(
-        mappedAnimalData.map(weight => weight.weight),
-      );
-      const animalStd = new Standardizer(
-        mappedAnimalData.map(weight => weight.weight),
-      );
-
-      let animalStandarizedVals = animalStd.getStandardisedArray(
-        mappedAnimalData.map(weight => weight.weight),
-      );
-
-      mappedAnimalData = mappedAnimalData.map((element, index) => ({
-        cellId: element.cellId,
-        percentile: iqrAnimalData[index],
-        weight: animalStandarizedVals[index],
-      }));
+      //console.log("data: " + mappedAnimalData[0]['data'][0]['cellId']);
+     // console.log('data: ' + mappedAnimalData[0]['data'].map((weight) => (weight.weight)));
+      
+      for(let i = 0; i <speciesSize; i++)
+      {
+        const iqrAnimalData = IQRIfy.runOn(
+          mappedAnimalData[i]['data'].map((weight) => (weight.weight)),          
+        );
+        const animalStd = new Standardizer(
+          mappedAnimalData[i]['data'].map((weight) => (weight.weight)),
+        );
+  
+        let animalStandarizedVals = animalStd.getStandardisedArray(
+          mappedAnimalData[i]['data'].map((weight) => (weight.weight)),
+        );
+        //console.log(animalStandarizedVals);
+  
+        mappedAnimalData[i]['data'] = mappedAnimalData[i]['data'].map((element, index) => ({
+          cellId: element['cellId'],
+          percentile: 1 - iqrAnimalData[index],
+          weight: animalStandarizedVals[index],
+        }));
+      }
+     
 
       // console.log(mappedAnimalData);
+       //console.log(mappedAnimalData[0]['data']);
 
       const poachingData = await con
         .getRepository(PoachingCellWeight)
         .find({ relations: ['cell'] });
 
       let mappedPoachingData = poachingData.map(element => ({
-        cellId: element.id,
+        cellId: element.cell['id'],
         percentile: -1,
         weight: element.weight,
       }));
 
       const iqrPoachingData = IQRIfy.runOn(
         mappedPoachingData.map(weight => weight.weight),
+        false,
       );
       const poachStd = new Standardizer(
         poachingData.map(weight => weight.weight),
@@ -527,51 +616,146 @@ export class MapService {
 
       mappedPoachingData = mappedPoachingData.map((element, index) => ({
         cellId: element.cellId,
-        percentile: iqrPoachingData[index],
+        percentile: 1 - iqrPoachingData[index],
         weight: poachingStandarizedVals[index],
       }));
 
-      //console.log(mappedPoachingData);
+      console.log(mappedPoachingData);
+      console.log(mappedAnimalData[0]);
+      
 
-      const size = mappedAnimalData.length;
+      const size = poachingData.length;
+      let temp = new Array();
 
-      let hotSpots = new Array();
-
-      for (let i = 0; i < size; i++) {
-        if (
-          mappedAnimalData[i].percentile <= 0.25 &&
-          mappedPoachingData[i].percentile <= 0.25
-        ) {
-          hotSpots.push(
-            '"id":' +
-              mappedAnimalData[i].cellId +
-              ',"weight":' +
-              (0.4 * mappedAnimalData[i].weight +
-                0.4 * mappedPoachingData[i].weight +
-                0.2 * mappedTimeData[i].timeSinceVisit),
-          );
-        } else if (mappedAnimalData[i].percentile <= 0.25) {
-          hotSpots.push(
-            '"id":' +
-              mappedAnimalData[i].cellId +
-              ',"weight":' +
-              (0.4 * mappedAnimalData[i].weight +
-                0.2 * mappedTimeData[i].timeSinceVisit),
-          );
-        } else if (mappedPoachingData[i].cellId <= 0.25) {
-          hotSpots.push(
-            '"id":' +
-              mappedAnimalData[i].cellId +
-              ',"weight":' +
-              (0.4 * mappedPoachingData[i].weight +
-                0.2 * mappedTimeData[i].timeSinceVisit),
-          );
-        } else {
+      for(let a= 0 ; a < speciesSize; a++)
+      {
+        for (let i = 0; i < size ; i++) {
+          // console.log("i: " + i);
+          // console.log(mappedPoachingData[i]);
+          // console.log(mappedPoachingData[i].cellId);
+          
+          if (
+            mappedAnimalData[a]['data'][i].percentile >= 0.75 &&
+            mappedPoachingData[i].percentile >= 0.75
+          ) {
+            temp.push(
+              {
+              cellId:  mappedPoachingData[i].cellId,
+              weight: percentage * mappedAnimalData[a]['data'][i].weight +
+                      percentage * mappedPoachingData[i].weight +
+                      timePercentage * mappedTimeData[i].timeSinceVisit,
+              // weight: percentage * mappedAnimalData[a]['data'][i].weight +
+              //     percentage * mappedPoachingData[i].weight +
+              //     timePercentage * mappedTimeData[i].timeSinceVisit,
+              }
+              
+              );
+          } else if (mappedAnimalData[a]['data'][i].percentile >= 0.75) {
+            temp.push({
+              cellId: mappedPoachingData[i].cellId,
+              weight: (percentage * mappedAnimalData[a]['data'][i].weight +
+                  timePercentage * mappedTimeData[i].timeSinceVisit),
+              });
+          } else if (mappedPoachingData[i].percentile >= 0.75) {
+            temp.push({            
+              cellId: mappedPoachingData[i].cellId,
+                weight: ( percentage * mappedPoachingData[i].weight +
+                  timePercentage * mappedTimeData[i].timeSinceVisit),
+                });
+          } else {
+          }
         }
       }
-      //console.log(hotSpots);
+
+
+      
+      console.log(temp);
       console.timeEnd('calculating averages');
-      return hotSpots;
+     // return temp;
+
+     temp = temp.sort((a, b) => b.weight - a.weight).slice(0, 5000);
+
+      const tempIqri = IQRIfy.runOn(
+        temp.map((weight) => (weight.weight)),        
+      );
+
+      // let k = tempIqri.map((weight,index) => ({
+      //   cellId: temp[index].cellId,
+      //   weight: weight,
+      // }));
+
+      let a = [];
+
+      for(let i = 0; i < tempIqri.length; i++)
+      {
+        if (tempIqri[i] >= 5/7) {
+          a.push({            
+            cellId: temp[i].cellId,
+              weight: tempIqri[i],
+              });
+      }
+    }
+
+    const cellPositionsMap: {[id: number]: MapCellData} = cellData.reduce((ob, cell) => {
+      ob[cell.id] = cell;
+      return ob;
+    }, {});
+      
+
+      return a.filter(hotspot => hotspot.weight >= 5/7).map(hotspot => ({
+        ...hotspot,
+        lon: cellPositionsMap[hotspot.cellId].cellMidLongitude,
+        lat: cellPositionsMap[hotspot.cellId].cellMidLatitude,
+      }));
+
+     
+      // for(let i = 0; i < tempIqri.length; i++)
+      // {
+      //   if (tempIqri[i] >= 5/7) {
+      //     a.push({            
+      //       cellId: temp[i].cellId,
+      //         weight: tempIqri[i],
+      //   })
+      //   }
+      //   else
+      //   {
+      //     a.push({            
+      //       cellId: temp[i].cellId,
+      //         weight: 0,
+      //   })
+      //   }      
+        
+      // }
+
+      
+      
+
+     // return temp.sort(() => 0.5 - Math.random());
+
+      // let tmp = {};
+
+     
+
+    //   let unique_array = temp.filter(function(elem, index, self) {
+    //     return elem.cellId == self.indexOf(elem.cellId);
+    // });
+
+
+    // let unique_array = []
+    // for(let i = 0;i < temp.length; i++){
+    //     if(unique_array.indexOf(temp[i]['cellId']) == -1){
+    //         unique_array.push(temp[i])
+    //     }
+    //     else if(unique_array[unique_array.indexOf(temp['cellId'])]['weight'] < temp[i]['weight'] )
+    //     {
+    //       unique_array[unique_array.indexOf(temp[i]['cellId'])]['weight'] =  temp[i]['weight'];
+    //     }
+    //     else{          
+    //     }
+    // }
+
+
+    //  return unique_array;
 
     });
    // return [""]; 

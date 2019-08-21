@@ -250,6 +250,6 @@ export class DroneService {
     const conn = await this.databaseService.getConnection();
     const rep = conn.getRepository(DroneRoute);
 
-    return await rep.find();
+    return await rep.find({order:{timestamp:"DESC"}});
   }
 }
