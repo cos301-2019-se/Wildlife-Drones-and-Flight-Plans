@@ -5,10 +5,12 @@ from __future__ import print_function
 
 from dronekit import connect, VehicleMode, LocationGlobalRelative, LocationGlobal, Command
 import time
+import subprocess
 import math
 from pymavlink import mavutil
 import base64
 import json
+import os
 #Set up option parsing to get connection string
 import argparse
 parser = argparse.ArgumentParser(description='Gets base64')
@@ -22,11 +24,32 @@ sitl = None
 decoded_base64 = base64.b64decode(base64String)
 
 my_json = decoded_base64.decode('utf8')
-
-print(my_json)
-#my_json.token
-# Load the JSON to a Python list & dump it back out as formatted JSON
 data = json.loads(my_json)
+points = data["points"]
+home = points[0]
+homeLong = home[1]
+homeLat = home[0]
+#print("Opening MissionPlanner")
+#os.system("cd /home/deane/dronekit-python/")
+#os.system("dronekit-sitl copter --home=-23.065818100824277,30.90998257732617,500,300")
+
+
+#os.system("cd /home/deane/Downloads/MissionPlanner-latest/")
+
+#os.system("mono MissionPlanner.exe")
+#os.system("konsole -e 'bash -c \"ls; exec bash\"'")
+#subprocess.Popen("konsole -e 'bash -c \"cd /home/deane/Downloads/MissionPlanner-latest/ && mono MissionPlanner.exe; exec bash\"'", shell = True)
+#time.sleep(120)
+print("Opening Drone-kit")
+subprocess.Popen("konsole -e 'bash -c \"cd /home/deane/dronekit-python/ && dronekit-sitl copter --home=" + str(homeLong) + "," + str(homeLat) + ",500,300 ; exec bash\"'", shell = True)
+time.sleep(5)
+print("Opening mavproxy")
+subprocess.Popen("konsole -e 'bash -c \"cd /home/deane/apm_planner/ && mavproxy.py --master tcp:127.0.0.1:5760 --out udp:127.0.0.1:14551 --out udp:127.0.0.1:14550; exec bash\"'", shell = True)
+print("Please connect mission planner in the next 10s")
+time.sleep(10)
+#my_json.token
+# Load the JSON to a Python list & dump it back out as formatted JSON
+
 #a = json.loads(decoded_base64)
 '''
 {
@@ -45,8 +68,8 @@ ewoJInRva2VuIjogImdyb292eU1hbiIsCgkiZHJvbmVJRCI6IDEsCgkiRHJvbmVTcGVlZCI6IDIsCgki
 '''
 
 
-print("json")
-print(data)
+#print("json")
+#print(data)
 #print(a)
 
 #Start SITL if no connection string specified with default
@@ -120,7 +143,7 @@ def download_mission():
 
 
 
-def add_mission(aLocation, aSize):
+def add_mission(aLocations):
     """
     Adds a takeoff command and four waypoint commands to the current mission.
     The waypoints are positioned to form a square of side length 2*aSize around the specified LocationGlobal (aLocation).
@@ -141,16 +164,19 @@ def add_mission(aLocation, aSize):
     cmds.add(Command( 0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_TAKEOFF, 0, 0, 0, 0, 0, 0, 0, 0, 10))
 
     #Define the four MAV_CMD_NAV_WAYPOINT locations and add the commands
-    point1 = get_location_metres(aLocation, aSize, -aSize)
-    point2 = get_location_metres(aLocation, aSize, aSize)
-    point3 = get_location_metres(aLocation, -aSize, aSize)
-    point4 = get_location_metres(aLocation, -aSize, -aSize)
-    cmds.add(Command( 0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 0, 0, 0, 0, 0, point1.lat, point1.lon, 11))
-    cmds.add(Command( 0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 0, 0, 0, 0, 0, point2.lat, point2.lon, 12))
-    cmds.add(Command( 0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 0, 0, 0, 0, 0, point3.lat, point3.lon, 13))
-    cmds.add(Command( 0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 0, 0, 0, 0, 0, point4.lat, point4.lon, 14))
+    #point1 = get_location_metres(aLocation, aSize, -aSize)
+    #point2 = get_location_metres(aLocation, aSize, aSize)
+    #point3 = get_location_metres(aLocation, -aSize, aSize)
+    #point4 = get_location_metres(aLocation, -aSize, -aSize)
+    for location in aLocations:
+        cmds.add(Command( 0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 0, 0, 0, 0, 0, location[1], location[0], 11))
+    location = aLocations[0]
+    cmds.add(Command( 0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 0, 0, 0, 0, 0, location[1], location[0], 11))
+    #cmds.add(Command( 0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 0, 0, 0, 0, 0, point2.lat, point2.lon, 12))
+    #cmds.add(Command( 0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 0, 0, 0, 0, 0, point3.lat, point3.lon, 13))
+    #cmds.add(Command( 0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 0, 0, 0, 0, 0, point4.lat, point4.lon, 14))
     #add dummy waypoint "5" at point 4 (lets us know when have reached destination)
-    cmds.add(Command( 0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 0, 0, 0, 0, 0, point4.lat, point4.lon, 14))
+    #cmds.add(Command( 0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 0, 0, 0, 0, 0, point4.lat, point4.lon, 14))
 
     print(" Upload new commands to vehicle")
     cmds.upload()
@@ -222,11 +248,18 @@ def arm_and_takeoff(aTargetAltitude):
 
 print('Create a new mission (for current location)')
 #getDroneRoutes(1)
-add_mission(vehicle.location.global_frame,50)
+add_mission(points)
 
 
 # From Copter 3.3 you will be able to take off using a mission item. Plane must take off using a mission item (currently).
 arm_and_takeoff(10)
+print("Setting groundspeed to max")
+vehicle.groundspeed = 15
+print("Setting airspeed to max")
+vehicle.airspeed = 10
+
+
+
 
 print("Starting mission")
 # Reset mission set to first (0) waypoint
@@ -235,7 +268,7 @@ vehicle.commands.next=1
 # Set mode to AUTO to start mission
 vehicle.mode = VehicleMode("AUTO")
 
-
+lent = len(points)
 # Monitor mission.
 # Demonstrates getting and setting the command number
 # Uses distance_to_current_waypoint(), a convenience function for finding the
@@ -245,11 +278,13 @@ while True:
     nextwaypoint=vehicle.commands.next
     print('Distance to waypoint (%s): %s' % (nextwaypoint, distance_to_current_waypoint()))
 
+
+    print('Long %s, Lat %s' % (vehicle.location.global_frame.lon, vehicle.location.global_frame.lat))
     #if nextwaypoint==3: #Skip to next waypoint
         #print('Skipping to Waypoint 5 when reach waypoint 3')
         #vehicle.commands.next = 5
-    if nextwaypoint==5: #Dummy waypoint - as soon as we reach waypoint 4 this is true and we exit.
-        print("Exit 'standard' mission when start heading to final waypoint (5)")
+    if nextwaypoint==lent+1: #Dummy waypoint - as soon as we reach waypoint 4 this is true and we exit.
+        print("Exit 'standard' mission when start heading to final waypoint")
         break;
     time.sleep(1)
 
