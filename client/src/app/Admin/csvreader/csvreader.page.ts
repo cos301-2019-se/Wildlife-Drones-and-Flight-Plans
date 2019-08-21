@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit,ViewChild, ElementRef } from '@angular/core';
 import { AuthenticationService } from './../../services/authentication.service';
 //import { File } from '@ionic-native/file/ngx';
 @Component({
@@ -7,8 +7,10 @@ import { AuthenticationService } from './../../services/authentication.service';
   styleUrls: ['./csvreader.page.scss'],
 })
 export class CSVReaderPage implements OnInit {
+  @ViewChild('csvInput') csvInput: ElementRef;
   file: File;
   formData:FormData;
+  error;
   constructor(private auth: AuthenticationService) { }
   changeListener(event):void
   {
@@ -22,6 +24,18 @@ export class CSVReaderPage implements OnInit {
   async uploadFile()
   {
      const result = await this.auth.postForm('csvUploader',this.formData);
+     if(result)
+     {
+       console.log('Valid');
+       this.error = 'File is being processed on the server.This may take some time.';
+       this.csvInput.nativeElement.value = "";
+     }
+     else
+     {
+      console.log('Invalid');
+      this.error = 'Headers of the file are incorrect.Please correct the headers.';
+      this.csvInput.nativeElement.value = "";
+     }
   }
 
   ngOnInit() {

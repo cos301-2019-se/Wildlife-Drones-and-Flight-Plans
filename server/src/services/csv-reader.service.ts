@@ -16,8 +16,7 @@ export class CsvReader {
 
   constructor(filename: string) {
     this.handle = new readlines(filename);
-
-    this.headers = this.handle.next().toString().split(',');
+    this.headers = this.handle.next().toString().replace(/(\r\n|\n|\r)/gm,"").split(',');
   }
 getHeaders()
 {
@@ -32,6 +31,7 @@ getHeaders()
 
     return line
       .toString()
+      .replace(/(\r\n|\n|\r)/gm,"")
       .split(',')
       .reduce((ob, cell, cellIndex) => {
         ob[this.headers[cellIndex]] = cell;

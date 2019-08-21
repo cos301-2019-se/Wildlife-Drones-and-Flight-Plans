@@ -282,6 +282,31 @@ export class UserService {
     }
   }
 
+  async sendEmailToAllAdmins(subject,message)
+  {
+    const con = await this.databaseService.getConnection();
+    const admins = await con
+      .getRepository(User)
+      .createQueryBuilder('user')
+      .select([
+        'user.email',
+      ])
+      .where('user.active = true and user.jobType="administrator"')
+      .getMany();
+
+      admins.forEach(async admin => {
+        await this.mailService.send({
+          subject: subject,
+          template: 'defaultEmail.twig',
+          templateParams: {
+            message,
+          },
+          to: admin.email,
+        });
+      });
+
+  }
+
   /**
    * updates user given a user id and any parameter, not all parameters have to be sent
    * @param id
