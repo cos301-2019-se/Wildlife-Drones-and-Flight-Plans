@@ -25,8 +25,25 @@
   <div class="form-overlay"
     *ngIf="state === states.setUpRoute || state === states.addMarkerDetails"
     @form-animation>
-    <!-- drone information form -->
+    <!-- set up route/drone information form -->
     <ng-container *ngIf="state === states.setUpRoute">
+      <ion-item no-padding>
+        <ion-label position="stacked">Flight type</ion-label>
+        <ion-select [(ngModel)]="states.setUpRoute.data.selectedFlightType" interface="popover">
+          <ion-select-option *ngFor="let flightType of states.setUpRoute.data.flightTypes" [value]="flightType">{{ flightType }}</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <div class="animal-selection" *ngIf="states.setUpRoute.data.selectedFlightType == flightTypesEnum.ANIMAL">
+        <ion-item *ngFor="let animalId of states.setUpRoute.data.animalIds">
+          <ion-label>{{ animalId }}</ion-label>
+          <ion-checkbox slot="end"
+            [(ngModel)]="states.setUpRoute.data.selectedAnimalIds[animalId]"
+            [disabled]="!states.setUpRoute.data.selectedAnimalIds[animalId] && states.setUpRoute.hasExceededNumSelectedAnimals(states.setUpRoute)"
+          ></ion-checkbox>
+        </ion-item>
+      </div>
+
       <ion-item no-padding>
         <ion-label position="stacked">Drone name</ion-label>
         <ion-select [(ngModel)]="states.setUpRoute.data.selectedDrone" interface="popover">

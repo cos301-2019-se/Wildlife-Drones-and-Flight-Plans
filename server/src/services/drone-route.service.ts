@@ -103,12 +103,18 @@ export class DroneRouteService {
 
       // first, account for the distance along the line the elephant has moved
       const geoLine = lineString(animalPositions);
-      const offsetLine = lineSliceAlong(
-        geoLine,
-        animalDistanceTravelled,
-        Infinity,
-        { units: 'kilometers' },
-      );
+      let offsetLine;
+      try {
+        offsetLine = lineSliceAlong(
+          geoLine,
+          animalDistanceTravelled,
+          Infinity,
+          { units: 'kilometers' },
+        );
+      } catch (err) {
+        console.error('line error', err);
+        return undefined;
+      }
 
       const points: any[] = offsetLine.geometry.coordinates;
 
@@ -178,7 +184,7 @@ export class DroneRouteService {
         return [interception.x, interception.y];
       }
 
-      return [undefined, undefined];
+      return undefined;
     };
 
     // calculate all permutations of predictions (i.e. for each animal)
@@ -200,8 +206,10 @@ export class DroneRouteService {
 
     const droneSpeedDeg = convertLength(droneInfo.speed / 60, 'kilometers', 'degrees');
 
+    let bestPointsReached = -Infinity;
     let bestDistance = Infinity;
     let bestPath = null;
+
     // now try find paths from depot to points, taking into account maximum distance
     for (const permutation of permutations) {
       const paths = [];
@@ -219,6 +227,10 @@ export class DroneRouteService {
           predictedPath.speed,
           predictedPath.positions,
         );
+
+        if (typeof interceptPoint === 'undefined') {
+          continue; // the point cannot be reached
+        }
 
         // distance from last point to the predicted point
         // if the distance to the point from the last point and then back to the depo
@@ -251,30 +263,43 @@ export class DroneRouteService {
         paths.push(activePath);
       }
 
-      // check if it is the best path
-      if (totalDistance < bestDistance) {
-        bestPath = paths;
+      const feasiblePaths = paths.filter(route => {
+        if (route.length <= 2) {
+          // if it's only depot to depot, don't count it
+          return false;
+        }
+
+        const routeDistance = route.reduce((sum, point, index) => {
+          if (index === route.length - 1) {
+            return sum;
+          }
+          const pointDistance = getDistance(point, route[index + 1], { units: 'degrees' });
+          return sum + pointDistance;
+        }, 0);
+
+        return routeDistance < droneInfo.maxFlightDistanceDegrees;
+      });
+
+      const numPointsReached = feasiblePaths.reduce((total, route) => {
+        return total + route.length - 2; // - 2 to exclude depots
+      }, 0);
+
+      // if it visits more points, then it is better
+      if (
+        bestPath === null ||
+        numPointsReached > bestPointsReached ||
+        (numPointsReached === bestPointsReached && totalDistance < bestDistance)
+      ) {
+        bestPath = feasiblePaths;
         bestDistance = totalDistance;
+        bestPointsReached = numPointsReached;
       }
     }
 
-    return bestPath.filter(route => {
-      const totalDistance = route.reduce((sum, point, index) => {
-        if (index === route.length - 1) {
-          return sum;
-        }
-        const pointDistance = getDistance(point, route[index], { units: 'degrees' });
-        return sum + pointDistance;
-      }, 0);
-      return totalDistance < droneInfo.maxFlightDistanceDegrees;
-    });
-
-
-    // TODO: find all possible combinations of the routes without duplicate individuals
-    // then find paths from depot to points, taking into account maximum distance
-    // then after calculating a set of routes, take the ones with the shortest over-all distance
-
-    // TODO: also return the animal future positions so we can display them on the ma
+    return {
+      futureLocations: predictions,
+      routes: bestPath,
+    };
   }
 
   /**

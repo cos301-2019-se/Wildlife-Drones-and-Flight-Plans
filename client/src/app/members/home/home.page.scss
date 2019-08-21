@@ -55,6 +55,18 @@ $tooltip-margin: 10px;
   transform: translateX(-50%);
 }
 
+.animal-selection {
+  max-height: 150px;
+  overflow-y: scroll;
+  background: #fafafa;
+  -webkit-overflow-scrolling: touch;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
+
+  ion-item {
+    --background: transparent;
+  }
+}
+
 /*
   Tooltip
 */

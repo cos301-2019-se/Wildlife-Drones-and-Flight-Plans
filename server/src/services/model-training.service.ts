@@ -9,6 +9,8 @@ import { RegressionService } from './regression.service';
 import { MapFeatureType } from '../entity/map-data.entity';
 import { SRTMService } from './srtm.service';
 import getDistance from '@turf/distance';
+import { lineString } from '@turf/helpers';
+import lineSliceAlong from '@turf/line-slice-along';
 
 /**
  * Handles training of models and saving them to the database
@@ -104,7 +106,7 @@ export class ModelTraining {
     positions: number[][];
   }> {
     // get the last few positions of the animal so we can predict the next locations
-    const lastFewPositions = await this.animalLocationService.getLastFewAnimalLocations(animalId, 10);
+    const lastFewPositions = await this.animalLocationService.getLastFewAnimalLocations(animalId, 20);
     if (lastFewPositions.length <= 1) {
       return undefined;
     }
@@ -172,17 +174,23 @@ export class ModelTraining {
       ])[0];
       const nextPointCoords = [nextPoint[1], nextPoint[0]];
 
+      // limit distance to how far an elephant can travel in 30 minutes
+      const line = lineString([lastPathPoint, nextPointCoords]);
+      const along = lineSliceAlong(line, 0, averageSpeed * 30, { units: 'kilometers' });
+      const predictedPoint = along.geometry.coordinates[along.geometry.coordinates.length - 1];
+
       // add the point to the path
-      futurePath.push(nextPointCoords);
+      futurePath.push(predictedPoint);
 
       // find the distance between the predicted point and the previous one
       const distance = getDistance(
         lastPathPoint,
-        nextPointCoords,
+        predictedPoint,
         { units: 'kilometers' },
       );
 
       elapsedDistance += distance;
+      console.log(elapsedDistance);
     }
 
     return {

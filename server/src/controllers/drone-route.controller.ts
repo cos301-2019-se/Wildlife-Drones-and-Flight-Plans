@@ -9,17 +9,29 @@ export class DroneRouteController {
     private readonly droneRouteService: DroneRouteService,
   ) {}
 
+  /**
+   * Create an incident route for the latest incidents
+   * @param body
+   */
   @Post('create-incident-route')
   async createIncidentRoute(@Body() body) {
-    return await this.droneRouteService.createIncidentRoutes(body.droneId, body.lon, body.lat);
+    return await this.droneRouteService.createIncidentRoutes(
+      body.droneId,
+      body.lon,
+      body.lat,
+    );
   }
 
+  /**
+   * Create a route that intercepts animals wjere possible
+   * @param body
+   */
   @Post('create-animal-prediction-route')
   async createAnimalPredictionRoute(@Body() body) {
     return await this.droneRouteService.createAnimalPredictionRoute(
       body.droneId,
-      31.787223815917965,
-      -24.761484760179226,
+      body.lon,
+      body.lat,
       body.animalIds,
     );
   }
