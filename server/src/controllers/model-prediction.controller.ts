@@ -4,6 +4,7 @@ import { AnimalLocationService } from '../services/animal-location.service';
 import getDistance from '@turf/distance';
 import { convertLength } from '@turf/helpers';
 import { AuthGuard } from '@nestjs/passport';
+import { AdminGuard } from '../auth/admin.guard';
 @UseGuards(AuthGuard('jwt'))
 @Controller()
 export class ModelPrediction {

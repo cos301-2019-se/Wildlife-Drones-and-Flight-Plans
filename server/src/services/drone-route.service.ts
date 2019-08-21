@@ -23,7 +23,7 @@ export class DroneRouteService {
   async createIncidentRoutes(droneId: number, lon: number, lat: number, since: Date = new Date(Date.now() - 30 * 86400000)) {
     const drone = await this.droneService.getDrone(droneId);
     if (!drone) {
-      throw new Error('The drone could not be found');
+      return false;
     }
 
     const DRONE_FLIGHT_ERROR = 0.9; // account for errors by making the route slightly shorter than the maximum distance

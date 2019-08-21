@@ -1,6 +1,7 @@
 import { Controller, Get, Query, Post, Body, UseGuards } from '@nestjs/common';
 import { DroneService } from '../services/drone.service';
 import { Drone } from '../entity/drone.entity';
+import { AdminGuard } from '../auth/admin.guard';
 import { AuthGuard } from '@nestjs/passport';
 import { DroneRoute } from 'src/entity/drone-route.entity';
  @UseGuards(AuthGuard('jwt'))

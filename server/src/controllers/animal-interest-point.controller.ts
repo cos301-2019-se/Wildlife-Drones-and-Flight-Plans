@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common';
 import { AnimalInterestPointService } from '../services/animal-interest-point.service';
 import { AuthGuard } from '@nestjs/passport';
 
+import { AdminGuard } from '../auth/admin.guard';
 @Controller()
 export class AnimalInterestPointController {
   constructor(

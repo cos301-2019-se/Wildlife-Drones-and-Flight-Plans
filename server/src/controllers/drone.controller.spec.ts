@@ -1,36 +1,37 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
 import { AppModule } from '../app.module';
+import { providers } from '../app.providers'; 
+import { imports } from '../app.imports';
+import { controllers } from '../app.controllers';
+import { AuthService } from '../auth/auth.service';
 
 jest.useFakeTimers();
 jest.setTimeout(12000000);
 let token;
-describe('MapController (e2e)', () => {
+describe('Drone route  (e2e)', async () => {
   let app;
+  let controller;
 
-  beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
+   beforeAll(async () => {
+      const module: TestingModule = await Test.createTestingModule({
+        imports:imports,
+        controllers: controllers,
+        providers:providers
+      }).compile();
+    
+      controller = await module.get<AuthService>(AuthService);
+      //const con = await controller.getConnection();
+      //const auth = await con.getRepository(AuthService);
+    
 
-    app = moduleFixture.createNestApplication();
+    app = module.createNestApplication();
     await app.init();
-  });
 
-  it('/login (POST)', async () => {
-    await request(app.getHttpServer())
-      .post('/login')
-      .send({
-        email: 'gst@gmail.com',
-        password: 'Reddbull@1',
-      })
-      .then(response => {
-        // console.log("The token that is given back " + response.body.accessToken)
-
-        token = response.body.accessToken;
-        console.log('got token', token);
-      });
+    token = await controller.createToken('reinhardt.eiselen@gmail.com')
+   // console.log('************************ ',token.accessToken)
   });
+  
 
   it('/addDrone (POST)', async () => {
     await request(app.getHttpServer())
@@ -44,15 +45,15 @@ describe('MapController (e2e)', () => {
         lon: '1234.33',
         lat: '12367.66'
       })
-      .set('Authorization', `Bearer ${token}`)
+      .set('Authorization', `Bearer ${token.accessToken}`)
       .expect('true');
   });
 
 
-  it('/updateDrone (POST)', async () => {
+  it('/updateDrones (POST)', async () => {
     await request(app.getHttpServer())
-      .post('/updateDrone')
-      .send({
+      .post('/updateDrones')
+      .send([{
         id: '2',
         name: 'poach2',
         avgSpeed: '60',
@@ -61,8 +62,8 @@ describe('MapController (e2e)', () => {
         flightTime: '76',
         lon: '1234.33',
         lat: '12367.66'
-      })
-      .set('Authorization', `Bearer ${token}`)
+      }])
+      .set('Authorization', `Bearer ${token.accessToken}`)
       .expect('false');
   });
 
@@ -70,9 +71,9 @@ describe('MapController (e2e)', () => {
     await request(app.getHttpServer())
       .post('/deactivateDrone')
       .send({
-        id: '1',
+        id: '2',
       })
-      .set('Authorization', `Bearer ${token}`)
+      .set('Authorization', `Bearer ${token.accessToken}`)
       .expect('true');
   });
 

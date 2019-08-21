@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common';
 import { UserService } from '../services/user.service';
 import { addUserDTO, updateUserDTO, deleteUserDTO } from '../dto/validation';
 import { User } from 'src/entity/user.entity';
-import { AdminGuard } from 'src/auth/admin.guard';
+import { AdminGuard } from '../auth/admin.guard';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from '../auth/auth.service';
 

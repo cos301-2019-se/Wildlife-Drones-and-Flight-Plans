@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Query, Body, UseGuards } from '@nestjs/common';
 import { AnimalLocationService } from '../services/animal-location.service';
 import { AnimalLocation } from '../entity/animal-location.entity';
-import { AdminGuard } from 'src/auth/admin.guard';
+import { AdminGuard } from '../auth/admin.guard';
 import { AuthGuard } from '@nestjs/passport';
 @UseGuards(AuthGuard('jwt'))
 
