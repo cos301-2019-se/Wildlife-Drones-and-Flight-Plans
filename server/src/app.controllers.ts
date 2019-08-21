@@ -6,7 +6,6 @@ import { ModelPrediction } from './controllers/model-prediction.controller';
 import { PoachingIncidentTypeController } from './controllers/poaching-incident-type.controller';
 import { PoachingIncidentController } from './controllers/poaching-incident.controller';
 import { DroneController } from './controllers/drone.controller';
-import { SpeciesController } from './controllers/animal-species.controller';
 import { DroneRouteController } from './controllers/drone-route.controller';
 
 export const controllers = [
@@ -17,7 +16,6 @@ export const controllers = [
   ModelPrediction,
   PoachingIncidentController,
   PoachingIncidentTypeController,
-  SpeciesController,
   DroneController,
   DroneRouteController,
 ];
