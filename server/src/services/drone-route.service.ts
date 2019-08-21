@@ -71,12 +71,17 @@ export class DroneRouteService {
    * latest positions, then tries to predict future positions and intercept the animals.
    * Takes into account fuel, flight time, etc.
    * @param droneId The ID of the drone used for this route
-   * @param lon The longitude of the depot (starting point)
-   * @param lat The latitude of the depot (starting point)
+   * @param depotLon The longitude of the depot (starting point)
+   * @param depotLat The latitude of the depot (starting point)
    * @param animaIds List of animal IDs. If incorrect, will be left out
    */
-  async createAnimalPredictionRoute(droneId: number, lon: number, lat: number, animalIds: string[]) {
+  async createAnimalPredictionRoute(droneId: number, depotLon: number, depotLat: number, animalIds: string[]) {
     const droneInfo = await this.getDroneInfo(droneId);
+
+    // cannot find a route if the drone does not move
+    if (droneInfo.speed <= 0) {
+      return [];
+    }
 
     console.log('drone info', droneInfo);
 
@@ -92,10 +97,9 @@ export class DroneRouteService {
     console.log('predictions', predictions.map(p => p.positions));
 
     // find intercept
-    const getIntercept = (dronePosition: [number, number], timeElapsed, droneSpeed, animalSpeed, animalPositions) => {
+    const getIntercept = (dronePosition: [number, number], timeElapsed, droneSpeedDeg, animalSpeed, animalPositions): [number, number] => {
       const animalDistanceTravelled = timeElapsed * animalSpeed;
       const animalSpeedDeg = convertLength(animalSpeed, 'kilometers', 'degrees');
-      const droneSpeedDeg = convertLength(droneSpeed / 60, 'kilometers', 'degrees');
 
       // first, account for the distance along the line the elephant has moved
       const geoLine = lineString(animalPositions);
@@ -173,9 +177,102 @@ export class DroneRouteService {
         // if the point is on the line, then return the interception point
         return [interception.x, interception.y];
       }
+
+      return [undefined, undefined];
     };
 
-    return predictions;
+    // calculate all permutations of predictions (i.e. for each animal)
+    const permutations = [];
+    const permute = (arr, m = []) => {
+      if (arr.length === 0) {
+        permutations.push(m);
+        return;
+      }
+      for (let i = 0; i < arr.length; i++) {
+        const curr = arr.slice();
+        const next = curr.splice(i, 1);
+        permute(curr.slice(), m.concat(next));
+      }
+    };
+    permute(predictions);
+
+    console.log('permutations', permutations.length);
+
+    const droneSpeedDeg = convertLength(droneInfo.speed / 60, 'kilometers', 'degrees');
+
+    let bestDistance = Infinity;
+    let bestPath = null;
+    // now try find paths from depot to points, taking into account maximum distance
+    for (const permutation of permutations) {
+      const paths = [];
+      let totalDistance = 0;
+      let distanceElapsed = 0;
+
+      let activePath: Array<[number, number]> = [[depotLon, depotLat]];
+      let lastPosition = activePath[0];
+
+      for (const predictedPath of permutation) {
+        const interceptPoint = getIntercept(
+          lastPosition,
+          distanceElapsed / droneSpeedDeg,
+          droneSpeedDeg,
+          predictedPath.speed,
+          predictedPath.positions,
+        );
+
+        // distance from last point to the predicted point
+        // if the distance to the point from the last point and then back to the depo
+        // is too great, then return to the depot and start a new route
+        const pointDistance = getDistance(lastPosition, interceptPoint, { units: 'degrees'});
+        const distanceBackToDepot = getDistance(interceptPoint, [depotLon, depotLat], { units: 'degrees' });
+
+        if (distanceElapsed + pointDistance + distanceBackToDepot > droneInfo.maxFlightDistanceDegrees) {
+          // end this path
+          activePath.push([depotLon, depotLat]);
+          paths.push(activePath);
+
+          // create a new path
+          activePath = [[depotLon, depotLat], interceptPoint];
+          lastPosition = [depotLon, depotLat];
+          distanceElapsed = 0;
+
+          totalDistance += pointDistance + distanceBackToDepot;
+        } else {
+          activePath.push(interceptPoint);
+          lastPosition = interceptPoint;
+          distanceElapsed += pointDistance;
+          totalDistance += pointDistance;
+        }
+      }
+
+      // if the last path did not exceed the maximum distance, add it
+      if (paths.indexOf(activePath) === -1 && activePath.length > 1) {
+        activePath.push([depotLon, depotLat]);
+        paths.push(activePath);
+      }
+
+      // check if it is the best path
+      if (totalDistance < bestDistance) {
+        bestPath = paths;
+        bestDistance = totalDistance;
+      }
+    }
+
+    return bestPath.filter(route => {
+      const totalDistance = route.reduce((sum, point, index) => {
+        if (index === route.length - 1) {
+          return sum;
+        }
+        const pointDistance = getDistance(point, route[index], { units: 'degrees' });
+        return sum + pointDistance;
+      }, 0);
+      return totalDistance < droneInfo.maxFlightDistanceDegrees;
+    });
+
+
+    // TODO: find all possible combinations of the routes without duplicate individuals
+    // then find paths from depot to points, taking into account maximum distance
+    // then after calculating a set of routes, take the ones with the shortest over-all distance
 
     // TODO: also return the animal future positions so we can display them on the ma
   }
