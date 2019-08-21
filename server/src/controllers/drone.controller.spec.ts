@@ -9,7 +9,7 @@ import { AuthService } from '../auth/auth.service';
 jest.useFakeTimers();
 jest.setTimeout(12000000);
 let token;
-describe('Drone route  (e2e)', async () => {
+describe('Drone route Controller (integration tests) (e2e)', async () => {
   let app;
   let controller;
 
@@ -33,7 +33,7 @@ describe('Drone route  (e2e)', async () => {
   });
   
 
-  it('/addDrone (POST)', async () => {
+  it('/addDrone Add a new drone to the System  using valid token => should succeed', async () => {
     await request(app.getHttpServer())
       .post('/addDrone')
       .send({
@@ -49,8 +49,23 @@ describe('Drone route  (e2e)', async () => {
       .expect('true');
   });
 
+  it('/addDrone Add a new drone to the System should fail without token', async () => {
+    await request(app.getHttpServer())
+      .post('/addDrone')
+      .send({
+        name: 'poach2',
+        avgSpeed: '60',
+        avgFlightTime:'120',
+        speed: '80',
+        flightTime: '76',
+        lon: '1234.33',
+        lat: '12367.66'
+      })
+      .expect(401);
+  });
 
-  it('/updateDrones (POST)', async () => {
+
+  it('/updateDrones Modifies the route the drone is currently on', async () => {
     await request(app.getHttpServer())
       .post('/updateDrones')
       .send([{
@@ -67,11 +82,75 @@ describe('Drone route  (e2e)', async () => {
       .expect('false');
   });
 
-  it('/deactivateDrone (POST)', async () => {
+  it('/deactivateDrone Deactivates a drone from the system', async () => {
     await request(app.getHttpServer())
       .post('/deactivateDrone')
       .send({
         id: '2',
+      })
+      .set('Authorization', `Bearer ${token.accessToken}`)
+      .expect('true');
+  });
+
+  it('/getDrones returns a list of active drones => should succeed with valid token', async () => {
+    await request(app.getHttpServer())
+      .post('/getDrones')
+      .send()
+      .set('Authorization', `Bearer ${token.accessToken}`)
+      .expect(201)
+  });
+
+  it('/getDrones returns a list of active drones => should fail without token', async () => {
+    await request(app.getHttpServer())
+      .post('/getDrones')
+      .send()
+      .expect(401)
+  });
+
+  it('/getDroneRoutes returns a list of drone routes => should suceed with valid token', async () => {
+    await request(app.getHttpServer())
+      .post('/getDroneRoutes')
+      .send()
+      .set('Authorization', `Bearer ${token.accessToken}`)
+      .expect(201)
+  });
+
+  it('/getDroneRoutes returns a list of drone routes => should fail without token', async () => {
+    await request(app.getHttpServer())
+      .post('/getDroneRoutes')
+      .send()
+      .expect(401)
+  });
+
+  it('/addDroneRoute adds a new drone route => succeed with valid token', async () => {
+    await request(app.getHttpServer())
+      .post('/addDroneRoute')
+      .send({
+        id: '3',
+        points: '1227906',
+      })
+      .set('Authorization', `Bearer ${token.accessToken}`)
+      .expect('true');
+  });
+
+  it('/addDroneRoute adds a new drone route => fail without token', async () => {
+    await request(app.getHttpServer())
+      .post('/addDroneRoute')
+      .send({
+        id: '3',
+        points: '1227906',
+      })
+     
+      .expect(401);
+  });
+
+  it('/updateDroneRoute (POST)', async () => {
+    await request(app.getHttpServer())
+      .post('/updateDroneRoute')
+      .send({
+        id: '3',
+        points: '1228900',
+        percent: '40'
       })
       .set('Authorization', `Bearer ${token.accessToken}`)
       .expect('true');
