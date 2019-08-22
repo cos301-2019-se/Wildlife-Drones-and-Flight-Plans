@@ -383,32 +383,36 @@ export class MapService {
   ): Promise<{
     [cellId: number]: number;
   }> {
-    const con = await this.databaseService.getConnection();
-    try {
-      console.time('get cells from db');
-      const cellsData = await con.getRepository(AnimalCellWeight).find({
-        where: {
-          species: speciesId,
-        },
-        relations: ['species', 'cell'],
-      });
-      console.timeEnd('get cells from db');
 
-      console.time('map fn');
-      const weights = cellsData.map(cd => cd[`time${time}Weight`]);
-      console.timeEnd('map fn');
-      console.time('normalized');
-      const normalizedWeights = IQRIfy.runOn(weights);
-      console.timeEnd('normalized');
+    const cache = this.cache;
+      return await cache.getKey('speciesWeightDataForTime', async () =>{
+      const con = await this.databaseService.getConnection();
+      try {
+        console.time('get cells from db');
+        const cellsData = await con.getRepository(AnimalCellWeight).find({
+          where: {
+            species: speciesId,
+          },
+          relations: ['species', 'cell'],
+        });
+        console.timeEnd('get cells from db');
 
-      return cellsData.reduce((ob, cell, cellIndex) => {
-        ob[cell.cell.id] = normalizedWeights[cellIndex];
-        return ob;
-      }, {});
-    } catch (error) {
-      console.error('error');
-      return undefined;
-    }
+        console.time('map fn');
+        const weights = cellsData.map(cd => cd[`time${time}Weight`]);
+        console.timeEnd('map fn');
+        console.time('normalized');
+        const normalizedWeights = IQRIfy.runOn(weights);
+        console.timeEnd('normalized');
+
+        return cellsData.reduce((ob, cell, cellIndex) => {
+          ob[cell.cell.id] = normalizedWeights[cellIndex];
+          return ob;
+        }, {});
+      } catch (error) {
+        console.error('error');
+        return undefined;
+      }
+    });
   }
 
   /**
@@ -418,25 +422,30 @@ export class MapService {
   async getCellPoachingWeight(): Promise<{
     [cellId: number]: number;
   }> {
-    const con = await this.databaseService.getConnection();
-    try {
-      console.log('Getting cell data');
-      const cellsData = await con.getRepository(PoachingCellWeight).find({
-        relations: ['cell'],
-      });
-      console.log('Got cell data', cellsData.length);
 
-      const weights = cellsData.map(cw => cw.weight);
-      const standardizedWeights = IQRIfy.runOn(weights);
+    const cache = this.cache;
+    return await cache.getKey('cellPoachingWeight', async () =>{
 
-      return cellsData.reduce((ob, cd, cdIdx) => {
-        ob[cd.cell.id] = standardizedWeights[cdIdx];
-        return ob;
-      }, {});
-    } catch (error) {
-      console.error(error);
-      return undefined;
-    }
+      const con = await this.databaseService.getConnection();
+      try {
+        console.log('Getting cell data');
+        const cellsData = await con.getRepository(PoachingCellWeight).find({
+          relations: ['cell'],
+        });
+        console.log('Got cell data', cellsData.length);
+
+        const weights = cellsData.map(cw => cw.weight);
+        const standardizedWeights = IQRIfy.runOn(weights);
+
+        return cellsData.reduce((ob, cd, cdIdx) => {
+          ob[cd.cell.id] = standardizedWeights[cdIdx];
+          return ob;
+        }, {});
+      } catch (error) {
+        console.error(error);
+        return undefined;
+      }
+    });
   }
 
   /**

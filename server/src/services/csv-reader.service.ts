@@ -28,11 +28,11 @@ export class CsvReader {
     }
 
     return line
-      .toString()
-      .split(',')
-      .reduce((ob, cell, cellIndex) => {
-        ob[this.headers[cellIndex]] = cell;
-        return ob;
-      }, {});
+    .toString()
+    .split(',')
+    .reduce((ob, cell, cellIndex) => {
+      ob[this.headers[cellIndex]] = cell;        
+      return ob;
+    }, {});
   }
 }
