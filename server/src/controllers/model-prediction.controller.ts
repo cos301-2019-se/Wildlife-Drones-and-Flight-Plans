@@ -1,8 +1,11 @@
-import { Controller, Get, Post, Query, Param } from '@nestjs/common';
+import { Controller, Get, Post, Query, Param, UseGuards } from '@nestjs/common';
 import { ModelTraining } from '../services/model-training.service';
 import { AnimalLocationService } from '../services/animal-location.service';
 import getDistance from '@turf/distance';
 import { convertLength } from '@turf/helpers';
+import { AuthGuard } from '@nestjs/passport';
+import { AdminGuard } from '../auth/admin.guard';
+@UseGuards(AuthGuard('jwt'))
 @Controller()
 export class ModelPrediction {
   constructor(

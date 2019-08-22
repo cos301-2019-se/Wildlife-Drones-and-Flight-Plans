@@ -1,8 +1,11 @@
-import { Controller, Get, Post, Query, Body } from '@nestjs/common';
+import { Controller, Get, Post, Query, Body, UseGuards } from '@nestjs/common';
 import { AnimalLocationService } from '../services/animal-location.service';
 import { AnimalLocation } from '../entity/animal-location.entity';
 import { ModelTraining } from '../services/model-training.service';
+import { AdminGuard } from '../auth/admin.guard';
+import { AuthGuard } from '@nestjs/passport';
 
+@UseGuards(AuthGuard('jwt'))
 @Controller()
 export class AnimalController {
   constructor(
@@ -10,6 +13,7 @@ export class AnimalController {
     private readonly modelTrainingService: ModelTraining,
   ) {}
 
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   @Post('addAnimalLocationData')
   async addAnimalLocationData(@Body() body): Promise<boolean> {
     return await this.animalLocationService.addAnimalLocationData(
@@ -22,6 +26,8 @@ export class AnimalController {
       body.habitat,
     );
   }
+
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   @Post('addAnimalLocationDataCSV')
   async addAnimalLocationDataCSV(@Body() body): Promise<void> {
     return await this.animalLocationService.addAnimalLocationDataCSV(

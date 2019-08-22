@@ -12,7 +12,7 @@ describe('MapService', () => {
       providers,
     });
     const authService: AuthenticationService = TestBed.get(AuthenticationService);
-    await authService.login('evans.matthew97@gmail.com', '123');
+   // await authService.login('evans.matthew97@gmail.com', '123');
   });
 
   it('should be created', () => {

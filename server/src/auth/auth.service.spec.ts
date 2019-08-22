@@ -3,19 +3,35 @@ import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
 import { AppModule } from '../app.module';
 
+import { providers } from '../app.providers'; 
+import { imports } from '../app.imports';
+import { controllers } from '../app.controllers';
+import { AuthService } from '../auth/auth.service';
+
 jest.useFakeTimers();
 jest.setTimeout(12000000);
 let token;
-describe('Authorization service', () => {
+describe('Auth service  (e2e)', async () => {
   let app;
+  let controller;
 
-  beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
+   beforeAll(async () => {
+      const module: TestingModule = await Test.createTestingModule({
+        imports:imports,
+        controllers: controllers,
+        providers:providers
+      }).compile();
+    
+      controller = await module.get<AuthService>(AuthService);
+      //const con = await controller.getConnection();
+      //const auth = await con.getRepository(AuthService);
+    
 
-    app = moduleFixture.createNestApplication();
+    app = module.createNestApplication();
     await app.init();
+
+    token = await controller.createToken('reinhardt.eiselen@gmail.com')
+  //  console.log('************************ ',token.accessToken)
   });
 
   it('/addUser (POST)', async () => {
@@ -24,25 +40,20 @@ describe('Authorization service', () => {
       .send({
         name: 'Anne',
         username: 'jm',
-        password: '123',
-        job: 'Pilot',
+        password: 'Reddbull@1',
+        job: 'pilot',
         email: 'gst@gmail.com',
       })
-      .expect('false');
+      .expect(401);
   });
 
   it('/login (POST)', async () => {
     await request(app.getHttpServer())
-      .post('/login')
+      .post('/loginEmail')
       .send({
         email: 'gst@gmail.com',
-        password: 'Reddbull@1',
       })
-      .then(response => {
-        // console.log("The token that is given back " + response.body.accessToken)
-
-        token = response.body.accessToken;
-      });
+      .expect('true')
   });
 
   it('/addUser (POST)', async () => {
@@ -54,20 +65,20 @@ describe('Authorization service', () => {
         password: 'Reddbull@1',
         job: 'ranger',
         email: 'gst@gmail.com',
-      })
+      }) .set('Authorization', `Bearer ${token.accessToken}`)
       .expect('true');
   });
 
   it('/getUsers)', () => {
     return request(app.getHttpServer())
-      .get('/getUsers')
-      .set('Authorization', `Bearer ${token}`)
-      .expect(200);
+      .post('/getUsers')
+      .set('Authorization', `Bearer ${token.accessToken}`)
+      .expect(201);
   });
 
   it('/getUsers)', () => {
     return request(app.getHttpServer())
-      .get('/getUsers')
+      .post('/getUsers')
       .expect(401);
   });
 });
