@@ -378,7 +378,7 @@ export class HomePage implements AfterViewInit, OnDestroy {
       },
       tooltip: 'Viewing route',
       confirmations: {
-        done: async () => {
+        done: async (self) => {
           const alert = await this.alertCtrl.create({
             message: 'Do you want to accept this route?',
             buttons: [
@@ -388,8 +388,23 @@ export class HomePage implements AfterViewInit, OnDestroy {
               },
               {
                 text: 'Accept',
-                handler: () => {
+                handler: async () => {
                   // TODO: Tell the server to send the route to the user
+                  const loader = await this.loadingCtrl.create();
+                  loader.present();
+                  try {
+                    await this.droneRouteService.selectDroneRoute(
+                      this.states.setUpRoute.data.selectedDrone.id,
+                      self.data.routes[self.data.routeIndex],
+                    )
+                  } catch (err) {
+                    console.error(err);
+                    const errorAlert = await this.alertCtrl.create({
+                      message: 'An unknown error occurred',
+                    });
+                    errorAlert.present();
+                  }
+                  loader.dismiss();
                   this.setState(this.states.default);
                 },
               },

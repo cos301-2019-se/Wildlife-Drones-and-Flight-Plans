@@ -42,6 +42,13 @@ export class DroneRouteService {
     return res;
   }
 
+  async selectDroneRoute(droneId: number, points: any[]) {
+    return await this.authService.post('selectDroneRoute', {
+      points,
+      droneId,
+    });
+  }
+
   /**
    * Get all animal IDs for planning predictive route
    */
