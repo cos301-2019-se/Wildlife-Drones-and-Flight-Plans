@@ -7,7 +7,6 @@ import XYZ from 'ol/source/XYZ';
 import GeoJSON from 'ol/format/GeoJSON';
 import { Vector as VectorLayer, Tile as TileLayer } from 'ol/layer';
 import VectorSource from 'ol/source/Vector';
-import { Heatmap } from 'ol/layer';
 
 import bbox from '@turf/bbox';
 import contains from '@turf/boolean-contains';
@@ -26,13 +25,8 @@ import { METERS_PER_UNIT } from 'ol/proj/Units';
 import CircleStyle from 'ol/style/Circle';
 import Point from 'ol/geom/Point';
 import { animations } from './admin-home.page.animations';
-import { DroneRouteService } from '../../services/drone-route.service';
-import LineString from 'ol/geom/LineString';
-import { modulo } from 'ol/math';
 import center from '@turf/center';
-import { IncidentsService } from '../../services/incidents.service';
 import { DronesService } from '../../services/drones.service';
-import { Drone } from '../../services/drones.service';
 import { HeatmapService, MapCell } from '../../services/heatmap.service';
 import { LoadingController, AlertController } from '@ionic/angular';
 
@@ -119,10 +113,15 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
       },
       confirmations: {
         done: async (self) => {
-          self.showPoachingHeatmap(self);
-          self.showAnimalHeatmap(self);
-          self.showHotspotHeatmap(self);
-          this.getDrones();
+          const loader = await this.loadingCtrl.create();
+          loader.present();
+          await Promise.all([
+            self.showPoachingHeatmap(self),
+            self.showAnimalHeatmap(self),
+            self.showHotspotHeatmap(self),
+            this.getDrones(),
+          ]);
+          loader.dismiss();
           this.setState(this.states.default);
         },
       },
@@ -282,8 +281,6 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
     private mapService: MapService,
     private geolocationService: GeolocationService,
     private cdr: ChangeDetectorRef,
-    private droneRouteService: DroneRouteService,
-    private incidentsService: IncidentsService,
     private dronesService: DronesService,
     private heatmapService: HeatmapService,
     private loadingCtrl: LoadingController,

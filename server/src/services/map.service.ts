@@ -385,7 +385,7 @@ export class MapService {
   }> {
 
     const cache = this.cache;
-      return await cache.getKey('speciesWeightDataForTime', async () =>{
+    return await cache.getKey(`speciesWeightDataForTime-${speciesId}-${time}`, async () => {
       const con = await this.databaseService.getConnection();
       try {
         console.time('get cells from db');
@@ -520,8 +520,6 @@ export class MapService {
     cellId: number;
     weight: number;
   }>> {
-    const cache = this.cache;
-
     let percentage: number = 0.4;
     let timePercentage: number = 0.2;
 
@@ -530,10 +528,9 @@ export class MapService {
       timePercentage = 0.5;
     }
 
-    return await cache.getKey('hotspots', async () => {
+    return await this.cache.getKey('hotspots', async () => {
       console.time('calculating averages');
       const con = await this.databaseService.getConnection();
-      //console.time('calculate animal cell averages');
 
       const cellData = await con.getRepository(MapCellData).find();
       const speciesData = await con.getRepository(Species).find();
@@ -544,8 +541,6 @@ export class MapService {
           (Date.now() - element.lastVisited.getTime()) * 0.00000001157407,
       }));
 
-      console.log(mappedTimeData);
-
       const iqrTimeData = IQRIfy.runOn(
         mappedTimeData.map(time => time.timeSinceVisit),
       );
@@ -555,12 +550,9 @@ export class MapService {
         timeSinceVisit: 1 - iqrTimeData[index],
       }));
 
-      //console.log(mappedTimeData);
-
       let animalData;
 
-      //mappedAnimalData [{speciesId}, data{cellId,percentile,weight}]
-      let mappedAnimalData = new Array();
+      const mappedAnimalData = new Array();
       const speciesSize = speciesData.length;
 
 
@@ -600,10 +592,9 @@ export class MapService {
           mappedAnimalData[i]['data'].map(weight => weight.weight),
         );
 
-        let animalStandarizedVals = animalStd.getStandardisedArray(
+        const animalStandarizedVals = animalStd.getStandardisedArray(
           mappedAnimalData[i]['data'].map(weight => weight.weight),
         );
-        //console.log(animalStandarizedVals);
 
         mappedAnimalData[i]['data'] = mappedAnimalData[i]['data'].map(
           (element, index) => ({
@@ -613,9 +604,6 @@ export class MapService {
           }),
         );
       }
-
-      //console.log(mappedAnimalData);
-      console.log(mappedAnimalData[0]['data']);
 
       const poachingData = await con
         .getRepository(PoachingCellWeight)
@@ -634,7 +622,7 @@ export class MapService {
         poachingData.map(weight => weight.weight),
       );
 
-      let poachingStandarizedVals = poachStd.getStandardisedArray(
+      const poachingStandarizedVals = poachStd.getStandardisedArray(
         mappedPoachingData.map(weight => weight.weight),
       );
 
@@ -643,9 +631,6 @@ export class MapService {
         percentile: 1 - iqrPoachingData[index],
         weight: poachingStandarizedVals[index],
       }));
-
-      console.log(mappedPoachingData);
-      console.log(mappedAnimalData[0]);
 
       const size = poachingData.length;
       let hotspots = new Array();
@@ -677,31 +662,11 @@ export class MapService {
                 percentage * mappedPoachingData[i].weight +
                 timePercentage * mappedTimeData[i].timeSinceVisit,
             });
-          } else {
           }
         }
       }
-      // console.log(hotspots);
-      console.timeEnd('calculating averages');
-
-      // console.log(hotspots);
-
-      let unique_array = hotspots.filter(function(elem, index, self) {
-        return index == self.indexOf(elem);
-      });
-
-      // hotspots = unique_array
-      //   .sort((a, b) => b.weight - a.weight)
-      //   .slice(0, 5000);
-
-      console.log(hotspots);
 
       const tempIqri = IQRIfy.runOn(hotspots.map(weight => weight.weight));
-
-      // let k = tempIqri.map((weight,index) => ({
-      //   cellId: hotspots[index].cellId,
-      //   weight: weight,
-      // }));
 
       let final = [];
 
@@ -730,11 +695,11 @@ export class MapService {
           lat: cellPositionsMap[hotspot.cellId].cellMidLatitude,
         }));
 
-       final = final
-        .sort((a, b) => b.weight - a.weight)
-        .slice(0, 5000);
+      final = final
+      .sort(() => 0.5 - Math.random())
+      .slice(0, 5000);
 
-        return final;
+      return final;
     });
   }
 
