@@ -7,7 +7,6 @@ import * as mailer from 'nodemailer';
 import { ConfigService } from './config.service';
 import { MailService } from './mail.service';
 import * as RandExp from 'randexp';
-import * as passwordGen from 'generate-password';
 
 @Injectable()
 export class UserService {
