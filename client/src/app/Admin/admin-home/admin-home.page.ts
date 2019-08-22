@@ -34,6 +34,7 @@ import { IncidentsService } from '../../services/incidents.service';
 import { DronesService } from '../../services/drones.service';
 import { Drone } from '../../services/drones.service';
 import { HeatmapService, MapCell } from '../../services/heatmap.service';
+import { LoadingController, AlertController } from '@ionic/angular';
 
 interface MapState {
   setup?: (self: MapState) => Promise<any>;
@@ -75,99 +76,43 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
   public withinReserve = true;
 
   readonly states = {
-    // Default state
+    // default state
     default: {},
-    // View route state - currently does nothing*
-    // viewRoute: {
-    //   setup: async (self) => {
-    //     self.data.antPathUpdate = true;
-    //     const startingCoords = this.coordinates;
 
-    //     const route = await this.droneRouteService.generateRoute(drone.id, startingCoords);
-
-    //     // line style
-    //     const lineStyle = new Style({
-    //       stroke: new Stroke({
-    //         color: '#39c',
-    //         width: 5,
-    //       }),
-    //     });
-    //     // an path inner style
-    //     const dashStyle = new Style({
-    //       stroke: new Stroke({
-    //         color: '#fff',
-    //         width: 5,
-    //         lineDash: [4, 10],
-    //       }),
-    //     });
-
-    //     const vector = new VectorSource({
-    //       features: [
-    //         new Feature(new LineString(route).transform('EPSG:4326', 'EPSG:3857')),
-    //       ],
-    //     });
-
-    //     self.data.routeLayer = new VectorLayer({
-    //       source: vector,
-    //       style: [
-    //         lineStyle,
-    //         dashStyle,
-    //       ],
-    //       updateWhileAnimating: true,
-    //       updateWhileInteracting: true,
-    //     });
-
-    //     const stroke = dashStyle.getStroke();
-    //     const dash = stroke.getLineDash();
-    //     let length = dash.reduce((a, b) => a + b, 0);
-    //     length = dash.length % 2 === 1 ? length * 2 : length;
-
-    //     const update = () => {
-    //       const offset = stroke.getLineDashOffset() || 0;
-    //       stroke.setLineDashOffset(modulo(offset + 0.25, length));
-    //       vector.refresh();
-
-    //       if (self.data.antPathUpdate) {
-    //         requestAnimationFrame(update);
-    //       }
-    //     };
-
-    //     update();
-
-    //     this.map.addLayer(self.data.routeLayer);
-    //   },
-    //   tooltip: 'Viewing route',
-    //   confirmations: {
-    //     done: async () => {
-    //       // TODO: tell the server that the drone is no longer en route
-    //       this.setState(this.states.default);
-    //     },
-    //   },
-    //   data: {
-    //     routeLayer: null,
-    //     antPathUpdate: true,
-    //   },
-    //   destruct: async () => {
-    //     // remove the map layer from the map
-    //     this.states.viewRoute.data.antPathUpdate = false;
-    //     this.map.removeLayer(this.states.viewRoute.data.routeLayer);
-    //     // encourage garbage collection on the layer data
-    //     this.states.viewRoute.data.routeLayer = null;
-    //     // track to the current user's location
-    //     this.goToGeolocation();
-    //   },
-    // },
     // map options state
     options: {
       setup: async (self) => {
-        if (!self.data.cellData.length) {
-          self.data.cellData = await this.heatmapService.getCells();
+        const loader = await this.loadingCtrl.create({
+          message: 'Loading map cells',
+        });
+        loader.present();
+        try {
+          if (!self.data.cellData.length) {
+            await self.loadCells(self);
+          }
+          if (!self.data.species.length) {
+            self.data.species = await this.heatmapService.getAnimalSpecies();
+            self.data.animalHeatmapSpecies = self.data.species[0].id;
+          }
+        } catch (err) {
+          this.setState(this.states.default);
+
+          const alert = await this.alertCtrl.create({
+            header: 'Error',
+            message: 'An unknown error occurred',
+            buttons: [
+              {
+                role: 'cancel',
+                text: 'Okay',
+              },
+            ],
+          });
+          alert.present();
+          loader.dismiss();
+          return;
         }
 
-        if (!self.data.species.length) {
-          self.data.species = await this.heatmapService.getAnimalSpecies();
-          self.data.animalHeatmapSpecies = self.data.species[0].id;
-        }
+        loader.dismiss();
 
         self.updateTime(self);
       },
@@ -188,6 +133,9 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
         animalHeatmapSpecies: null,
         useCurrentTime: true,
         time: 0,
+      },
+      loadCells: async (self) => {
+        self.data.cellData = await this.heatmapService.getCells();
       },
       updateTime: (self) => {
         if (self.data.useCurrentTime) {
@@ -309,6 +257,8 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
     private incidentsService: IncidentsService,
     private dronesService: DronesService,
     private heatmapService: HeatmapService,
+    private loadingCtrl: LoadingController,
+    private alertCtrl: AlertController,
   ) {}
 
   async ngOnDestroy() {
@@ -347,6 +297,9 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
         this.map.updateSize();
       }
     }, 1000);
+
+    // preload map cells for settings
+    this.states.options.loadCells(this.states.options);
   }
 
   /**
