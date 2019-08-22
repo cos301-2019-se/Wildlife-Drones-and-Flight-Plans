@@ -6,7 +6,7 @@ import { SRTMService } from './srtm.service';
 import { Species } from '../entity/animal-species.entity';
 import { MapService } from './map.service';
 import { MapFeatureType } from '../entity/map-data.entity';
-
+import { UserService } from './user.service';
 
 @Injectable()
 export class AnimalLocationService {
@@ -15,6 +15,7 @@ export class AnimalLocationService {
     private readonly csvReader: CsvReaderService,
     private readonly mapService: MapService,
     private readonly altitude: SRTMService,
+    private readonly userService:UserService,
   ) {}
 
   async addAnimalLocationData(
@@ -41,7 +42,7 @@ export class AnimalLocationService {
     const featureSearchers = this.mapService.getFeatureSearchSets();
     console.timeEnd('feature searchers');
 
-    console.timeEnd('get map data');
+   // console.timeEnd('get map data');
 
     const entryDate = new Date(date);
     try {
@@ -75,6 +76,33 @@ export class AnimalLocationService {
     }
   }
 
+  async validateAnimalCSV(filename): Promise<boolean>
+  {
+    const csvReader = this.csvReader.readCSV(filename);
+    const headers = csvReader.getHeaders();
+    let isValid = false;
+    //Check if headers are valid if so then remove then populate table and remove headers
+    if(headers.includes('event-id') && headers.includes('visible') && headers.includes('timestamp')
+    && headers.includes('location-long')&& headers.includes('location-lat')&& headers.includes('external-temperature')
+    && headers.includes('habitat')&& headers.includes('sensor-type')&& headers.includes('individual-taxon-canonical-name')
+    && headers.includes('tag-local-identifier')&& headers.includes('individual-local-identifier')&& headers.includes('study-name')
+    && headers.includes('species'))
+    {
+      isValid = true;
+    }
+    return isValid;
+  }
+
+  fileNameGenerator(length) {
+    var result           = '';
+    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for ( var i = 0; i < length; i++ ) {
+       result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+ }
+
   async addAnimalLocationDataCSV(filename): Promise<void> {
     const csvFile = filename;
 
@@ -86,14 +114,15 @@ export class AnimalLocationService {
     const featureSearchers = await this.mapService.getFeatureSearchSets();
     console.timeEnd('feature searchers');
 
-    console.timeEnd('get map data');
+    //console.timeEnd('get map data');
 
     const csvReader = this.csvReader.readCSV(csvFile);
 
     let countInserted = 0;
-
-    let row;
-    while (row = csvReader.next()) {
+    await this.userService.sendEmailToAllAdmins('CSV Upload in progress',
+    'CSV upload has started!');
+    let row = csvReader.next();
+    while (typeof row !== 'undefined') {
       const lat = parseFloat(row['location-lat']);
       const lng = parseFloat(row['location-long']);
 
@@ -110,7 +139,7 @@ export class AnimalLocationService {
         location.habitat = row.habitat;
         location.month = rowDate.getMonth() + 1;
         location.time = rowDate.getHours() * 60 + rowDate.getMinutes();
-
+        
         // find the species in the database for the row
         let species = await animalSpeciesRepo.findOne({
           where: { species: row['species'] },
@@ -125,15 +154,23 @@ export class AnimalLocationService {
 
         location.species = species;
         location.active = true;
-
         await this.calculateAnimalLocationDistances(location, lat, lng, featureSearchers);
-
         await animalLocations.save(location);
         console.log('inserted', ++countInserted);
       } catch (error) {
         console.error(error);
       }
+      row = csvReader.next();
     }
+    await this.userService.sendEmailToAllAdmins('CSV Upload Succesful',
+      'CSV upload has completed succesfully!');
+    //Delete the file
+    var fs = require('fs');
+    fs.unlink(filename, function (err) {
+      if (err) throw err;
+      // if no error, file has been deleted successfully
+      console.log('File deleted!');
+    });
   }
 
   private async calculateAnimalLocationDistances(location: AnimalLocation, lat, lng, featureSearchers) {

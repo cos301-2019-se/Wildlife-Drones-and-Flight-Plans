@@ -224,7 +224,7 @@ export class ModelTraining {
       console.error('No data for species');
       return;
     }
-
+    console.log('My points',locationsForSpecies.length);
     const teachingData = locationsForSpecies
       .map(tp => ({
         month: tp.month,
@@ -238,7 +238,7 @@ export class ModelTraining {
         slopiness: tp.properties.slopiness,
       }));
 
-    console.log('input location points:', teachingData.length);
+
     //  Populate classifier with teaching data
     console.time('Populate Classifier');
     const classifier = new Classifier(teachingData, 200000);
@@ -266,6 +266,7 @@ export class ModelTraining {
           distanceToIntermittentWater: cell.properties.distanceToIntermittentWater,
           slopiness: cell.properties.slopiness,
         };
+        //console.log('Meant to display',JSON.stringify(cellDistances));
         animalCellWeight[`weight${time}`] = classifier.getDistance(
           cellDistances,
         );

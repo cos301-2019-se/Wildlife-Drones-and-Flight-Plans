@@ -6,7 +6,6 @@ export class DroneRouteService {
   constructor(
     private authService: AuthenticationService,
   ) {}
-
   async generateIncidentRoutes(droneId: number, coords: Coordinates): Promise<any[]> {
     const routes = await this.authService.post('drone-route/create-incident-route', {
       droneId,

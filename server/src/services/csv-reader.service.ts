@@ -16,10 +16,12 @@ export class CsvReader {
 
   constructor(filename: string) {
     this.handle = new readlines(filename);
-
-    this.headers = this.handle.next().toString().split(',');
+    this.headers = this.handle.next().toString().replace(/(\r\n|\n|\r)/gm,"").split(',');
   }
-
+getHeaders()
+{
+  return this.headers;
+}
   next() {
     const line = this.handle.next();
 
@@ -28,11 +30,12 @@ export class CsvReader {
     }
 
     return line
-    .toString()
-    .split(',')
-    .reduce((ob, cell, cellIndex) => {
-      ob[this.headers[cellIndex]] = cell;        
-      return ob;
-    }, {});
+      .toString()
+      .replace(/(\r\n|\n|\r)/gm,"")
+      .split(',')
+      .reduce((ob, cell, cellIndex) => {
+        ob[this.headers[cellIndex]] = cell;
+        return ob;
+      }, {});
   }
 }
