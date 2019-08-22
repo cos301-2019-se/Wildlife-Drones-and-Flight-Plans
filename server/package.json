@@ -13,7 +13,7 @@
     "prestart:prod": "rimraf dist && npm run build",
     "start:prod": "node dist/main.js",
     "lint": "tslint -p tsconfig.json -c tslint.json",
-    "test": "jest --setupFiles dotenv/config",
+    "test": "jest --setupFiles dotenv/config --verbose --silent",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
@@ -53,6 +53,7 @@
     "axios": "^0.18.0",
     "bcrypt": "^3.0.6",
     "big-json": "^2.0.2",
+    "btoa": "^1.2.1",
     "cache-manager": "^2.10.0",
     "class-transformer": "^0.2.3",
     "class-validator": "^0.9.1",
@@ -110,6 +111,9 @@
       "js",
       "json",
       "ts"
+    ],
+    "testPathIgnorePatterns": [
+      "server/src/services/animal-location.service.spec.ts"
     ],
     "rootDir": "src",
     "testRegex": ".spec.ts$",

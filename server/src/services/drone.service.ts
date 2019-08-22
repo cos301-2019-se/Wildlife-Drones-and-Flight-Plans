@@ -145,21 +145,22 @@ export class DroneService {
     return await rep.find();
   }
 
+
   /**
    * adds drone route, with given information 
-   * @param id 
+   * @param droneId 
    * @param points 
    */
-  async addDroneRoute(id: number, points: string): Promise<boolean> {
+  async selectDroneRoute(droneId: number, points: string): Promise<boolean> {
     const con = await this.databaseService.getConnection();
     const droneRoute = new DroneRoute();
 
     let droneIdFromDroneTable = await con
       .getRepository(Drone)
-      .findOne({ id: id });
+      .findOne({ id: droneId });
 
     if (!droneIdFromDroneTable) {
-      console.log('Drone ' + id + ' was not found');
+      console.log('Drone ' + droneId + ' was not found');
       return false;
     }    
 
@@ -169,7 +170,7 @@ export class DroneService {
       droneRoute.percentComplete = 0;
       droneRoute.timestamp = new Date();
       droneRoute.active = true;
-      // tslint:disable-next-line:no-console
+
       const addedDroneRoute = await con
         .getRepository(DroneRoute)
         .save(droneRoute);
@@ -252,4 +253,6 @@ export class DroneService {
 
     return await rep.find({order:{timestamp:"DESC"}});
   }
+
+  
 }

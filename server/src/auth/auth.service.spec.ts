@@ -10,8 +10,9 @@ import { AuthService } from '../auth/auth.service';
 
 jest.useFakeTimers();
 jest.setTimeout(12000000);
-let token;
-describe('Auth service  (e2e)', async () => {
+let tokenAdmin;
+let tokenUser
+describe('Authorization/validation & Authentication tests (e2e)', async () => {
   let app;
   let controller;
 
@@ -30,11 +31,12 @@ describe('Auth service  (e2e)', async () => {
     app = module.createNestApplication();
     await app.init();
 
-    token = await controller.createToken('reinhardt.eiselen@gmail.com')
+    tokenAdmin = await controller.createToken('reinhardt.eiselen@gmail.com')
+    tokenUser = await controller.createToken('evans.matthew97@gmail.com')
   //  console.log('************************ ',token.accessToken)
   });
 
-  it('/addUser (POST)', async () => {
+  it('/addUser (should return 401,unauthorized access (pilot profile)', async () => {
     await request(app.getHttpServer())
       .post('/addUser')
       .send({
@@ -47,7 +49,20 @@ describe('Auth service  (e2e)', async () => {
       .expect(401);
   });
 
-  it('/login (POST)', async () => {
+  it('/addUser (should return 201, created (admin profile) ', async () => {
+    await request(app.getHttpServer())
+      .post('/addUser')
+      .send({
+        name: 'Anne',
+        username: 'jm',
+        password: 'Reddbull@1',
+        job: 'pilot',
+        email: 'gst@gmail.com',
+      }).set('Authorization', `Bearer ${tokenAdmin.accessToken}`)
+      .expect(201);
+  });
+
+  it('/loginEmail (Given a valid email should pass first step)', async () => {
     await request(app.getHttpServer())
       .post('/loginEmail')
       .send({
@@ -56,29 +71,33 @@ describe('Auth service  (e2e)', async () => {
       .expect('true')
   });
 
-  it('/addUser (POST)', async () => {
+  it('/loginEmail (Given an invalid email should fail at first step)', async () => {
     await request(app.getHttpServer())
-      .post('/addUser')
+      .post('/loginEmail')
       .send({
-        name: 'Anne',
-        username: 'jm',
-        password: 'Reddbull@1',
-        job: 'ranger',
-        email: 'gst@gmail.com',
-      }) .set('Authorization', `Bearer ${token.accessToken}`)
-      .expect('true');
+        email: 'a@gmail.com',
+      })
+      .expect('false')
   });
 
-  it('/getUsers)', () => {
+
+  it('/getUsers Should be succesful with valid Bearer token attached & Admin Profile)', () => {
     return request(app.getHttpServer())
       .post('/getUsers')
-      .set('Authorization', `Bearer ${token.accessToken}`)
+      .set('Authorization', `Bearer ${tokenAdmin.accessToken}`)
       .expect(201);
   });
 
-  it('/getUsers)', () => {
+  it('/getUsers Should fail without token )', () => {
     return request(app.getHttpServer())
       .post('/getUsers')
       .expect(401);
+  });
+
+  it('/getUsers Should fail with token but invalid profile (normal user profile) )', () => {
+    return request(app.getHttpServer())
+      .post('/getUsers')
+      .set('Authorization', `Bearer ${tokenUser.accessToken}`)
+      .expect(403);
   });
 });
