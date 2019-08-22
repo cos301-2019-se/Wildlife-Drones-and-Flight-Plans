@@ -56,6 +56,7 @@ interface MapState {
 enum FlightTypes {
   ANIMAL = 'Visit animals',
   INCIDENT = 'Latest incidents',
+  HOTSPOTS = 'Hotspots'
 }
 
 @Component({
@@ -266,6 +267,8 @@ export class HomePage implements AfterViewInit, OnDestroy {
             // create a route based on the chosen route type
             if (flightType == FlightTypes.INCIDENT) {
               self.data.routes = await this.droneRouteService.generateIncidentRoutes(drone.id, startingCoords);
+            } else if (flightType == FlightTypes.HOTSPOTS) {
+              self.data.routes = await this.droneRouteService.generateHotspotRoutes(drone.id, startingCoords);
             } else if (flightType == FlightTypes.ANIMAL) {
               const animalIdsMap = this.states.setUpRoute.data.selectedAnimalIds;
               const res = await this.droneRouteService.generatePredictiveRoutes(

@@ -351,7 +351,7 @@ export class UserService {
   }
 
   async validateUser(payload: JwtPayload) {
-    console.log(JSON.stringify(payload));
+    //console.log(JSON.stringify(payload));
     const con = await this.databaseService.getConnection();
     return await con.getRepository(User).findOne({
       where: {

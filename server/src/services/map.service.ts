@@ -514,7 +514,12 @@ export class MapService {
    * poaching cell weights and cell last visited to create an array of
    * cells that have the highest priority to be visited
    */
-  async getCellHotspots(priority): Promise<Array<String>> {
+  async getCellHotspots(priority): Promise<Array<{
+    lon: number;
+    lat: number;
+    cellId: number;
+    weight: number;
+  }>> {
     const cache = this.cache;
 
     let percentage: number = 0.4;
