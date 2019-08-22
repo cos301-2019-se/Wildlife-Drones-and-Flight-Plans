@@ -21,6 +21,14 @@ export class RegressionService {
     return true;
   }
 
+  async trainAndReturnRegressor(inputs: number[][], outputs: number[][]): Promise<Regressor> {
+    const model = new Regressor();
+
+    model.trainModel(inputs, outputs);
+
+    return model;
+  }
+
   /**
    * Loads a trained regressor from the database and predicts
    * a set of inputs.
@@ -68,7 +76,7 @@ export class RegressionService {
     const conn = await this.databaseService.getConnection();
 
     try {
-      const model = await conn.getRepository(ModelData).findOne({
+      const model = await conn.getRepository(ModelData).findOneOrFail({
         where: { name: `regressor-${name}` },
       });
 

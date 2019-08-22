@@ -8,6 +8,9 @@ import { MapService } from './map.service';
 import { RegressionService } from './regression.service';
 import { MapFeatureType } from '../entity/map-data.entity';
 import { SRTMService } from './srtm.service';
+import getDistance from '@turf/distance';
+import { lineString } from '@turf/helpers';
+import lineSliceAlong from '@turf/line-slice-along';
 
 /**
  * Handles training of models and saving them to the database
@@ -85,37 +88,115 @@ export class ModelTraining {
 
     const inputData = [];
     for (const input of inputs) {
-      const altitudeData = await this.altitudeService.getAltitudeForPoint(input.latitude, input.longitude);
-
-      const closestRivers = searchSets[MapFeatureType.rivers].getNearest(input.longitude, input.latitude);
-      const closestDams = searchSets[MapFeatureType.dams].getNearest(input.longitude, input.latitude);
-      const closestRoads = searchSets[MapFeatureType.roads].getNearest(input.longitude, input.latitude);
-      const closestResidences = searchSets[MapFeatureType.residential].getNearest(input.longitude, input.latitude);
-      const closestIntermittentWater = searchSets[MapFeatureType.intermittent].getNearest(input.longitude, input.latitude);
-
-      inputData.push([
-        input.latitude,
-        input.longitude,
-        input.month,
-        input.time,
-
-        closestRivers.distance,
-        closestRivers.getBearing(),
-        closestDams.distance,
-        closestDams.getBearing(),
-        closestRoads.distance,
-        closestRoads.getBearing(),
-        closestResidences.distance,
-        closestResidences.getBearing(),
-        closestIntermittentWater.distance,
-        closestIntermittentWater.getBearing(),
-
-        altitudeData.averageAltitude,
-        altitudeData.variance,
-      ]);
+      inputData.push(await this.getDistancesForPoint(searchSets, input));
     }
 
     return regressor.predict(inputData);
+  }
+
+  /**
+   * Predicts an animal's future position for some given time. Uses the animal's
+   * average speed over the last few locations.
+   * @param animalId The animal ID
+   * @param timeInMinutes How long (in minutes) to predict in future
+   * @param startingPoint The starting point of the animal
+   */
+  async predictFutureAnimalPosition(animalId: string, timeInMinutes: number): Promise<{
+    speed: number;
+    positions: number[][];
+  }> {
+    // get the last few positions of the animal so we can predict the next locations
+    const lastFewPositions = await this.animalLocationService.getLastFewAnimalLocations(animalId, 20);
+    if (lastFewPositions.length <= 1) {
+      return undefined;
+    }
+
+    // train a regressor off of the last few positions
+    const searchSets = await this.mapService.getFeatureSearchSets();
+    const lastFewPointsInputs = [];
+    for (const pos of lastFewPositions) {
+      const point = await this.getDistancesForPoint(searchSets, pos);
+      lastFewPointsInputs.push(point);
+    }
+    const lastFewPointsOutputs = lastFewPointsInputs.slice();
+    // we train inputs off of the next point
+    lastFewPointsInputs.pop();
+    lastFewPointsOutputs.shift();
+
+    const regressor = await this.regressionService.trainAndReturnRegressor(lastFewPointsInputs, lastFewPointsOutputs);
+
+    // the regressor is now trained
+
+    // the latest position of the animal
+    const latestPosition = lastFewPositions[lastFewPositions.length - 1];
+
+    // calculate the animal's average speed so we can find the necessary distance
+    const averageSpeed = lastFewPositions
+      .reduce((sum, position, index) => {
+        if (index === lastFewPositions.length - 1) {
+          return sum;
+        }
+        const nextPosition = lastFewPositions[index + 1];
+
+        const distance = getDistance(
+          [position.longitude, position.latitude],
+          [nextPosition.longitude, nextPosition.latitude],
+          { units: 'kilometers' }
+        );
+
+        const deltaTimeMinutes = (nextPosition.timestamp.getTime() - position.timestamp.getTime()) / 60000;
+
+        const speed = distance / deltaTimeMinutes;
+
+        return sum + speed;
+      }, 0) / (lastFewPositions.length - 1);
+
+    // find how long the animal needes to travel for the time in the future
+    const neededDistance = timeInMinutes * averageSpeed;
+
+    // predict a future path for the needed distance
+    let elapsedDistance = 0;
+    const futurePath = [
+      [latestPosition.longitude, latestPosition.latitude],
+    ];
+    while (elapsedDistance < neededDistance) {
+      // use the last point as the input
+      const lastPathPoint = futurePath[futurePath.length - 1];
+      const pointWithDistances = await this.getDistancesForPoint(searchSets, {
+        time: latestPosition.time,
+        month: latestPosition.month,
+        longitude: lastPathPoint[0],
+        latitude: lastPathPoint[1],
+      });
+      // find the next point
+      const nextPoint = regressor.predict([
+        pointWithDistances
+      ])[0];
+      const nextPointCoords = [nextPoint[1], nextPoint[0]];
+
+      // limit distance to how far an elephant can travel in 30 minutes
+      const line = lineString([lastPathPoint, nextPointCoords]);
+      const along = lineSliceAlong(line, 0, averageSpeed * 30, { units: 'kilometers' });
+      const predictedPoint = along.geometry.coordinates[along.geometry.coordinates.length - 1];
+
+      // add the point to the path
+      futurePath.push(predictedPoint);
+
+      // find the distance between the predicted point and the previous one
+      const distance = getDistance(
+        lastPathPoint,
+        predictedPoint,
+        { units: 'kilometers' },
+      );
+
+      elapsedDistance += distance;
+      console.log(elapsedDistance);
+    }
+
+    return {
+      speed: averageSpeed,
+      positions: futurePath,
+    };
   }
 
   /**
@@ -250,5 +331,47 @@ export class ModelTraining {
       await new Promise(resolve => setTimeout(resolve, 0));
     }
     return true;
+  }
+
+  /**
+   * Returns an array representation of a point (for input into regressor) with
+   * distances and bearings to geographical features applied.
+   * @param searchSets The search sets to use (passed to optimise performance)
+   * @param input The point to find distances for
+   */
+  private async getDistancesForPoint(searchSets, input: {
+    month: number;
+    time: number;
+    latitude: number;
+    longitude: number;
+  }) {
+    const altitudeData = await this.altitudeService.getAltitudeForPoint(input.latitude, input.longitude);
+
+    const closestRivers = searchSets[MapFeatureType.rivers].getNearest(input.longitude, input.latitude);
+    const closestDams = searchSets[MapFeatureType.dams].getNearest(input.longitude, input.latitude);
+    const closestRoads = searchSets[MapFeatureType.roads].getNearest(input.longitude, input.latitude);
+    const closestResidences = searchSets[MapFeatureType.residential].getNearest(input.longitude, input.latitude);
+    const closestIntermittentWater = searchSets[MapFeatureType.intermittent].getNearest(input.longitude, input.latitude);
+
+    return [
+      input.latitude,
+      input.longitude,
+      input.month,
+      input.time,
+
+      closestRivers.distance,
+      closestRivers.getBearing(),
+      closestDams.distance,
+      closestDams.getBearing(),
+      closestRoads.distance,
+      closestRoads.getBearing(),
+      closestResidences.distance,
+      closestResidences.getBearing(),
+      closestIntermittentWater.distance,
+      closestIntermittentWater.getBearing(),
+
+      altitudeData.averageAltitude,
+      altitudeData.variance,
+    ];
   }
 }

@@ -39,6 +39,7 @@
     "@turf/explode": "^5.1.5",
     "@turf/flatten": "^5.1.5",
     "@turf/helpers": "^6.1.4",
+    "@turf/line-slice-along": "^5.1.5",
     "@turf/line-to-polygon": "^6.0.1",
     "@turf/nearest-point-on-line": "^6.0.2",
     "@turf/point-to-line-distance": "^6.0.0",
@@ -78,6 +79,7 @@
     "sqlite3": "^4.0.8",
     "twig": "^1.13.3",
     "typeorm": "^0.2.17",
+    "victor": "^1.1.0",
     "xmldom": "^0.1.27"
   },
   "devDependencies": {
@@ -91,6 +93,7 @@
     "@types/passport-jwt": "^3.0.1",
     "@types/supertest": "^2.0.7",
     "@types/twig": "^1.12.2",
+    "@types/victor": "^1.1.0",
     "compodoc": "0.0.41",
     "jest": "^23.6.0",
     "nodemon": "^1.18.9",

@@ -17,6 +17,26 @@ export class DroneRouteService {
     console.log('got routes', routes);
     return routes as any[];
   }
+
+  async generatePredictiveRoutes(droneId: number, coords: Coordinates, animalIds: string[]): Promise<any> {
+    const res = await this.authService.post('drone-route/create-animal-prediction-route', {
+      droneId,
+      lon: coords.longitude,
+      lat: coords.latitude,
+      animalIds,
+    });
+
+    console.log('got routes', res);
+
+    return res;
+  }
+
+  /**
+   * Get all animal IDs for planning predictive route
+   */
+  async getAnimalIds(): Promise<string[]> {
+    return await this.authService.post('getAnimalIds', {}) as string[];
+  }
 }
 
 @Injectable()

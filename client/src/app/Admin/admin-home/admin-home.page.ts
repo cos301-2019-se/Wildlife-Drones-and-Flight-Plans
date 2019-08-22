@@ -34,7 +34,7 @@ import { IncidentsService } from '../../services/incidents.service';
 import { DronesService } from '../../services/drones.service';
 import { Drone } from '../../services/drones.service';
 import { HeatmapService, MapCell } from '../../services/heatmap.service';
-import Geometry from 'ol/geom/Geometry';
+import { LoadingController, AlertController } from '@ionic/angular';
 
 interface MapState {
   setup?: (self: MapState) => Promise<any>;
@@ -83,14 +83,37 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
     // map options state
     options: {
       setup: async (self) => {
-        if (!self.data.cellData.length) {
-          self.data.cellData = await this.heatmapService.getCells();
+        const loader = await this.loadingCtrl.create({
+          message: 'Loading map cells',
+        });
+        loader.present();
+        try {
+          if (!self.data.cellData.length) {
+            await self.loadCells(self);
+          }
+          if (!self.data.species.length) {
+            self.data.species = await this.heatmapService.getAnimalSpecies();
+            self.data.animalHeatmapSpecies = self.data.species[0].id;
+          }
+        } catch (err) {
+          this.setState(this.states.default);
+
+          const alert = await this.alertCtrl.create({
+            header: 'Error',
+            message: 'An unknown error occurred',
+            buttons: [
+              {
+                role: 'cancel',
+                text: 'Okay',
+              },
+            ],
+          });
+          alert.present();
+          loader.dismiss();
+          return;
         }
 
-        if (!self.data.species.length) {
-          self.data.species = await this.heatmapService.getAnimalSpecies();
-          self.data.animalHeatmapSpecies = self.data.species[0].id;
-        }
+        loader.dismiss();
 
         self.updateTime(self);
       },
@@ -113,6 +136,9 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
         animalHeatmapSpecies: null,
         useCurrentTime: true,
         time: 0,
+      },
+      loadCells: async (self) => {
+        self.data.cellData = await this.heatmapService.getCells();
       },
       updateTime: (self) => {
         if (self.data.useCurrentTime) {
@@ -260,6 +286,8 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
     private incidentsService: IncidentsService,
     private dronesService: DronesService,
     private heatmapService: HeatmapService,
+    private loadingCtrl: LoadingController,
+    private alertCtrl: AlertController,
   ) {}
 
   async ngOnDestroy() {
@@ -298,6 +326,9 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
         this.map.updateSize();
       }
     }, 1000);
+
+    // preload map cells for settings
+    this.states.options.loadCells(this.states.options);
   }
 
   /**
