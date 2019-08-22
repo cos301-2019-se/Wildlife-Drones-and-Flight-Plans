@@ -59,8 +59,8 @@ time.sleep(10)
 '''
 {
     "token": "groovyMan",
-    "droneID": 1,
-    "DroneSpeed": 2,
+    "droneId": 1,
+    "droneSpeed": 2,
     "points":[
         [30.8925414763817,-22.7150831589717],
         [30.8925414763817,-22.7060899553344],
@@ -229,10 +229,8 @@ def arm_and_takeoff(aTargetAltitude):
         time.sleep(1)
 
 print('Create a new mission (for current location)')
-#getDroneRoutes(1)
 add_mission(points)
 
-# From Copter 3.3 you will be able to take off using a mission item. Plane must take off using a mission item (currently).
 arm_and_takeoff(10)
 print("Setting groundspeed to max")
 vehicle.groundspeed = 15
@@ -248,21 +246,68 @@ vehicle.mode = VehicleMode("AUTO")
 
 lent = len(points)
 
+import requests
+
+
+
+url = "http://127.0.0.1:3000/updateDronePosition"
+
+
+
+payload = " {\"droneId\":1,\"latitude\":0,\"longitude\":0}"
+
+headers = {
+
+    'Content-Type': "application/json",
+
+    'Authorization': "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImJsYXplLmN5YmVyY2VsbEBnbWFpbC5jb20iLCJpYXQiOjE1NjY1MDU1NjIsImV4cCI6MTU2NzExMDM2Mn0.Jm3r0bJMqP_aQDsAhCRod-g-m2pGDOy_Mor3KFcJo88",
+
+    'User-Agent': "PostmanRuntime/7.15.2",
+
+    'Accept': "/",
+
+    'Cache-Control': "no-cache",
+
+    'Postman-Token': "a1b7f85b-63eb-41a6-a654-2465740c78e7,f74eae29-6f3d-4872-a316-41b4a765138d",
+
+    'Host': "127.0.0.1:3000",
+
+    'Accept-Encoding': "gzip, deflate",
+
+    'Content-Length': "14",
+
+    'Connection': "keep-alive",
+
+    'cache-control': "no-cache"
+
+    }
+
+
+
+response = requests.request("POST", url, data=payload, headers=headers)
+
+
+
+print(response.text)
+
+
 while True:
     nextwaypoint = vehicle.commands.next
     print('Distance to waypoint (%s): %s' % (nextwaypoint, distance_to_current_waypoint()))
 
-
     print('Long %s, Lat %s' % (vehicle.location.global_frame.lon, vehicle.location.global_frame.lat))
-   
+    payload = " {\"droneId\":1,\"latitude\":"+str(vehicle.location.global_frame.lat)+",\"longitude\":"+str(vehicle.location.global_frame.lon)+"}"
+
+    response = requests.request("POST", url, data=payload, headers=headers)
+
+    print(response)
     if nextwaypoint == lent + 1: #Dummy waypoint - as soon as we reach waypoint lent + 1 this is true and we exit.
         print("Exit 'standard' mission when start heading to final waypoint")
         break;
-    time.sleep(1)
+    time.sleep(5)
 
 print('Return to launch')
 vehicle.mode = VehicleMode("RTL")
-
 
 # Close vehicle object before exiting script
 print("Close vehicle object")
