@@ -61,6 +61,10 @@ export class DroneRouteService {
   private async createStaticRoute(droneId: number, lon: number, lat: number, points: Point[], sampleSize = 0) {
     const droneInfo = await this.getDroneInfo(droneId);
 
+    if (!droneInfo) {
+      return false;
+    }
+
     const depot = new Point(lon, lat, 0);
 
     points = points
@@ -106,6 +110,9 @@ export class DroneRouteService {
    */
   async createAnimalPredictionRoute(droneId: number, depotLon: number, depotLat: number, animalIds: string[]) {
     const droneInfo = await this.getDroneInfo(droneId);
+    if (!droneInfo) {
+      return false;
+    }
 
     // cannot find a route if the drone does not move
     if (droneInfo.speed <= 0) {
@@ -346,7 +353,7 @@ export class DroneRouteService {
   }> {
     const drone = await this.droneService.getDrone(droneId);
     if (!drone) {
-      throw new Error('The drone could not be found');
+      return null;
     }
 
     const DRONE_FLIGHT_ERROR = 0.9; // account for errors by making the route slightly shorter than the maximum distance

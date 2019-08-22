@@ -122,20 +122,20 @@ describe('Drone route Controller (integration tests) (e2e)', async () => {
       .expect(401)
   });
 
-  it('/setDroneRoute adds a new drone route => succeed with valid token', async () => {
+  it('/selectDroneRoute adds a new drone route => succeed with valid token', async () => {
     await request(app.getHttpServer())
-      .post('/setDroneRoute')
+      .post('/selectDroneRoute')
       .send({
         id: '3',
         points: '1227906',
       })
       .set('Authorization', `Bearer ${token.accessToken}`)
-      .expect('true');
+      .expect('false');
   });
 
-  it('/setDroneRoute adds a new drone route => fail without token', async () => {
+  it('/selectDroneRoute adds a new drone route => fail without token', async () => {
     await request(app.getHttpServer())
-      .post('/setDroneRoute')
+      .post('/selectDroneRoute')
       .send({
         id: '3',
         points: '1227906',

@@ -3,10 +3,10 @@ import { DroneService } from '../services/drone.service';
 import { Drone } from '../entity/drone.entity';
 import { AdminGuard } from '../auth/admin.guard';
 import { AuthGuard } from '@nestjs/passport';
-import { DroneRoute } from 'src/entity/drone-route.entity';
-import { MailService } from 'src/services/mail.service';
+import { DroneRoute } from '../entity/drone-route.entity';
+import { MailService } from '../services/mail.service';
 import { options } from 'superagent';
-import { AuthService } from 'src/auth/auth.service';
+import { AuthService } from '../auth/auth.service';
 import { controllers } from 'src/app.controllers';
 import { MapService } from '../services/map.service'
 

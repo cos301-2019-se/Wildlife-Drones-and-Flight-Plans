@@ -101,6 +101,7 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
             self.data.animalHeatmapSpecies = self.data.species[0].id;
           }
         } catch (err) {
+          console.error(err);
           this.setState(this.states.default);
 
           const alert = await this.alertCtrl.create({
