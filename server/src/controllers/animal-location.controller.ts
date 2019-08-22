@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Query, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Query, Body,UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { AnimalLocationService } from '../services/animal-location.service';
 import { AnimalLocation } from '../entity/animal-location.entity';
 import { ModelTraining } from '../services/model-training.service';
@@ -27,6 +28,31 @@ export class AnimalController {
     );
   }
 
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
+  @Post('csvUploader')
+  @UseInterceptors(FileInterceptor('csvFile'))
+  async csvUploader(@UploadedFile() file): Promise<boolean> {
+    var fs = require('fs');
+    
+    const fileName = this.animalLocationService.fileNameGenerator(15);
+    const path = fileName+'.csv';
+    fs.writeFileSync(path,file.buffer);
+    //Check for valid headers
+    const isValid = await this.animalLocationService.validateAnimalCSV(path);
+    if(isValid)
+    {
+      this.animalLocationService.addAnimalLocationDataCSV(path); 
+    }
+    else
+    {
+      fs.unlink(path, function (err) {
+        if (err) throw err;
+        // if no error, file has been deleted successfully
+        console.log('File deleted!');
+      });
+    }
+    return isValid;
+  }
   @UseGuards(AuthGuard('jwt'), AdminGuard)
   @Post('addAnimalLocationDataCSV')
   async addAnimalLocationDataCSV(@Body() body): Promise<void> {

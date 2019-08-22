@@ -383,7 +383,6 @@ export class MapService {
   ): Promise<{
     [cellId: number]: number;
   }> {
-
     const cache = this.cache;
     return await cache.getKey(`speciesWeightDataForTime-${speciesId}-${time}`, async () => {
       const con = await this.databaseService.getConnection();
@@ -422,10 +421,8 @@ export class MapService {
   async getCellPoachingWeight(): Promise<{
     [cellId: number]: number;
   }> {
-
     const cache = this.cache;
-    return await cache.getKey('cellPoachingWeight', async () =>{
-
+    return await cache.getKey('cellPoachingWeight', async () => {
       const con = await this.databaseService.getConnection();
       try {
         console.log('Getting cell data');
@@ -514,12 +511,18 @@ export class MapService {
    * poaching cell weights and cell last visited to create an array of
    * cells that have the highest priority to be visited
    */
-  async getCellHotspots(priority): Promise<Array<{
-    lon: number;
-    lat: number;
-    cellId: number;
-    weight: number;
-  }>> {
+  async getCellHotspots(
+    priority,
+  ): Promise<
+    Array<{
+      lon: number;
+      lat: number;
+      cellId: number;
+      weight: number;
+    }>
+  > {
+    const cache = this.cache;
+
     let percentage: number = 0.4;
     let timePercentage: number = 0.2;
 
@@ -554,7 +557,6 @@ export class MapService {
 
       const mappedAnimalData = new Array();
       const speciesSize = speciesData.length;
-
 
       for (let i = 0; i < speciesSize; i++) {
         animalData = await con
@@ -696,14 +698,26 @@ export class MapService {
         }));
 
       final = final
-      .sort(() => 0.5 - Math.random())
-      .slice(0, 5000);
+        .sort(() => 0.5 - Math.random())
+        .slice(0, 5000);
 
       return final;
     });
   }
 
-  async updateCellLastVisited(lng: number, lat: number): Promise<boolean> {
-    return true;
+  async updateCellLastVisited(points: number[]) {
+    const con = await this.databaseService.getConnection();
+
+    const date = new Date();
+
+    for (const point of points) {
+      let cell = await con
+        .getRepository(MapCellData)
+        .findOne({ cellMidLongitude: point[0], cellMidLatitude: point[1] });
+      if (cell) {
+        cell.lastVisited = date;
+        await con.getRepository(MapCellData).save(cell);
+      }
+    }
   }
 }

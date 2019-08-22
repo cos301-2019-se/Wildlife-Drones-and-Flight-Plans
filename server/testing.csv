@@ -1,0 +1,5 @@
+event-id,visible,timestamp,location-long,location-lat,external-temperature,habitat,sensor-type,individual-taxon-canonical-name,tag-local-identifier,individual-local-identifier,study-name,species
+9421351127,TRUE,2007-08-13 00:30:00.000,31.87091,-24.81373,24.0,Combretum spp/T. sericea woodland,gps,,AM105,AM105,ThermochronTracking Elephants Kruger 2007,Andreas
+9421351128,TRUE,2007-08-13 02:00:00.000,31.87399,-24.81483,23.0,Combretum apiculatum woodland,gps,,AM105,AM105,ThermochronTracking Elephants Kruger 2007,Andreas
+9421351129,TRUE,2007-08-13 03:31:00.000,31.87724,-24.81673,21.0,Acacia welwitschii tree thicket,gps,,AM105,AM105,ThermochronTracking Elephants Kruger 2007,Andreas
+9421351130,TRUE,2007-08-13 04:00:00.000,31.87822,-24.81569,21.0,Terminalia seriacia/D.cineria open tree savannah,gps,,AM105,AM105,ThermochronTracking Elephants Kruger 2007,Andreas

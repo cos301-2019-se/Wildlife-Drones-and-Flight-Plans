@@ -60,6 +60,36 @@ export class AuthenticationService {
   }
 
   /**
+   * Sends a post form request to the API at the given endpoint name.
+   * Automatically attaches the stored token to the request if there is one.
+   * @param endpointName The name of the endpoint (excluding the '/')
+   * @param body The data to send to the api in the format of FormData
+   */
+  async postForm(endpointName: string, body: any) {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        Accept: 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST',
+        Authorization: `Bearer ${await this.getToken()}`,
+      }),
+    };
+
+    try {
+      return await this.http.post(`${this.url}/${endpointName}`, body, httpOptions).toPromise();
+    } catch (err) {
+      if (err.status === 401) {
+        // authentication error
+        console.error('Not authenticated');
+        this.authenticationState.next({ status: false, jobType: null });
+      } else {
+        // some other error occurred
+        throw err;
+      }
+    }
+  }
+
+  /**
    * Sends a get request to the API at the given endpoint name.
    * Automatically attaches the stored token to the request if there is one.
    * @param endpointName The endpoint name excluding '/'
