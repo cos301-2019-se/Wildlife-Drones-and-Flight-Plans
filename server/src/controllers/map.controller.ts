@@ -68,7 +68,12 @@ export class MapController {
   }
 
   @Post('getCellHotspots')
-  async getCellHotspots(@Body() body): Promise<Array<String>> {
+  async getCellHotspots(@Body() body): Promise<Array<{
+    lon: number;
+    lat: number;
+    cellId: number;
+    weight: number;
+  }>> {
     return await this.mapService.getCellHotspots(body.time);
   }
 }

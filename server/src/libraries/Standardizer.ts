@@ -16,6 +16,7 @@ export class Standardizer {
     this.sumOfSquared = numbers.reduce((sum, x) => sum + x * x, 0);
 
     this.stdev = Math.sqrt((this.sumOfSquared - (this.sum * this.sum) / this.n) / this.n);
+    //console.log('std',this.stdev);
   }
 
   /**
@@ -32,6 +33,10 @@ export class Standardizer {
    * @param existingValue A value presumed to be in the array already
    */
   standardizeExisting(existingValue: number) {
+    if(this.stdev == 0)
+    {
+      return 0;
+    }
     return (existingValue - this.sum / this.n) / this.stdev;
   }
 

@@ -65,7 +65,7 @@ export class Classifier {
   //  We use this to determine probability of cell containing animal based on external factors
   public getDistance(ob, n = 10) {
     const nearest = this.kd.nearest(ob, n);
-
-    return nearest.reduce((sum, pair) => sum + pair[1], 0) / n;
+    const result = nearest.reduce((sum, pair) => sum + pair[1], 0) / n;
+    return result;
   }
 }
