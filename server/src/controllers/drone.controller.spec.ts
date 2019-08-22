@@ -122,9 +122,9 @@ describe('Drone route Controller (integration tests) (e2e)', async () => {
       .expect(401)
   });
 
-  it('/addDroneRoute adds a new drone route => succeed with valid token', async () => {
+  it('/setDroneRoute adds a new drone route => succeed with valid token', async () => {
     await request(app.getHttpServer())
-      .post('/addDroneRoute')
+      .post('/setDroneRoute')
       .send({
         id: '3',
         points: '1227906',
@@ -133,9 +133,9 @@ describe('Drone route Controller (integration tests) (e2e)', async () => {
       .expect('true');
   });
 
-  it('/addDroneRoute adds a new drone route => fail without token', async () => {
+  it('/setDroneRoute adds a new drone route => fail without token', async () => {
     await request(app.getHttpServer())
-      .post('/addDroneRoute')
+      .post('/setDroneRoute')
       .send({
         id: '3',
         points: '1227906',
