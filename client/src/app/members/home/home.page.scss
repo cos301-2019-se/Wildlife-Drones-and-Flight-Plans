@@ -41,11 +41,11 @@ $tooltip-margin: 10px;
 }
 
 /*
-  Flight overlay 
+  Form overlay 
 */
 .form-overlay {
   position: absolute;
-  bottom: 160px;
+  bottom: 100px;
   left: 50%;
   background: #fff;
   border-radius: 10px;
@@ -56,7 +56,7 @@ $tooltip-margin: 10px;
 }
 
 .animal-selection {
-  max-height: 150px;
+  max-height: 130px;
   overflow-y: scroll;
   background: #fafafa;
   -webkit-overflow-scrolling: touch;
@@ -104,6 +104,7 @@ ion-item {
 }
 
 ::ng-deep .confirmation-buttons {
+  display: flex;
   align-content: space-around;
   left: 50% !important;
   transform: translateX(-50%) translateY(4px) !important;
@@ -111,17 +112,9 @@ ion-item {
   margin-inline-start: unset !important;
   ::ng-deep .confirmation-button {
     display: inline-block;
-    margin-left: 16px !important;
-    margin-right: 16px !important;
+    margin-left: 8px !important;
+    margin-right: 8px !important;
     transition: all 0.3s ease-in-out;
-  }
-  ::ng-deep .confirmation-button-middle {
-    position: absolute;
-    left: 50%;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-    margin-top: 0 !important;
-    transform: translate(-50%, -75%);
   }
 }
 

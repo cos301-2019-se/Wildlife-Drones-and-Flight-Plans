@@ -177,7 +177,18 @@ export class HomePage implements AfterViewInit, OnDestroy {
           loader.present();
           try {
             await this.dronesService.updateDrones(this.states.setUpRoute.data.drones);
-            self.getDrones(self);
+            await self.getDrones(self);
+            console.log(self.data.drones);
+            // find the ID of the drone in case it has just been added
+            const currentlySelectedDrone = self.data.selectedDrone;
+            self.data.selectedDrone = self.data.drones.find(drone => {
+              return (
+                drone.name === currentlySelectedDrone.name &&
+                drone.avgSpeed === currentlySelectedDrone.avgSpeed &&
+                drone.avgFlightTime === currentlySelectedDrone.avgFlightTime
+              );
+            });
+            console.log(self.data.selectedDrone);
             this.setState(this.states.viewRoute);
           } catch (err) {
             console.error('found error', err);

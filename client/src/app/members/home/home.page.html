@@ -112,7 +112,7 @@
     *ngIf="state.confirmations"
   >
     <!-- prev button -->
-    <ion-fab-button class="confirmation-button" size="small" color="dark"
+    <ion-fab-button class="confirmation-button prev-button" size="small" color="dark"
       *ngIf="state.confirmations.prev"
       (click)="state.confirmations.prev(state)" @button-animation
       [disabled]="state.isAtStart(state)"
@@ -121,7 +121,7 @@
     </ion-fab-button>
     
     <!-- cancel button -->
-    <ion-fab-button class="confirmation-button" size="small" color="dark"
+    <ion-fab-button class="confirmation-button cancel-button" size="small" color="dark"
     *ngIf="state.confirmations.cancel"
       (click)="state.confirmations.cancel(state)" @button-animation
     >
@@ -129,15 +129,15 @@
     </ion-fab-button>
 
     <!-- add button -->
-    <ion-fab-button class="confirmation-button confirmation-button-middle" size="small" color="dark"
+    <ion-fab-button class="confirmation-button add-button" size="small" color="dark"
       *ngIf="state.confirmations.add"
-      (click)="state.confirmations.add(state)" @add-button-animation
+      (click)="state.confirmations.add(state)" @button-animation
     >
       <ion-icon name="add"></ion-icon>
     </ion-fab-button>
 
     <!-- done button -->
-    <ion-fab-button class="confirmation-button" size="small" color="dark"
+    <ion-fab-button class="confirmation-button done-button" size="small" color="dark"
       (click)="state.confirmations.done(state)" @button-animation
       [disabled]="state === states.addMarker && !withinReserve"
     >
@@ -145,7 +145,7 @@
     </ion-fab-button>
 
     <!-- next button -->
-    <ion-fab-button class="confirmation-button" size="small" color="dark"
+    <ion-fab-button class="confirmation-button next-button" size="small" color="dark"
       *ngIf="state.confirmations.next"
       (click)="state.confirmations.next(state)" @button-animation
       [disabled]="state.isAtEnd(state)"
