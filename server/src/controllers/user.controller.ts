@@ -50,6 +50,9 @@ export class UserController {
     if (status) {
       return true;
     }
+    else{
+      return false;
+    }
   }
 
   @Post('resetPassword')
