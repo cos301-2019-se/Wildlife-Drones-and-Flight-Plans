@@ -1,0 +1,15 @@
+<ion-content>
+  <form>
+    <ion-row>
+      <ion-col>
+        <ion-item>
+          <ion-label id="csv_file" color="dark" position="stacked">Upload CSV file with animal data</ion-label>
+          <input class="csvInput" #csvInput color="dark" type="file" accept=".csv" (change)="changeListener($event)"/>
+        </ion-item>
+      </ion-col>
+      </ion-row>
+    </form>
+    <div padding class="error" [class.failure]="error">
+      {{ error }}
+    </div>
+</ion-content>

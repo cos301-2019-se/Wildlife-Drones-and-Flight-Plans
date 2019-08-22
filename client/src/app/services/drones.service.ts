@@ -21,6 +21,9 @@ export class DronesService {
     return await this.authService.post('getDrones', {}) as Drone[];
   }
 
+  async getDroneRoutes(): Promise<Drone[]> {
+    return await this.authService.post('getDroneRoutes', {}) as any[];
+  }
   async updateDrones(drones: Drone[]) {
     await this.authService.post('updateDrones', {
       drones,
