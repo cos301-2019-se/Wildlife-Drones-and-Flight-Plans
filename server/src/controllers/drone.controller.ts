@@ -8,13 +8,15 @@ import { MailService } from 'src/services/mail.service';
 import { options } from 'superagent';
 import { AuthService } from 'src/auth/auth.service';
 import { controllers } from 'src/app.controllers';
+import { MapService } from '../services/map.service'
 
  @UseGuards(AuthGuard('jwt'))
 @Controller()
 export class DroneController {
   constructor(private readonly droneService: DroneService,
               private readonly mailService : MailService,
-              private readonly authService : AuthService ) {}
+              private readonly authService : AuthService,
+              private readonly mapService : MapService, ) {}
 
   @Post('addDrone')
   async addDrone(@Body() body): Promise<boolean> {
@@ -64,6 +66,7 @@ export class DroneController {
      const droneT = await this.droneService.getDrone(body.droneId)
 
     if(res){
+      this.mapService.updateCellLastVisited(body.points);
       let tokenT = await this.authService.createToken(user.email)
      
       
