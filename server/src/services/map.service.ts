@@ -521,8 +521,6 @@ export class MapService {
       weight: number;
     }>
   > {
-    const cache = this.cache;
-
     let percentage: number = 0.4;
     let timePercentage: number = 0.2;
 
@@ -536,7 +534,19 @@ export class MapService {
       const con = await this.databaseService.getConnection();
 
       const cellData = await con.getRepository(MapCellData).find();
-      const speciesData = await con.getRepository(Species).find();
+      const speciesDataRaw = await con.getRepository(Species)
+        .createQueryBuilder('species')
+        .innerJoin('species.animalCellWeightSpecies', 'location')
+        .groupBy('species.id')
+        .having('COUNT(location.id) > 0')
+        .execute();
+
+      const speciesData = speciesDataRaw.map(s => ({
+        id: s.species_id,
+        species: s.species_species,
+      }));
+
+      console.log('got species', speciesData);
 
       let mappedTimeData = cellData.map(element => ({
         cellId: element.id,
@@ -610,6 +620,11 @@ export class MapService {
       const poachingData = await con
         .getRepository(PoachingCellWeight)
         .find({ relations: ['cell'] });
+
+      // return nothing if there is no trained poaching data
+      if (!poachingData.length) {
+        return [];
+      }
 
       let mappedPoachingData = poachingData.map(element => ({
         cellId: element.cell['id'],

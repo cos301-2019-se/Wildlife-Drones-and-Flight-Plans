@@ -634,7 +634,7 @@ export class HomePage implements AfterViewInit, OnDestroy {
 
     // animate zoom to the reserve
     const MAX_ZOOM = 18;
-    const MIN_ZOOM = 11;
+    const MIN_ZOOM = 9;
 
     const view = this.map.getView();
     view.setMaxZoom(MAX_ZOOM);

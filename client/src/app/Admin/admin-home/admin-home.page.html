@@ -36,12 +36,6 @@
           [(ngModel)]="states.options.data.enableAnimalHeatmap"
         ></ion-checkbox>
       </ion-item>
-      <ion-item no-padding>
-        <ion-label>Show past flight plans</ion-label>
-        <ion-checkbox slot="end"
-          [(ngModel)]="states.options.data.enablePastFlightPlans"
-        ></ion-checkbox>
-      </ion-item>
       <ng-container *ngIf="states.options.data.enableAnimalHeatmap">
         <ion-item no-padding>
           <ion-label position="stacked">Animal species</ion-label>
@@ -121,11 +115,19 @@
 
     <!-- done button -->
     <ion-fab-button class="confirmation-button" size="small" color="dark"
+      *ngIf="state.confirmations.done"
       (click)="state.confirmations.done(state)" @button-animation
-      [disabled]="state === states.addMarker && !withinReserve"
     >
       <ion-icon name="checkmark"></ion-icon>
     </ion-fab-button>
+
+    <div *ngIf="state === states.default && flightPlans.length" class="flight-plan-info">
+      <div class="inner">
+        {{ flightPlanIndex + 1 }} / {{ flightPlans.length }}<br />
+        {{ flightPlans[flightPlanIndex].timestamp | date:'dd MMM \'yy' }}
+      </div>
+    </div>
+
      <!-- next button -->
      <ion-fab-button class="confirmation-button" size="small" color="dark"
      *ngIf="state.confirmations.next"

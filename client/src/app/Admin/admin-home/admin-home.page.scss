@@ -92,24 +92,32 @@
   }
   
   ::ng-deep .confirmation-buttons {
+    display: flex;
     align-content: space-around;
     left: 50% !important;
     transform: translateX(-50%) translateY(4px) !important;
     margin-left: unset !important;
     margin-inline-start: unset !important;
+    align-items: center;
+
     ::ng-deep .confirmation-button {
       display: inline-block;
-      margin-left: 16px !important;
-      margin-right: 16px !important;
+      margin-left: 8px !important;
+      margin-right: 8px !important;
       transition: all 0.3s ease-in-out;
     }
-    ::ng-deep .confirmation-button-middle {
-      position: absolute;
-      left: 50%;
-      margin-left: 0 !important;
-      margin-right: 0 !important;
-      margin-top: 0 !important;
-      transform: translate(-50%, -75%);
+
+    ::ng-deep .flight-plan-info {
+      color: #fff;
+      font-weight: 700;
+      text-shadow: 2px 2px 0 #000, 0 0 3px #000;
+
+      .inner {
+        background: rgba(0,0,0,0.6);
+        padding: 10px;
+        border-radius: 10px;
+        text-align: center;
+      }
     }
   }
   

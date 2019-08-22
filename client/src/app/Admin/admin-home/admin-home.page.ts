@@ -7,6 +7,7 @@ import XYZ from 'ol/source/XYZ';
 import GeoJSON from 'ol/format/GeoJSON';
 import { Vector as VectorLayer, Tile as TileLayer } from 'ol/layer';
 import VectorSource from 'ol/source/Vector';
+import LineString from 'ol/geom/LineString';
 
 import bbox from '@turf/bbox';
 import contains from '@turf/boolean-contains';
@@ -29,13 +30,16 @@ import center from '@turf/center';
 import { DronesService } from '../../services/drones.service';
 import { HeatmapService, MapCell } from '../../services/heatmap.service';
 import { LoadingController, AlertController } from '@ionic/angular';
+import { IncidentsService } from '../../services/incidents.service';
+import { DroneRouteService } from '../../services/drone-route.service';
+import { modulo } from 'ol/math';
 interface MapState {
   setup?: (self: MapState) => Promise<any>;
   destruct?: (self: MapState) => Promise<any>;
   confirmations?: {
     add?: () => void;
     cancel?: () => void;
-    done: () => void;
+    done?: () => void;
     next?: (state: MapState) => void;
     prev?: (state: MapState) => void;
   };
@@ -44,6 +48,8 @@ interface MapState {
     [s: string]: any;
   };
   [s: string]: any;
+  isAtStart?: (state: MapState) => boolean;
+  isAtEnd?: (state: MapState) => boolean;
 }
 
 @Component({
@@ -74,12 +80,96 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
 
   public withinReserve = true;
 
+  public flightPlans = [];
+  public flightPlanIndex = 0;
+  public flightPlanLayer = null;
+  private flightPathAntUpdate = null;
+
   readonly states = {
     // default state
-    default: {},
+    default: {
+      setup: async (self) => {
+        this.flightPlans = await this.droneRouteService.getPastRoutes();
+        console.log('plans', this.flightPlans);
+        if (this.flightPlans.length) {
+          self.renderRoute(self);
+        }
+      },
+      confirmations: {
+        prev: async (self) => {
+          this.flightPlanIndex--;
+          self.renderRoute(self);
+        },
+        next: async (self) => {
+          this.flightPlanIndex++;
+          self.renderRoute(self);
+        },
+      },
+      isAtStart: () => this.flightPlanIndex === 0,
+      isAtEnd: () => this.flightPlans.length === 0 || this.flightPlanIndex >= this.flightPlans.length - 1,
+      renderRoute: async (self) => {
+        const plan = this.flightPlans[this.flightPlanIndex];
+        const route = JSON.parse(plan.points);
+
+        if (this.flightPlanLayer) {
+          this.map.removeLayer(this.flightPlanLayer);
+        }
+
+        // line style
+        const lineStyle = new Style({
+          stroke: new Stroke({
+            color: '#39c',
+            width: 5,
+          }),
+        });
+        // an path inner style
+        const dashStyle = new Style({
+          stroke: new Stroke({
+            color: '#fff',
+            width: 5,
+            lineDash: [4, 10],
+          }),
+        });
+
+        const vector = new VectorSource({
+          features: [
+            new Feature(new LineString(route).transform('EPSG:4326', 'EPSG:3857')),
+          ],
+        });
+
+        this.flightPlanLayer = new VectorLayer({
+          source: vector,
+          style: [
+            lineStyle,
+            dashStyle,
+          ],
+          updateWhileAnimating: true,
+          updateWhileInteracting: true,
+        });
+
+        const stroke = dashStyle.getStroke();
+        const dash = stroke.getLineDash();
+        let length = dash.reduce((a, b) => a + b, 0);
+        length = dash.length % 2 === 1 ? length * 2 : length;
+
+        const antPathUpdate = () => {
+          const offset = stroke.getLineDashOffset() || 0;
+          stroke.setLineDashOffset(modulo(offset + 0.25, length));
+          vector.refresh();
+
+          if (this.flightPathAntUpdate === antPathUpdate) {
+            requestAnimationFrame(this.flightPathAntUpdate);
+          }
+        };
+
+        this.flightPathAntUpdate = antPathUpdate;
+        this.flightPathAntUpdate();
+
+        this.map.addLayer(this.flightPlanLayer);
+      }
+    },
 
     // map options state
-    // View route state
     options: {
       setup: async (self) => {
         const loader = await this.loadingCtrl.create({
@@ -120,12 +210,17 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
         done: async (self) => {
           const loader = await this.loadingCtrl.create();
           loader.present();
-          await Promise.all([
-            self.showPoachingHeatmap(self),
-            self.showAnimalHeatmap(self),
-            self.showHotspotHeatmap(self),
-            this.getDrones(),
-          ]);
+          try {
+            await Promise.all([
+              self.showPoachingHeatmap(self),
+              self.showAnimalHeatmap(self),
+              self.showHotspotHeatmap(self),
+              this.getDrones(),
+            ]);
+          } catch (err) {
+            console.error(err);
+            loader.dismiss();
+          }
           loader.dismiss();
           this.setState(this.states.default);
         },
@@ -289,6 +384,8 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
     private cdr: ChangeDetectorRef,
     private dronesService: DronesService,
     private heatmapService: HeatmapService,
+    private droneRouteService: DroneRouteService,
+    private incidentsService: IncidentsService,
     private loadingCtrl: LoadingController,
     private alertCtrl: AlertController,
   ) {}
@@ -322,8 +419,10 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
   ngAfterViewInit() {
     this.initialiseMap();
 
+    this.setState(this.states.default);
+
      // get incidents every minute
-     this.incidentsPoller = setInterval(() => {
+    this.incidentsPoller = setInterval(() => {
       this.getIncidents();
     }, 5000);
 
@@ -558,10 +657,6 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
     });
   }
 
-  async getPastFlightPlans(){
-  
-  }
-
   /**
    * Updates the incidents layer to show incident markers
    */
@@ -587,7 +682,7 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
         image: new CircleStyle({
           radius: 6,
           fill: new Fill({
-            color: 'red',
+            color: '#fc0',
           }),
         }),
       }),
@@ -616,7 +711,7 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
         image: new CircleStyle({
           radius: 6,
           fill: new Fill({
-            color: 'red',
+            color: '#f09',
           }),
         }),
       }),
