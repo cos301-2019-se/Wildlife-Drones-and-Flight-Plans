@@ -7,6 +7,7 @@ import { AuthenticationService } from './../../services/authentication.service';
 })
 export class passwordReset implements OnInit {
   enteredEmail: string;
+  enteredOTP : string;
   error;
   resetting = false;
 
@@ -25,7 +26,7 @@ export class passwordReset implements OnInit {
     this.error = 'Checking credentials...';
 
     try {
-      const res = await this.authService.resetPasword(this.enteredEmail);
+      const res = await this.authService.resetPassword(this.enteredEmail,this.enteredOTP);
       if (!res) {
         this.error = 'Incorrect credentials';
       }

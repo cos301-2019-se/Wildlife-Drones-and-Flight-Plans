@@ -1,68 +1,52 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
 import { AppModule } from '../app.module';
+import { JwtService } from '@nestjs/jwt';
+import { UserService } from '../services/user.service';
+import { providers } from '../app.providers'; 
+import { imports } from '../app.imports';
+import { controllers } from '../app.controllers';
+import { AuthService } from '../auth/auth.service';
 
 jest.useFakeTimers();
 jest.setTimeout(12000000);
 let token;
-describe('MapController (e2e)', () => {
+describe('Drone route  (e2e)', async () => {
   let app;
+  let controller;
 
-  beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
+   beforeAll(async () => {
+      const module: TestingModule = await Test.createTestingModule({
+        imports:imports,
+        controllers: controllers,
+        providers:providers
+      }).compile();
+    
+      controller = await module.get<AuthService>(AuthService);
+      //const con = await controller.getConnection();
+      //const auth = await con.getRepository(AuthService);
+    
 
-    app = moduleFixture.createNestApplication();
+    app = module.createNestApplication();
     await app.init();
+
+    token = await controller.createToken('reinhardt.eiselen@gmail.com')
+   // console.log('************************ ',token.accessToken)
   });
-
-  it('/login (POST)', async () => {
+  
+  it('/create-incident-route (POST)', async () => {
     await request(app.getHttpServer())
-      .post('/login')
+      .post('/drone-route/create-incident-route')
       .send({
-        email: 'gst@gmail.com',
-        password: 'Reddbull@1',
+        doneId: '3',
+        lon: '1227906',
+        lat : '1234234'
       })
-      .then(response => {
-        // console.log("The token that is given back " + response.body.accessToken)
-
-        token = response.body.accessToken;
-        console.log('got token', token);
-      });
-  });
-
-  it('/addDroneRoute (POST)', async () => {
-    await request(app.getHttpServer())
-      .post('/addDroneRoute')
-      .send({
-        id: '3',
-        points: '1227906',
-      })
-      .set('Authorization', `Bearer ${token}`)
+      .set('Authorization', `Bearer ${token.accessToken}`)
       .expect('false');
   });
 
-  it('/updateDroneRoute (POST)', async () => {
-    await request(app.getHttpServer())
-      .post('/updateDroneRoute')
-      .send({
-        id: '3',
-        points: '1228900',
-        percent: '40'
-      })
-      .set('Authorization', `Bearer ${token}`)
-      .expect('false');
-  });
 
-  it('/deactivateDroneRoute (POST)', async () => {
-    await request(app.getHttpServer())
-      .post('/deactivateDroneRoute')
-      .send({
-        id: '3',
-      })
-      .set('Authorization', `Bearer ${token}`)
-      .expect('false');
-  });
+
 
 });

@@ -1,6 +1,6 @@
 import { Controller, Get, Query, Post, Body, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-
+import { AdminGuard } from '../auth/admin.guard';
 import { MapService } from '../services/map.service';
 import { MapFeatureType } from '../entity/map-data.entity';
 

@@ -1,6 +1,7 @@
 import { Controller, Get, Query, Post, Body, UseGuards } from '@nestjs/common';
 import { PoachingIncidentTypeService } from '../services/poaching-incident-type.service';
 import { AuthGuard } from '@nestjs/passport';
+import { AdminGuard } from '../auth/admin.guard';
 import { PoachingIncidentType } from '../entity/poaching-incident-type.entity';
 
 @UseGuards(AuthGuard('jwt'))
