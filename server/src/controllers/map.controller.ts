@@ -66,4 +66,9 @@ export class MapController {
   async getCellSize(): Promise<number> {
     return await this.mapService.getCellSize();
   }
+
+  @Post('getCellHotspots')
+  async getCellHotspots(@Body() body): Promise<Array<String>> {
+    return await this.mapService.getCellHotspots(body.time);
+  }
 }

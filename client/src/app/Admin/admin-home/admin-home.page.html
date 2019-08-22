@@ -29,6 +29,12 @@
     <!-- options form -->
     <ng-container *ngIf="state === states.options">
       <ion-item no-padding>
+        <ion-label>Show hotspot heatmap</ion-label>
+        <ion-checkbox slot="end"
+          [(ngModel)]="states.options.data.enableHotspotHeatmap"
+        ></ion-checkbox>
+      </ion-item>
+      <ion-item no-padding>
         <ion-label>Show poaching heatmap</ion-label>
         <ion-checkbox slot="end"
           [(ngModel)]="states.options.data.enablePoachingHeatmap"
@@ -38,12 +44,6 @@
         <ion-label>Show animal heatmap</ion-label>
         <ion-checkbox slot="end"
           [(ngModel)]="states.options.data.enableAnimalHeatmap"
-        ></ion-checkbox>
-      </ion-item>
-      <ion-item no-padding>
-        <ion-label>Show all active drones</ion-label>
-        <ion-checkbox slot="end"
-          [(ngModel)]="states.options.data.enableActiveDrones"
         ></ion-checkbox>
       </ion-item>
       <ng-container *ngIf="states.options.data.enableAnimalHeatmap">
@@ -74,6 +74,12 @@
           {{ states.options.data.time / 60 | number:'2.0' }}:00
         </ng-container>
       </ng-container>
+      <ion-item no-padding>
+        <ion-label>Show all active drones</ion-label>
+        <ion-checkbox slot="end"
+          [(ngModel)]="states.options.data.enableActiveDrones"
+        ></ion-checkbox>
+      </ion-item>
     </ng-container>
   </div>
   <!-- end of set up flight overlay -->

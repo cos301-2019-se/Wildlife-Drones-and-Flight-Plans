@@ -71,6 +71,7 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
 
   poachingHeatmapLayer = null;
   animalHeatmapLayer = null;
+  hotspotHeatmapLayer = null;
   private timePoller = null;
 
   public withinReserve = true;
@@ -120,6 +121,7 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
         done: async (self) => {
           self.showPoachingHeatmap(self);
           self.showAnimalHeatmap(self);
+          self.showHotspotHeatmap(self);
           this.getDrones();
           this.setState(this.states.default);
         },
@@ -127,6 +129,7 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
       data: {
         cellData: [],
         species: [],
+        enableHotspotHeatmap: false,
         enablePoachingHeatmap: false,
         enableAnimalHeatmap: false,
         enableActiveDrones: true,
@@ -143,6 +146,30 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
             (new Date().getHours() * 60 + new Date().getMinutes()) / 120
           ) * 120; // time in minutes floored to two hours
         }
+      },
+      showHotspotHeatmap: async (self) => {
+        if (!self.data.enableHotspotHeatmap) {
+          if (this.hotspotHeatmapLayer) {
+            this.map.removeLayer(this.hotspotHeatmapLayer);
+            this.hotspotHeatmapLayer = null;
+          }
+          return;
+        }
+
+        const hotspots = await this.heatmapService.getHotspotsCellWeights();
+        const weights = hotspots.reduce((ob, hotspot) => {
+          ob[hotspot.cellId] = 1;
+          return ob;
+        }, {});
+
+        const heatmap = await self.createHeatmap(self, weights, [
+          [0, 0, 0],
+          [255, 255, 255],
+        ], 999);
+
+        this.map.removeLayer(this.hotspotHeatmapLayer);
+        this.hotspotHeatmapLayer = heatmap;
+        this.map.addLayer(this.hotspotHeatmapLayer);
       },
       showPoachingHeatmap: async (self) => {
         if (!self.data.enablePoachingHeatmap) {
@@ -202,15 +229,16 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
           this.map.removeLayer(this.animalHeatmapLayer);
         }
         this.animalHeatmapLayer = heatmap;
+
         this.map.addLayer(this.animalHeatmapLayer);
       },
-      createHeatmap: (self, cellWeights, gradient) => {
+      createHeatmap: (self, cellWeights, gradient, zIndex = 1) => {
         const OPACITY = 0.8;
 
         const features = self.data.cellData.map((cell: MapCell) => ({
           ...cell.geoJSON,
           properties: {
-            weight: cellWeights[cell.id],
+            weight: cellWeights[cell.id] || 0,
           },
         }));
 
@@ -231,6 +259,7 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
           updateWhileAnimating: false,
           updateWhileInteracting: false,
           renderMode: 'image',
+          zIndex,
           style: cell => {
             const weight = cell.getProperties().weight;
             return new Style({

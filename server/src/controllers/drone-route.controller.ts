@@ -23,7 +23,20 @@ export class DroneRouteController {
   }
 
   /**
-   * Create a route that intercepts animals wjere possible
+   * Create a hotspot route
+   * @param body
+   */
+  @Post('create-hotspot-route')
+  async createHotspotRoute(@Body() body) {
+    return await this.droneRouteService.createHotspotRoute(
+      body.droneId,
+      body.lon,
+      body.lat,
+    );
+  }
+
+  /**
+   * Create a route that intercepts animals where possible
    * @param body
    */
   @Post('create-animal-prediction-route')

@@ -162,7 +162,7 @@ export class DroneService {
     if (!droneIdFromDroneTable) {
       console.log('Drone ' + droneId + ' was not found');
       return false;
-    }
+    }    
 
     try {
       droneRoute.drone = droneIdFromDroneTable;
@@ -251,7 +251,7 @@ export class DroneService {
     const conn = await this.databaseService.getConnection();
     const rep = conn.getRepository(DroneRoute);
 
-    return await rep.find();
+    return await rep.find({order:{timestamp:"DESC"}});
   }
 
   

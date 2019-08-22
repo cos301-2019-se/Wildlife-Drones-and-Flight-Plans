@@ -11,6 +11,7 @@ import getDistance from '@turf/distance';
 import { lineString } from '@turf/helpers';
 import lineSliceAlong from '@turf/line-slice-along';
 import getBearing from '@turf/bearing';
+import { MapService } from './map.service';
 const Victor = require('victor');
 // import * as Victor from 'victor';
 
@@ -21,6 +22,7 @@ export class DroneRouteService {
     private readonly poachingIncidentService: PoachingIncidentService,
     private readonly animalLocationsService: AnimalLocationService,
     private readonly modelTrainingService: ModelTraining,
+    private readonly mapService: MapService,
   ) {}
 
   /**
@@ -31,28 +33,55 @@ export class DroneRouteService {
    * @param since Since when to look at incidents - defaults to a 30 days back
    */
   async createIncidentRoutes(droneId: number, lon: number, lat: number, since: Date = new Date(Date.now() - 30 * 86400000)) {
+    const incidents = await this.poachingIncidentService.getAllPoachingIncidentTableData();
+    const incidentPoints: Point[] = incidents
+      .sort((a, b) => a.timestamp > b.timestamp ? 1 : -1) // sort incidents by their time stamp
+      .map((incident, incidentIndex, arr) => new Point(incident.longitude, incident.latitude, 0.5 + incidentIndex / arr.length));
+
+    return await this.createStaticRoute(droneId, lon, lat, incidentPoints);
+  }
+
+  /**
+   * Creates a route between hotspots
+   * @param droneId The ID of the drone being used
+   * @param lon The longitude of the starting position
+   * @param lat The latitude of the starting position
+   */
+  async createHotspotRoute(droneId: number, lon: number, lat: number) {
+    const hotspots = await this.mapService.getCellHotspots(false);
+
+    console.log('hotspots', hotspots.length, hotspots.slice(0, 3));
+
+    const hotspotPoints = hotspots.map(hotspot => new Point(hotspot.lon, hotspot.lat, hotspot.weight));
+    console.log('hotspot points', hotspotPoints.slice(0, 5));
+
+    return await this.createStaticRoute(droneId, lon, lat, hotspotPoints, 500);
+  }
+
+  private async createStaticRoute(droneId: number, lon: number, lat: number, points: Point[], sampleSize = 0) {
     const droneInfo = await this.getDroneInfo(droneId);
 
     const depot = new Point(lon, lat, 0);
 
-    const incidents = await this.poachingIncidentService.getAllPoachingIncidentTableData();
-    const incidentPoints: Point[] = incidents
-      // all incidents within maximum range
-      .filter(incident => distance(
+    points = points
+      .filter(point => distance( // all points within maximum range
         [depot.x, depot.y],
-        [incident.longitude, incident.latitude],
+        [point.x, point.y],
         { units: 'degrees' }) <= droneInfo.maxPointDistanceDegrees
-      )
-      .sort((a, b) => a.timestamp > b.timestamp ? 1 : -1) // sort incidents by their time stamp
-      .map((incident, incidentIndex, arr) => new Point(incident.longitude, incident.latitude, 0.5 + incidentIndex / arr.length));
+      );
+    
+    if (sampleSize > 0) {
+      points = points.sort(() => 0.5 - Math.random()).slice(0, sampleSize);
+    }
 
     // if no points can possibly be reached, return an empty route
-    if (!incidentPoints.length) {
+    if (!points.length) {
+      console.log('no points found');
       return [];
     }
 
     // create the problem
-    const problem = new ClarkeWrightProblem(incidentPoints, depot, droneInfo.maxFlightDistanceDegrees);
+    const problem = new ClarkeWrightProblem(points, depot, droneInfo.maxFlightDistanceDegrees);
 
     // solve the problem
     const routes = problem.solve({

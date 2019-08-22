@@ -8,7 +8,6 @@ import { ConfigService } from './config.service';
 import { MailService } from './mail.service';
 import * as RandExp from 'randexp';
 
-
 @Injectable()
 export class UserService {
   private readonly NUM_LOGIN_ATTEMPTS = this.config.getConfig().auth.otp.attempts;
@@ -352,7 +351,7 @@ export class UserService {
   }
 
   async validateUser(payload: JwtPayload) {
-    console.log(JSON.stringify(payload));
+    //console.log(JSON.stringify(payload));
     const con = await this.databaseService.getConnection();
     return await con.getRepository(User).findOne({
       where: {
