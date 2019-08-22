@@ -9,7 +9,7 @@ import { AuthService } from '../auth/auth.service';
 jest.useFakeTimers();
 jest.setTimeout(12000000);
 let token;
-describe('Map controller (e2e)', async () => {
+describe('Drone route Controller (integration tests) (e2e)', async () => {
   let app;
   let controller;
 
@@ -29,31 +29,15 @@ describe('Map controller (e2e)', async () => {
     await app.init();
 
     token = await controller.createToken('reinhardt.eiselen@gmail.com')
-    //console.log('************************ ',token.accessToken)
-  });
-
-  it('/addUser (POST)', async () => {
-    await request(app.getHttpServer())
-      .post('/addUser')
-      .send({
-        name: 'Anne',
-        username: 'jm',
-        password: 'Reddbull@1',
-        job: 'ranger',
-        email: 'gst@gmail.com',
-      })
-      .expect(401);
+   // console.log('************************ ',token.accessToken)
   });
   
-  // it('/map/update (POST)', () => {
-  //   return request(app.getHttpServer())
-  //     .post('/map/update')
-  //     .set('Authorization',`Bearer ${token}`)
-  //     .send({
-  //       name : "Rietvlei Nature Reserve"
-  //     })
-  //     .expect(201);
-  // });
+  it('/addAnimalInterestPoint Adds animal interest point => should succeed', async () => {
+    await request(app.getHttpServer())
+      .post('/addAnimalInterestPoint')
+      .send()
+      .set('Authorization', `Bearer ${token.accessToken}`)
+      .expect(201);
+  });
 
- 
 });

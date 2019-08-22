@@ -209,20 +209,26 @@ export class AuthenticationService {
   }
 
 
-  async resetPasword(email: string): Promise<boolean> {
-
+  async resetPassword(email: string, otp : string): Promise<boolean> {
+   // console.log("about to send post for reset")
     let res: any;
     try {
-      res = await this.post('/resetPassword', {
-        email
+      res = await this.post('resetPassword', {
+        email,
+        otp
       });
     } catch (err) {
       console.log(err);
       throw err;
     }
 
-
-    return;
+    if(res){
+      return true;
+    }
+    else{
+      return false;
+    }
+  
   }
 
   /**

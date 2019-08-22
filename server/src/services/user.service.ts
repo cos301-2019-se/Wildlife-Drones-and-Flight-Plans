@@ -174,68 +174,72 @@ export class UserService {
     };
   }
 
-  async reset(email): Promise<boolean> {
-    var num = Math.floor(100000 + Math.random() * 900000);
-    var num1 = num.toString();
-    var s = '';
-    s +=
-      ' </head><body><span class="preheader"><h2> Your reset code is ' +
-      num1.substring(0, 3) +
-      '-' +
-      num1.substring(3, 6) +
-      '</h2></span> <table class="email-wrapper" role="presentation" width="100%" cellspacing="0" cellpadding="0">';
-    s +=
-      '<tbody><tr><td align="center"><table class="email-content" role="presentation" width="100%" cellspacing="0" cellpadding="0"><tbody><tr><td class="email-masthead">';
-    s +=
-      '</td></tr><!-- Email Body --><tr><td class="email-body" cellpadding="0" cellspacing="0" width="570"><table class="email-body_inner" role="presentation" width="570" cellspacing="0" cellpadding="0" align="center">  <!-- Body content --> <tbody><tr><td class="content-cell"><div class="f-fallback"><p>You recently requested to reset your password for your WDS account. Use the code below to reset it. <strong>This password reset is only valid for the next 24 hours.</strong></p> <!-- Action --><table class="body-action" role="presentation" width="100%" cellspacing="0" cellpadding="0" align="center"><tbody><tr><td align="center"><!-- Border based button';
-    s +=
-      'https://litmus.com/blog/a-guide-to-bulletproof-buttons-in-email-design --><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"><tbody><tr><td align="center"><a href="{{action_url}}" class="f-fallback button button--green" target="_blank"><strong> Your reset code is <h1>' +
-      num1.substring(0, 3) +
-      '-' +
-      num1.substring(3, 6) +
-      ' </h1></strong></a></td></tr></tbody></table></td></tr></tbody></table>';
-    s +=
-      '<p>If you did not request a password reset, please ignore this email or <a href="{{support_url}}">contact support</a> if you have questions.</p><p>Thanks,<br>The [WDS] Team</p><!-- Sub copy --><table class="body-sub" role="presentation"><tbody><tr><td> <p class="f-fallback sub">{{action_url}}</p></td></tr></tbody></table></div></td></tr></tbody></table></td></tr>';
-    s +=
-      '<tr><td><table class="email-footer" role="presentation" width="570" cellspacing="0" cellpadding="0" align="center"><tbody><tr><td class="content-cell" align="center"><p class="f-fallback sub align-center">© 2019 [Product Name]. All rights reserved.</p><p class="f-fallback sub align-center">[EPI-USE, LLC]<br>1234 Street Rd.<br>Suite 1234</p></td></tr> </tbody></table></td></tr></tbody></table></td></tr></tbody></table></body></html>';
+    async reset(email,otpTemp): Promise<boolean> {
+     
+      const con = await this.databaseService.getConnection();
+      const usersRepo = con.getRepository(User);
+  
+      const existingUser = await usersRepo.findOne({
+        where: {
+          email,
+          active : '1',
+          code : otpTemp
+        },
+      });
+      //console.log('The entered otp ',otpTemp)
 
-    const con = await this.databaseService.getConnection();
-    const usersRepo = con.getRepository(User);
-
-    const existingUser = await usersRepo.findOne({
-      where: {
-        email,
-      },
-    });
-
-    if (!existingUser) {
-      return false;
+     // console.log('The entered otp ',existingUser.code)
+  
+      // if the email does not match a user, return false
+      if (!existingUser) {
+        return false;
+      }
+  
+  
+      // check that the user is within their number of login attempts
+      // if the epiry date of the code has passed, we can create a new OTP
+      // otherwise, we re-send the assigned OTP
+      let reSending = true;
+      if (existingUser.codeExpires <= new Date()) {
+        existingUser.loginAttemptsRemaining = this.NUM_LOGIN_ATTEMPTS;
+        reSending = false;
+      }
+  
+      console.log("The old expiry time",existingUser.codeExpires)
+      // generate an OTP
+      const otpPattern = new RandExp(this.config.getConfig().auth.otp.pattern);
+      console.log("The new expiry time",existingUser.codeExpires)
+      await usersRepo.save(existingUser);
+      //const passwordPattern = new RandExp(/(?=^.{8,}$)(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\s)[0-9a-zA-Z!@#$%^&*()]*$/);
+      const otp = reSending
+        ? existingUser.code
+        : otpPattern.gen() 
+  
+        let tempPass =  Math.floor(10000 + Math.random() * 90000);
+        const newPass = tempPass.toString();
+      // set the user's OTP in the database
+      existingUser.code = otp;
+      // send th email out
+      await this.mailService.send({
+        subject: `Your new password is : ${newPass}`,
+        template: 'reset.twig',
+        templateParams: {
+          otp: otp,
+          pass : newPass,
+        },
+        to: email,
+      });
+  
+      existingUser.codeExpires = new Date(new Date().getTime() + this.EXPIRY_TIME);
+      const temp = bcrypt.hashSync(newPass, 10);
+      existingUser.password = temp;
+      console.log("The newly hashed password ", temp);
+      await usersRepo.save(existingUser);
+  
+      return true;
     }
-
-    let tp = mailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 465,
-      secure: true, // use SSL
-      auth: {
-        user: 'drbam301@gmail.com',
-        pass: 'drbamisawesome',
-      },
-      tls: {
-        rejectUnauthorized: false,
-      },
-
-      // proxy: "socks5://u16009917:Viper3489753489@vpn.up.ac.za:"
-    });
-    //return s;
-    let mail = {
-      from: '"DrBam" <drbam301@gmail.com>',
-      to: email + ', reinhardt.eiselen@gmail.com',
-      subject: 'Password reset',
-      html: s,
-    };
-
-    tp.sendMail(mail);
-  }
+  
+  
 
   /**
    * Validates the received password against the minimum password requirements.

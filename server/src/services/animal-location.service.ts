@@ -257,4 +257,50 @@ export class AnimalLocationService {
       return false;
     }
   }
+
+  async getAnimalIds(): Promise<string[]> {
+    const conn = await this.databaseService.getConnection();
+
+    const locationsRepo = conn.getRepository(AnimalLocation);
+    const res = await locationsRepo.createQueryBuilder()
+      .select('DISTINCT animalId')
+      .getRawMany();
+
+    return res.map(e => e.animalId);
+  }
+
+  /**
+   * Returns the last few animal locations for a given animal
+   * IN CHRONOLOGICAL ORDER (latest position is last in array)
+   * @param animalId The ID of the animal
+   */
+  async getLastFewAnimalLocations(animalId: string, numPositions = 10): Promise<Array<{
+    speciesId: number;
+    animalId: string;
+    month: number;
+    time: number;
+    longitude: number;
+    latitude: number;
+    timestamp: Date;
+  }>> {
+    const conn = await this.databaseService.getConnection();
+
+    const repo = conn.getRepository(AnimalLocation);
+    const res = await repo.createQueryBuilder()
+      .select('speciesId, animalId, month, time, longitude, latitude, timestamp')
+      .where(`animalId = :animalId`, { animalId })
+      .orderBy('timestamp', 'DESC')
+      .limit(numPositions)
+      .getRawMany();
+
+    return res.map(el => ({
+      speciesId: el.speciesId,
+      animalId: el.animalId,
+      month: el.month,
+      time: el.time,
+      longitude: el.longitude,
+      latitude: el.latitude,
+      timestamp: new Date(el.timestamp),
+    })).reverse();
+  }
 }

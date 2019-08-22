@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { AuthenticationService } from './../../services/authentication.service';
 import { Router } from '@angular/router';
 import { ToastController } from '@ionic/angular';
+import { AlertController } from '@ionic/angular';
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
@@ -23,6 +24,7 @@ export class LoginPage implements OnInit {
     private authService: AuthenticationService,
     private router: Router,
     private toastCtrl: ToastController,
+    private alertCtrl: AlertController,
   ) {}
 
   ngOnInit() {}
@@ -110,6 +112,92 @@ export class LoginPage implements OnInit {
   }
 
   async reset() {
+
+    this.presentPrompt();
+
+    
+    
     // TODO: implementation
   }
+
+  async displayAlert() {
+    const alert = await this.alertCtrl.create({
+      message: 'Do you wish reset your password?',
+      buttons: [
+        {
+          text: 'No',
+          role: 'cancel',
+          handler: () => {
+            console.log('Cancel clicked');
+            
+          }
+        },
+        {
+          text: 'Yes',
+          handler: async () => {
+            console.log('Yes clicked');
+            const res = await this.authService.resetPassword(
+              this.enteredEmail,
+              this.enteredOTP
+            );
+            this.router.navigate(['login']);
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
+
+  async presentPrompt() {
+    const alert = await this.alertCtrl.create({
+      message: 'Reset Confirm',
+      inputs: [
+        {
+          name: 'OTP',
+          placeholder: 'OTP'
+        },
+      ],
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          handler: data => {
+            console.log('Cancel clicked');
+            
+          }
+        },
+        {
+          text: 'Confirm',
+          handler: async (data) => {
+            console.log('Yes clicked');
+            const res = await this.authService.resetPassword(
+              this.enteredEmail,
+              data.OTP
+            );
+            if(!res) {
+              const sentToast = await this.toastCtrl.create({
+                message: `OTP was inccorect`,
+                duration: 15000,
+              });
+              sentToast.present();
+            }
+            else{
+              const sentToast = await this.toastCtrl.create({
+                message: `Password has been reset, check your email`,
+                duration: 15000,
+              });
+              sentToast.present();
+            } 
+            
+            this.router.navigate(['login']);
+          }
+        }
+       
+      ]
+    });
+    await alert.present();
+  }
+
+  
+
 }

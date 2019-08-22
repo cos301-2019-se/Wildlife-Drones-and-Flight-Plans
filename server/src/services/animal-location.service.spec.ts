@@ -2,11 +2,11 @@ import { AnimalLocationService } from './animal-location.service';
 import { DatabaseService } from './db.service';
 
 import { CsvReaderService } from './csv-reader.service';
-import { MapUpdaterService } from './map-updater.service';
+import { MapUpdaterService } from './map.service';
 import { GeoService } from './geo.service';
 import { SRTMService } from './srtm.service';
 import { OverpassService } from './overpass.service';
-import { MapPartitionerService } from '../services/map-partitioner.service';
+import { MapPartitionerService } from './map.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AnimalController } from '../controllers/animal-location.controller';
 import { AnimalLocation } from '../entity/animal-location.entity';

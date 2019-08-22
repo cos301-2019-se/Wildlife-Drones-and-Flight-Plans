@@ -75,105 +75,50 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
 
   poachingHeatmapLayer = null;
   animalHeatmapLayer = null;
+  hotspotHeatmapLayer = null;
   private timePoller = null;
 
   public withinReserve = true;
 
   readonly states = {
-    // Default state
+    // default state
     default: {},
-    // View route state - currently does nothing*
-    // viewRoute: {
-    //   setup: async (self) => {
-    //     self.data.antPathUpdate = true;
-    //     const startingCoords = this.coordinates;
 
-    //     const route = await this.droneRouteService.generateRoute(drone.id, startingCoords);
-
-    //     // line style
-    //     const lineStyle = new Style({
-    //       stroke: new Stroke({
-    //         color: '#39c',
-    //         width: 5,
-    //       }),
-    //     });
-    //     // an path inner style
-    //     const dashStyle = new Style({
-    //       stroke: new Stroke({
-    //         color: '#fff',
-    //         width: 5,
-    //         lineDash: [4, 10],
-    //       }),
-    //     });
-
-    //     const vector = new VectorSource({
-    //       features: [
-    //         new Feature(new LineString(route).transform('EPSG:4326', 'EPSG:3857')),
-    //       ],
-    //     });
-
-    //     self.data.routeLayer = new VectorLayer({
-    //       source: vector,
-    //       style: [
-    //         lineStyle,
-    //         dashStyle,
-    //       ],
-    //       updateWhileAnimating: true,
-    //       updateWhileInteracting: true,
-    //     });
-
-    //     const stroke = dashStyle.getStroke();
-    //     const dash = stroke.getLineDash();
-    //     let length = dash.reduce((a, b) => a + b, 0);
-    //     length = dash.length % 2 === 1 ? length * 2 : length;
-
-    //     const update = () => {
-    //       const offset = stroke.getLineDashOffset() || 0;
-    //       stroke.setLineDashOffset(modulo(offset + 0.25, length));
-    //       vector.refresh();
-
-    //       if (self.data.antPathUpdate) {
-    //         requestAnimationFrame(update);
-    //       }
-    //     };
-
-    //     update();
-
-    //     this.map.addLayer(self.data.routeLayer);
-    //   },
-    //   tooltip: 'Viewing route',
-    //   confirmations: {
-    //     done: async () => {
-    //       // TODO: tell the server that the drone is no longer en route
-    //       this.setState(this.states.default);
-    //     },
-    //   },
-    //   data: {
-    //     routeLayer: null,
-    //     antPathUpdate: true,
-    //   },
-    //   destruct: async () => {
-    //     // remove the map layer from the map
-    //     this.states.viewRoute.data.antPathUpdate = false;
-    //     this.map.removeLayer(this.states.viewRoute.data.routeLayer);
-    //     // encourage garbage collection on the layer data
-    //     this.states.viewRoute.data.routeLayer = null;
-    //     // track to the current user's location
-    //     this.goToGeolocation();
-    //   },
-    // },
     // map options state
     // View route state
     options: {
       setup: async (self) => {
-        if (!self.data.cellData.length) {
-          self.data.cellData = await this.heatmapService.getCells();
+        const loader = await this.loadingCtrl.create({
+          message: 'Loading map cells',
+        });
+        loader.present();
+        try {
+          if (!self.data.cellData.length) {
+            await self.loadCells(self);
+          }
+          if (!self.data.species.length) {
+            self.data.species = await this.heatmapService.getAnimalSpecies();
+            self.data.animalHeatmapSpecies = self.data.species[0].id;
+          }
+        } catch (err) {
+          this.setState(this.states.default);
+
+          const alert = await this.alertCtrl.create({
+            header: 'Error',
+            message: 'An unknown error occurred',
+            buttons: [
+              {
+                role: 'cancel',
+                text: 'Okay',
+              },
+            ],
+          });
+          alert.present();
+          loader.dismiss();
+          return;
         }
 
-        if (!self.data.species.length) {
-          self.data.species = await this.heatmapService.getAnimalSpecies();
-          self.data.animalHeatmapSpecies = self.data.species[0].id;
-        }
+        loader.dismiss();
 
         self.updateTime(self);
       },
@@ -181,6 +126,7 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
         done: async (self) => {
           self.showPoachingHeatmap(self);
           self.showAnimalHeatmap(self);
+          self.showHotspotHeatmap(self);
           this.getDrones();
           this.setState(this.states.default);
         },
@@ -188,6 +134,7 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
       data: {
         cellData: [],
         species: [],
+        enableHotspotHeatmap: false,
         enablePoachingHeatmap: false,
         enableAnimalHeatmap: false,
         enableActiveDrones: true,
@@ -196,12 +143,39 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
         useCurrentTime: true,
         time: 0,
       },
+      loadCells: async (self) => {
+        self.data.cellData = await this.heatmapService.getCells();
+      },
       updateTime: (self) => {
         if (self.data.useCurrentTime) {
           self.data.time = Math.floor(
             (new Date().getHours() * 60 + new Date().getMinutes()) / 120
           ) * 120; // time in minutes floored to two hours
         }
+      },
+      showHotspotHeatmap: async (self) => {
+        if (!self.data.enableHotspotHeatmap) {
+          if (this.hotspotHeatmapLayer) {
+            this.map.removeLayer(this.hotspotHeatmapLayer);
+            this.hotspotHeatmapLayer = null;
+          }
+          return;
+        }
+
+        const hotspots = await this.heatmapService.getHotspotsCellWeights();
+        const weights = hotspots.reduce((ob, hotspot) => {
+          ob[hotspot.cellId] = 1;
+          return ob;
+        }, {});
+
+        const heatmap = await self.createHeatmap(self, weights, [
+          [0, 0, 0],
+          [255, 255, 255],
+        ], 999);
+
+        this.map.removeLayer(this.hotspotHeatmapLayer);
+        this.hotspotHeatmapLayer = heatmap;
+        this.map.addLayer(this.hotspotHeatmapLayer);
       },
       showPoachingHeatmap: async (self) => {
         if (!self.data.enablePoachingHeatmap) {
@@ -261,15 +235,16 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
           this.map.removeLayer(this.animalHeatmapLayer);
         }
         this.animalHeatmapLayer = heatmap;
+
         this.map.addLayer(this.animalHeatmapLayer);
       },
-      createHeatmap: (self, cellWeights, gradient) => {
+      createHeatmap: (self, cellWeights, gradient, zIndex = 1) => {
         const OPACITY = 0.8;
 
         const features = self.data.cellData.map((cell: MapCell) => ({
           ...cell.geoJSON,
           properties: {
-            weight: cellWeights[cell.id],
+            weight: cellWeights[cell.id] || 0,
           },
         }));
 
@@ -290,6 +265,7 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
           updateWhileAnimating: false,
           updateWhileInteracting: false,
           renderMode: 'image',
+          zIndex,
           style: cell => {
             const weight = cell.getProperties().weight;
             return new Style({
@@ -365,6 +341,9 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
         this.map.updateSize();
       }
     }, 1000);
+
+    // preload map cells for settings
+    this.states.options.loadCells(this.states.options);
   }
 
   /**

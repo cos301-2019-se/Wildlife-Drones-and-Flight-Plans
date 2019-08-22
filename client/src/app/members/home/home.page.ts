@@ -10,7 +10,7 @@ import VectorSource from 'ol/source/Vector';
 
 import bbox from '@turf/bbox';
 import contains from '@turf/boolean-contains';
-import { point } from '@turf/helpers';
+import { point, lineString } from '@turf/helpers';
 import flatten from '@turf/flatten';
 import mask from '@turf/mask';
 
@@ -53,6 +53,12 @@ interface MapState {
   isAtStart?: (state: MapState) => boolean;
 }
 
+enum FlightTypes {
+  ANIMAL = 'Visit animals',
+  INCIDENT = 'Latest incidents',
+  HOTSPOTS = 'Hotspots'
+}
+
 @Component({
   selector: 'app-home',
   templateUrl: './home.page.html',
@@ -76,6 +82,8 @@ export class HomePage implements AfterViewInit, OnDestroy {
   private timePoller = null;
 
   public withinReserve = true;
+
+  public flightTypesEnum = FlightTypes;
 
   readonly states = {
     // Default state
@@ -140,15 +148,22 @@ export class HomePage implements AfterViewInit, OnDestroy {
     setUpRoute: {
       setup: async (self) => {
         // load drones if not already loaded
+        const loader = await this.loadingCtrl.create();
+        loader.present();
+
         if (!self.data.drones.length) {
-          const loader = await this.loadingCtrl.create();
-          loader.present();
-          await self.getDrones(self);
-          loader.dismiss();
+          await Promise.all([
+            self.getAnimalIds(self),
+            self.getDrones(self),
+          ]);
         }
+
+        // add a drone if none exist
         if (!self.data.drones.length) {
           await self.confirmations.add();
         }
+
+        loader.dismiss();
 
         // set the first drone in the list as the active drone
         self.data.selectedDrone = self.data.drones[0];
@@ -163,7 +178,18 @@ export class HomePage implements AfterViewInit, OnDestroy {
           loader.present();
           try {
             await this.dronesService.updateDrones(this.states.setUpRoute.data.drones);
-            self.getDrones(self);
+            await self.getDrones(self);
+            console.log(self.data.drones);
+            // find the ID of the drone in case it has just been added
+            const currentlySelectedDrone = self.data.selectedDrone;
+            self.data.selectedDrone = self.data.drones.find(drone => {
+              return (
+                drone.name === currentlySelectedDrone.name &&
+                drone.avgSpeed === currentlySelectedDrone.avgSpeed &&
+                drone.avgFlightTime === currentlySelectedDrone.avgFlightTime
+              );
+            });
+            console.log(self.data.selectedDrone);
             this.setState(this.states.viewRoute);
           } catch (err) {
             console.error('found error', err);
@@ -198,9 +224,27 @@ export class HomePage implements AfterViewInit, OnDestroy {
       data: {
         selectedDrone: null,
         drones: [],
+
+        flightTypes: Object.keys(FlightTypes).map(key => FlightTypes[key]),
+        selectedFlightType: FlightTypes.ANIMAL,
+
+        animalIds: [],
+        selectedAnimalIds: {},
       },
       getDrones: async (self) => {
         self.data.drones = await this.dronesService.getDrones();
+      },
+      getAnimalIds: async (self) => {
+        self.data.animalIds = await this.droneRouteService.getAnimalIds();
+        self.data.selectedAnimalIds = Object.keys(self.data.animalIds).reduce((ob, id) => {
+          ob[id] = false;
+          return ob;
+        }, {});
+      },
+      hasExceededNumSelectedAnimals: (self) => {
+        return Object.keys(self.data.selectedAnimalIds).reduce((total, id) => {
+          return total + (self.data.selectedAnimalIds[id] ? 1 : 0);
+        }, 0) >= 5;
       },
     },
 
@@ -209,8 +253,10 @@ export class HomePage implements AfterViewInit, OnDestroy {
     viewRoute: {
       setup: async (self) => {
         self.data.routeIndex = 0;
+
         const startingCoords = this.coordinates;
         const drone = this.states.setUpRoute.data.selectedDrone;
+        const flightType = this.states.setUpRoute.data.selectedFlightType;
 
         while (true) {
           const loader = await this.loadingCtrl.create({
@@ -218,27 +264,76 @@ export class HomePage implements AfterViewInit, OnDestroy {
           });
           loader.present();
           try {
-            self.data.routes = await this.droneRouteService.generateIncidentRoutes(drone.id, startingCoords);
+            // create a route based on the chosen route type
+            if (flightType == FlightTypes.INCIDENT) {
+              self.data.routes = await this.droneRouteService.generateIncidentRoutes(drone.id, startingCoords);
+            } else if (flightType == FlightTypes.HOTSPOTS) {
+              self.data.routes = await this.droneRouteService.generateHotspotRoutes(drone.id, startingCoords);
+            } else if (flightType == FlightTypes.ANIMAL) {
+              const animalIdsMap = this.states.setUpRoute.data.selectedAnimalIds;
+              const res = await this.droneRouteService.generatePredictiveRoutes(
+                drone.id,
+                startingCoords,
+                Object.keys(animalIdsMap).filter(id => animalIdsMap[id]),
+              );
+
+              self.data.routes = res.routes;
+
+              // draw the animal positions
+              const predictedPathsLayer = new VectorLayer({
+                source: new VectorSource({
+                  features: new GeoJSON().readFeatures({
+                    type: 'FeatureCollection',
+                    features: res.futureLocations.map(loc => lineString(loc.positions)),
+                  }, {
+                    featureProjection: 'EPSG:3857',
+                  }),
+                }),
+                style: () => new Style({
+                  stroke: new Stroke({
+                    width: 3,
+                    color: '#f09',
+                  }),
+                }),
+                updateWhileAnimating: false,
+                updateWhileInteracting: false,
+              });
+
+              const tempLayer = self.data.predictedPathsLayer;
+              this.map.addLayer(predictedPathsLayer);
+              self.data.predictedPathsLayer = predictedPathsLayer;
+              this.map.removeLayer(tempLayer);
+            }
             break;
           } catch (err) {
-            const alert = await this.alertCtrl.create({
-              message: 'An unknown error occurred',
-              buttons: [
-                {
-                  role: 'cancel',
-                  text: 'Cancel',
-                  handler: () => {
-                    this.setState(this.states.setUpRoute);
-                    return;
+            console.error(err);
+            loader.dismiss();
+            const retry = await new Promise(async resolve => {
+              const alert = await this.alertCtrl.create({
+                message: 'An unknown error occurred',
+                buttons: [
+                  {
+                    role: 'cancel',
+                    text: 'Cancel',
+                    handler: () => {
+                      return resolve(false);
+                    },
                   },
-                },
-                {
-                  text: 'Retry',
-                  handler: () => {},
-                }
-              ],
+                  {
+                    text: 'Retry',
+                    handler: () => {
+                      return resolve(true);
+                    },
+                  }
+                ],
+              });
+              alert.present();
             });
-            alert.present();
+
+            if (!retry) {
+              this.setState(this.states.setUpRoute);
+              return;
+            }
           } finally {
             loader.dismiss();
           }
@@ -326,6 +421,7 @@ export class HomePage implements AfterViewInit, OnDestroy {
         routeLayer: null,
         depotLayer: null,
         antPathUpdate: null,
+        predictedPathsLayer: null,
       },
       isAtStart: (self) => self.data.routeIndex <= 0,
       isAtEnd: (self) => self.data.routeIndex >= self.data.routes.length - 1,
@@ -334,6 +430,7 @@ export class HomePage implements AfterViewInit, OnDestroy {
         self.data.antPathUpdate = null;
         this.map.removeLayer(self.data.routeLayer);
         this.map.removeLayer(self.data.depotLayer);
+        this.map.removeLayer(self.data.predictedPathsLayer);
         // encourage garbage collection on the layer data
         self.data.routeLayer = null;
         // track to the current user's location
@@ -456,6 +553,9 @@ export class HomePage implements AfterViewInit, OnDestroy {
 
     // preload drones
     this.states.setUpRoute.getDrones(this.states.setUpRoute);
+
+    // preload animal IDs
+    this.states.setUpRoute.getAnimalIds(this.states.setUpRoute);
   }
 
   /**

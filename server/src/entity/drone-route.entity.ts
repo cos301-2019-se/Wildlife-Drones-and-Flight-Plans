@@ -19,5 +19,5 @@ export class DroneRoute {
   timestamp: Date;
 
   @Column()
-  active: boolean;
+  active: boolean; 
 }

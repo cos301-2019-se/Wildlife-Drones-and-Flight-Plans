@@ -91,4 +91,17 @@ export class HeatmapService {
 
     return res as CellWeightMap;
   }
+
+  async getHotspotsCellWeights(): Promise<Array<{
+    cellId: number;
+    weight: number;
+    lon: number;
+    lat: number;
+  }>> {
+    const res = await this.auth.post('map/getCellHotspots', {
+      time: false,
+    });
+
+    return res as any;
+  }
 }

@@ -14,7 +14,7 @@ export class AuthService {
     const user: JwtPayload = { email };
     const accessToken = this.jwtService.sign(user);
     return {
-      expiresIn: process.env.TOKEN_EXPIRES,
+      expiresIn: 3600,
       accessToken,
     };
   }
@@ -22,6 +22,7 @@ export class AuthService {
   async validateUser(payload: JwtPayload) {
     return await this.userService.validateUser(payload);
   }
+
 
   validateToken(token) {
     try {
@@ -32,3 +33,7 @@ export class AuthService {
     }
   }
 }
+
+    
+    
+

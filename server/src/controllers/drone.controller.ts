@@ -1,12 +1,20 @@
-import { Controller, Get, Query, Post, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, Post, Body, UseGuards, Request } from '@nestjs/common';
 import { DroneService } from '../services/drone.service';
 import { Drone } from '../entity/drone.entity';
+import { AdminGuard } from '../auth/admin.guard';
 import { AuthGuard } from '@nestjs/passport';
 import { DroneRoute } from 'src/entity/drone-route.entity';
-// @UseGuards(AuthGuard('jwt'))
+import { MailService } from 'src/services/mail.service';
+import { options } from 'superagent';
+import { AuthService } from 'src/auth/auth.service';
+import { controllers } from 'src/app.controllers';
+
+ @UseGuards(AuthGuard('jwt'))
 @Controller()
 export class DroneController {
-  constructor(private readonly droneService: DroneService) {}
+  constructor(private readonly droneService: DroneService,
+              private readonly mailService : MailService,
+              private readonly authService : AuthService ) {}
 
   @Post('addDrone')
   async addDrone(@Body() body): Promise<boolean> {
@@ -45,9 +53,46 @@ export class DroneController {
     return await this.droneService.updateDrones(body.drones);
   }
 
-  @Post('addDroneRoute')
-  async addDroneRoute(@Body() body): Promise<boolean> {
-    return await this.droneService.addDroneRoute(body.id, body.points);
+  @Post('selectDroneRoute')
+  async selectDroneRoute(@Body() body, @Request() req): Promise<boolean> {
+    const user = req.user;
+    
+  
+     let res = await this.droneService.selectDroneRoute(body.droneId, body.points);
+     console.log('The info extracted from the request  ',user)
+
+     const droneT = await this.droneService.getDrone(body.droneId)
+
+    if(res){
+      let tokenT = await this.authService.createToken(user.email)
+     
+      
+      let cArray = {
+          droneId : body.droneId,
+          token : tokenT.accessToken,
+          points : body.points,
+          droneSpeed : droneT.avgSpeed,
+      }    
+
+        console.log('The drone array ',cArray)
+      //console.log('The drone  ',droneT)
+      //console.log(Buffer.from('Hello World!').toString('base64'));
+      var encodedString = Buffer.from(JSON.stringify(cArray)).toString('base64')
+
+      await this.mailService.send({
+        subject: `You route is ready`,
+        template: 'route.twig',
+        templateParams: {
+          routeString : encodedString,
+        },
+        to: user.email,
+      });
+      return true;
+      
+    }
+    else {
+      return false;
+    }
   }
 
   @Post('updateDroneRoute')

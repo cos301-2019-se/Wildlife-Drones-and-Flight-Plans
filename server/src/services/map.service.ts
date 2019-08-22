@@ -9,8 +9,10 @@ import { SRTMService } from './srtm.service';
 import center from '@turf/center';
 import { MapCellData } from '../entity/map-cell-data.entity';
 import { AnimalCellWeight } from '../entity/animal-cell-weight.entity';
-import { IQRIfy } from '../libraries/Standardizer';
+import { IQRIfy, Standardizer } from '../libraries/Standardizer';
 import { PoachingCellWeight } from '../entity/poaching-cell-weight.entity';
+import { CacheService } from './cashe.service';
+import { Species } from 'src/entity/animal-species.entity';
 
 @Injectable()
 export class MapService {
@@ -23,6 +25,7 @@ export class MapService {
     private readonly geoService: GeoService,
     @Inject(forwardRef(() => SRTMService))
     private readonly altitudeService: SRTMService,
+    private readonly cache: CacheService,
   ) {
     this.loadFeatureSearchSets();
   }
@@ -32,7 +35,10 @@ export class MapService {
    * @param feature The name of the feature (e.g. rivers)
    * @param properties The GeoJSON collection
    */
-  private async setMapData(feature: MapFeatureType, properties: JSON): Promise<boolean> {
+  private async setMapData(
+    feature: MapFeatureType,
+    properties: JSON,
+  ): Promise<boolean> {
     const con = await this.databaseService.getConnection();
     const mapData = new MapData();
 
@@ -116,7 +122,10 @@ export class MapService {
 
     console.log('intermittent', intermittentWater.features.length);
 
-    await this.setMapData(MapFeatureType.intermittent, intermittentWater.features);
+    await this.setMapData(
+      MapFeatureType.intermittent,
+      intermittentWater.features,
+    );
 
     const roads = await this.overpass
       .query(`area["name"="${name}"]->.boundaryarea;
@@ -144,8 +153,7 @@ export class MapService {
 
     console.log('residential', residential.features.length);
 
-    const externalResidential = await this.overpass
-      .query(`
+    const externalResidential = await this.overpass.query(`
         nwr[name="${name}"]->.reserve;
         area[name="${name}"]->.boundary;
 
@@ -165,7 +173,10 @@ export class MapService {
 
         out geom;`);
 
-    await this.setMapData(MapFeatureType.externalResidential, externalResidential.features);
+    await this.setMapData(
+      MapFeatureType.externalResidential,
+      externalResidential.features,
+    );
 
     console.log('externalResidential', externalResidential.features.length);
     console.log('downloaded map data');
@@ -177,20 +188,22 @@ export class MapService {
   /**
    * Returns a key-value object of map features
    */
-  public async getMapFeatures(): Promise<{[feature in MapFeatureType]: any}> {
+  public async getMapFeatures(): Promise<{ [feature in MapFeatureType]: any }> {
     const conn = await this.databaseService.getConnection();
     const features = await conn.getRepository(MapData).find();
 
     return features.reduce((ob, feature) => {
       ob[feature.feature] = JSON.parse(feature.properties);
       return ob;
-    }, {}) as {[feature in MapFeatureType]: any};
+    }, {}) as { [feature in MapFeatureType]: any };
   }
 
   /**
    * Returns feature search sets for each feature type in the database
    */
-  public async getFeatureSearchSets(): Promise<{ [featureType: string]: GeoSearchSet }> {
+  public async getFeatureSearchSets(): Promise<{
+    [featureType: string]: GeoSearchSet;
+  }> {
     if (!this.featureSearchSets) {
       console.log('load feature search sets');
       this.loadFeatureSearchSets();
@@ -207,16 +220,20 @@ export class MapService {
     this.featureSearchSets = new Promise(async resolve => {
       const mapFeatures = await this.getMapFeatures();
 
-      const searchDatasets = Object.keys(mapFeatures)
-        .reduce((ob, featureType: MapFeatureType) => {
+      const searchDatasets = Object.keys(mapFeatures).reduce(
+        (ob, featureType: MapFeatureType) => {
           // skip reserve
           if (featureType === MapFeatureType.reserve) {
             return ob;
           }
 
-          ob[featureType] = this.geoService.createFastSearchDataset(mapFeatures[featureType]);
+          ob[featureType] = this.geoService.createFastSearchDataset(
+            mapFeatures[featureType],
+          );
           return ob;
-        }, {});
+        },
+        {},
+      );
 
       resolve(searchDatasets);
     });
@@ -237,7 +254,10 @@ export class MapService {
 
     const reserve = await this.getMapFeature(MapFeatureType.reserve);
 
-    console.log('before partitioning map', process.memoryUsage().heapUsed / 1024 / 1024);
+    console.log(
+      'before partitioning map',
+      process.memoryUsage().heapUsed / 1024 / 1024,
+    );
 
     const cells = await cellsRepo.find();
 
@@ -285,12 +305,25 @@ export class MapService {
       cell.properties = {
         altitude: cell.properties.altitude,
         slopiness: cell.properties.slopiness,
-        distanceToRivers: searchDatasets[MapFeatureType.rivers].getNearest(lng, lat).distance,
-        distanceToRoads: searchDatasets[MapFeatureType.roads].getNearest(lng, lat).distance,
-        distanceToDams: searchDatasets[MapFeatureType.dams].getNearest(lng, lat).distance,
-        distanceToExternalResidences: searchDatasets[MapFeatureType.externalResidential].getNearest(lng, lat).distance,
-        distanceToResidences: searchDatasets[MapFeatureType.residential].getNearest(lng, lat).distance,
-        distanceToIntermittentWater: searchDatasets[MapFeatureType.intermittent].getNearest(lng, lat).distance,
+        distanceToRivers: searchDatasets[MapFeatureType.rivers].getNearest(
+          lng,
+          lat,
+        ).distance,
+        distanceToRoads: searchDatasets[MapFeatureType.roads].getNearest(
+          lng,
+          lat,
+        ).distance,
+        distanceToDams: searchDatasets[MapFeatureType.dams].getNearest(lng, lat)
+          .distance,
+        distanceToExternalResidences: searchDatasets[
+          MapFeatureType.externalResidential
+        ].getNearest(lng, lat).distance,
+        distanceToResidences: searchDatasets[
+          MapFeatureType.residential
+        ].getNearest(lng, lat).distance,
+        distanceToIntermittentWater: searchDatasets[
+          MapFeatureType.intermittent
+        ].getNearest(lng, lat).distance,
       };
 
       await cellsRepo.save(cell);
@@ -317,11 +350,13 @@ export class MapService {
    * Returns all map cells with their ID, lon and lat
    * centres. Does not return any other data.
    */
-  async getMapCells(): Promise<Array<{
-    id: number;
-    lon: number;
-    lat: number;
-  }>> {
+  async getMapCells(): Promise<
+    Array<{
+      id: number;
+      lon: number;
+      lat: number;
+    }>
+  > {
     const con = await this.databaseService.getConnection();
     try {
       const cellsData = await con.getRepository(MapCellData).find();
@@ -342,36 +377,42 @@ export class MapService {
    * @param speciesId The species ID
    * @param time The time in minutes (e.g. 2h = 120) rounded to 2 hours
    */
-  async getSpeciesWeightDataForTime(speciesId: number, time: number): Promise<{
+  async getSpeciesWeightDataForTime(
+    speciesId: number,
+    time: number,
+  ): Promise<{
     [cellId: number]: number;
   }> {
-    const con = await this.databaseService.getConnection();
-    try {
-      console.time('get cells from db');
-      const cellsData = await con.getRepository(AnimalCellWeight).find({
-        where: {
-          species: speciesId,
-        },
-        relations: ['species', 'cell'],
-      });
-      console.timeEnd('get cells from db');
 
-      console.time('map fn');
-      const weights = cellsData.map(cd => cd[`time${time}Weight`]);
-      console.timeEnd('map fn');
-      console.time('normalized');
-      const normalizedWeights = IQRIfy.runOn(weights);
-      console.timeEnd('normalized');
+    const cache = this.cache;
+      return await cache.getKey('speciesWeightDataForTime', async () =>{
+      const con = await this.databaseService.getConnection();
+      try {
+        console.time('get cells from db');
+        const cellsData = await con.getRepository(AnimalCellWeight).find({
+          where: {
+            species: speciesId,
+          },
+          relations: ['species', 'cell'],
+        });
+        console.timeEnd('get cells from db');
 
+        console.time('map fn');
+        const weights = cellsData.map(cd => cd[`time${time}Weight`]);
+        console.timeEnd('map fn');
+        console.time('normalized');
+        const normalizedWeights = IQRIfy.runOn(weights);
+        console.timeEnd('normalized');
 
-      return cellsData.reduce((ob, cell, cellIndex) => {
-        ob[cell.cell.id] = normalizedWeights[cellIndex];
-        return ob;
-      }, {});
-    } catch (error) {
-      console.error('error');
-      return undefined;
-    }
+        return cellsData.reduce((ob, cell, cellIndex) => {
+          ob[cell.cell.id] = normalizedWeights[cellIndex];
+          return ob;
+        }, {});
+      } catch (error) {
+        console.error('error');
+        return undefined;
+      }
+    });
   }
 
   /**
@@ -381,25 +422,30 @@ export class MapService {
   async getCellPoachingWeight(): Promise<{
     [cellId: number]: number;
   }> {
-    const con = await this.databaseService.getConnection();
-    try {
-      console.log('Getting cell data');
-      const cellsData = await con.getRepository(PoachingCellWeight).find({
-        relations: ['cell']
-      });
-      console.log('Got cell data', cellsData.length);
 
-      const weights = cellsData.map(cw => cw.weight);
-      const standardizedWeights = IQRIfy.runOn(weights);
+    const cache = this.cache;
+    return await cache.getKey('cellPoachingWeight', async () =>{
 
-      return cellsData.reduce((ob, cd, cdIdx) => {
-        ob[cd.cell.id] = standardizedWeights[cdIdx];
-        return ob;
-      }, {});
-    } catch (error) {
-      console.error(error);
-      return undefined;
-    }
+      const con = await this.databaseService.getConnection();
+      try {
+        console.log('Getting cell data');
+        const cellsData = await con.getRepository(PoachingCellWeight).find({
+          relations: ['cell'],
+        });
+        console.log('Got cell data', cellsData.length);
+
+        const weights = cellsData.map(cw => cw.weight);
+        const standardizedWeights = IQRIfy.runOn(weights);
+
+        return cellsData.reduce((ob, cd, cdIdx) => {
+          ob[cd.cell.id] = standardizedWeights[cdIdx];
+          return ob;
+        }, {});
+      } catch (error) {
+        console.error(error);
+        return undefined;
+      }
+    });
   }
 
   /**
@@ -432,5 +478,267 @@ export class MapService {
     }
 
     return JSON.parse(feature.properties);
+  }
+
+  async speciseWeights(speciesId: number): Promise<any[]> {
+    const con = await this.databaseService.getConnection();
+
+    const animalData = await con
+      .getRepository(AnimalCellWeight)
+      .find({ relations: ['cell'], where: { species: speciesId } });
+
+    const mappedAnimalData = animalData.map(element => ({
+      cellId: element.cell[0],
+      percentile: -1,
+      weight:
+        (element.time0Weight +
+          element.time120Weight +
+          element.time240Weight +
+          element.time360Weight +
+          element.time480Weight +
+          element.time600Weight +
+          element.time720Weight +
+          element.time840Weight +
+          element.time960Weight +
+          element.time1080Weight +
+          element.time1200Weight +
+          element.time1320Weight) /
+        12,
+    }));
+
+    return mappedAnimalData;
+  }
+
+  /**
+   * gets hotspots according to cells, takes all animal cell weights,
+   * poaching cell weights and cell last visited to create an array of
+   * cells that have the highest priority to be visited
+   */
+  async getCellHotspots(priority): Promise<Array<{
+    lon: number;
+    lat: number;
+    cellId: number;
+    weight: number;
+  }>> {
+    const cache = this.cache;
+
+    let percentage: number = 0.4;
+    let timePercentage: number = 0.2;
+
+    if (priority) {
+      percentage = 0.25;
+      timePercentage = 0.5;
+    }
+
+    return await cache.getKey('hotspots', async () => {
+      console.time('calculating averages');
+      const con = await this.databaseService.getConnection();
+      //console.time('calculate animal cell averages');
+
+      const cellData = await con.getRepository(MapCellData).find();
+      const speciesData = await con.getRepository(Species).find();
+
+      let mappedTimeData = cellData.map(element => ({
+        cellId: element.id,
+        timeSinceVisit:
+          (Date.now() - element.lastVisited.getTime()) * 0.00000001157407,
+      }));
+
+      console.log(mappedTimeData);
+
+      const iqrTimeData = IQRIfy.runOn(
+        mappedTimeData.map(time => time.timeSinceVisit),
+      );
+
+      mappedTimeData = mappedTimeData.map((element, index) => ({
+        cellId: element.cellId,
+        timeSinceVisit: 1 - iqrTimeData[index],
+      }));
+
+      //console.log(mappedTimeData);
+
+      let animalData;
+
+      //mappedAnimalData [{speciesId}, data{cellId,percentile,weight}]
+      let mappedAnimalData = new Array();
+      const speciesSize = speciesData.length;
+
+
+      for (let i = 0; i < speciesSize; i++) {
+        animalData = await con
+          .getRepository(AnimalCellWeight)
+          .find({ relations: ['cell'], where: { species: speciesData[i].id } });
+
+        mappedAnimalData.push({
+          speciesId: speciesData[i].id,
+          data: animalData.map(element => ({
+            cellId: element.cell['id'],
+            percentile: -1,
+            weight:
+              (element.time0Weight +
+                element.time120Weight +
+                element.time240Weight +
+                element.time360Weight +
+                element.time480Weight +
+                element.time600Weight +
+                element.time720Weight +
+                element.time840Weight +
+                element.time960Weight +
+                element.time1080Weight +
+                element.time1200Weight +
+                element.time1320Weight) /
+              12,
+          })),
+        });
+      }
+
+      for (let i = 0; i < speciesSize; i++) {
+        const iqrAnimalData = IQRIfy.runOn(
+          mappedAnimalData[i]['data'].map(weight => weight.weight),
+        );
+        const animalStd = new Standardizer(
+          mappedAnimalData[i]['data'].map(weight => weight.weight),
+        );
+
+        let animalStandarizedVals = animalStd.getStandardisedArray(
+          mappedAnimalData[i]['data'].map(weight => weight.weight),
+        );
+        //console.log(animalStandarizedVals);
+
+        mappedAnimalData[i]['data'] = mappedAnimalData[i]['data'].map(
+          (element, index) => ({
+            cellId: element['cellId'],
+            percentile: 1 - iqrAnimalData[index],
+            weight: animalStandarizedVals[index],
+          }),
+        );
+      }
+
+      //console.log(mappedAnimalData);
+      console.log(mappedAnimalData[0]['data']);
+
+      const poachingData = await con
+        .getRepository(PoachingCellWeight)
+        .find({ relations: ['cell'] });
+
+      let mappedPoachingData = poachingData.map(element => ({
+        cellId: element.cell['id'],
+        percentile: -1,
+        weight: element.weight,
+      }));
+
+      const iqrPoachingData = IQRIfy.runOn(
+        mappedPoachingData.map(weight => weight.weight),
+      );
+      const poachStd = new Standardizer(
+        poachingData.map(weight => weight.weight),
+      );
+
+      let poachingStandarizedVals = poachStd.getStandardisedArray(
+        mappedPoachingData.map(weight => weight.weight),
+      );
+
+      mappedPoachingData = mappedPoachingData.map((element, index) => ({
+        cellId: element.cellId,
+        percentile: 1 - iqrPoachingData[index],
+        weight: poachingStandarizedVals[index],
+      }));
+
+      console.log(mappedPoachingData);
+      console.log(mappedAnimalData[0]);
+
+      const size = poachingData.length;
+      let hotspots = new Array();
+
+      for (let a = 0; a < speciesSize; a++) {
+        for (let i = 0; i < size; i++) {
+          if (
+            mappedAnimalData[a]['data'][i].percentile <= 3 / 7 &&
+            mappedPoachingData[i].percentile <= 3 / 7
+          ) {
+            hotspots.push({
+              cellId: mappedPoachingData[i].cellId,
+              weight:
+                percentage * mappedAnimalData[a]['data'][i].weight +
+                percentage * mappedPoachingData[i].weight +
+                timePercentage * mappedTimeData[i].timeSinceVisit,
+            });
+          } else if (mappedAnimalData[a]['data'][i].percentile <= 3 / 7) {
+            hotspots.push({
+              cellId: mappedPoachingData[i].cellId,
+              weight:
+                percentage * mappedAnimalData[a]['data'][i].weight +
+                timePercentage * mappedTimeData[i].timeSinceVisit,
+            });
+          } else if (mappedPoachingData[i].percentile <= 3 / 7) {
+            hotspots.push({
+              cellId: mappedPoachingData[i].cellId,
+              weight:
+                percentage * mappedPoachingData[i].weight +
+                timePercentage * mappedTimeData[i].timeSinceVisit,
+            });
+          } else {
+          }
+        }
+      }
+      // console.log(hotspots);
+      console.timeEnd('calculating averages');
+
+      // console.log(hotspots);
+
+      let unique_array = hotspots.filter(function(elem, index, self) {
+        return index == self.indexOf(elem);
+      });
+
+      // hotspots = unique_array
+      //   .sort((a, b) => b.weight - a.weight)
+      //   .slice(0, 5000);
+
+      console.log(hotspots);
+
+      const tempIqri = IQRIfy.runOn(hotspots.map(weight => weight.weight));
+
+      // let k = tempIqri.map((weight,index) => ({
+      //   cellId: hotspots[index].cellId,
+      //   weight: weight,
+      // }));
+
+      let final = [];
+
+      for (let i = 0; i < tempIqri.length; i++) {
+        if (1 - tempIqri[i] <= 3 / 7) {
+          final.push({
+            cellId: hotspots[i].cellId,
+            weight: 1 - tempIqri[i],
+          });
+        }
+      }
+
+      const cellPositionsMap: { [id: number]: MapCellData } = cellData.reduce(
+        (ob, cell) => {
+          ob[cell.id] = cell;
+          return ob;
+        },
+        {},
+      );
+
+      final = final
+        .filter(hotspot => hotspot.weight <= 3 / 7)
+        .map(hotspot => ({
+          ...hotspot,
+          lon: cellPositionsMap[hotspot.cellId].cellMidLongitude,
+          lat: cellPositionsMap[hotspot.cellId].cellMidLatitude,
+        }));
+
+       final = final
+        .sort((a, b) => b.weight - a.weight)
+        .slice(0, 5000);
+
+        return final;
+    });
+  }
+
+  async updateCellLastVisited(lng: number, lat: number): Promise<boolean> {
+    return true;
   }
 }
