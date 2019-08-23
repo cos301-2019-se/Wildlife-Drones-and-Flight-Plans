@@ -5,15 +5,15 @@ DR BAM
 
 To aid ERP rangers in anti-poaching patrolling, a system is being developed to automatically create and optimise drone flight plans based on animal tracking information and reserve features. The project aims to increase the probability of drones covering key areas with endangered wildlife, while being random enough to prevent poachers identifying patrol routes. Rangers and drone pilots will be empowered with useful information through this dynamic application.
 
-SRS: [Latest](Drone_Flight_Plans_SRS.pdf), [Demo 1](Drone_Flight_Plans_SRS(1).pdf), [Demo 2](Drone%20Flight%20Plans%20SRS(2).pdf)
+SRS:  [Demo 4 Architectural design & SRS](Documentation/Demo4/Drone_Flight_Plans_SRS_Demo4.pdf),[Demo 3](Documentation/Demo3/Drone_Flight_Plans_SRS%20Demo3.pdf), [Demo 2](Documentation/Demo2/Drone_Flight_Plans_SRS%20Demo2.pdf), [Demo 1](Documentation/Demo1/Drone_Flight_Plans_SRS_Demo1.pdf)
 
-Architectural design: [Latest](Architectural%20Designs.pdf), [Demo 2](Architectural%20Designs(1).pdf)
+Architectural design: [Demo3](Documentation/Demo3/Architectural_Designs_Demo3.pdf), [Demo 2](Documentation/Demo2/Architectural_Designs_Demo2.pdf)
 
-Coding Standards: [Latest](/Documentation/Demo4/CodingStandards_Demo4.pdf), [Demo 3](/Documentation/Demo3/CodingStandards_Demo3.pdf), [Demo 2](/Documentation/Demo2/CodingStandards_Demo2.pdf)
+Coding Standards: [Demo 4](/Documentation/Demo4/CodingStandards_Demo4.pdf), [Demo 3](/Documentation/Demo3/CodingStandards_Demo3.pdf), [Demo 2](/Documentation/Demo2/CodingStandards_Demo2.pdf)
 
-Testing Policy Document: [Latest](Testing%20policy%20document.pdf), [Demo 2](Testing%20policy%20document(1).pdf)
+Testing Policy Document:  [Demo 4](/Documentation/Demo4/Testing_policy_document_Demo4.pdf),[Demo 3](/Documentation/Demo3/Testing_policy_document_Demo3.pdf), [Demo 2](/Documentation/Demo2/Testing_policy_document_Demo2.pdf)
 
-User Manual: [Latest](userManual.pdf), [Demo 2](User%20Manual(1).pdf)
+User Manual: [Demo 4](Documentation/Demo4/userManual_Demo4.pdf),[Demo 3](Documentation/Demo3/userManual_Demo3.pdf), [Demo 2](/Documentation/Demo2/User_Manual_Demo2.pdf)
 
 [Trello Board](https://trello.com/b/GWit5JXi/capstone)
 
