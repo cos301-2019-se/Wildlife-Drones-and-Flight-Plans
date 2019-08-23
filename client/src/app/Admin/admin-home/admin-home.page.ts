@@ -145,6 +145,7 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
           ],
           updateWhileAnimating: true,
           updateWhileInteracting: true,
+          zIndex: 99999,
         });
 
         const stroke = dashStyle.getStroke();
@@ -671,29 +672,33 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
     }
 
     const drones = await this.dronesService.getDrones();
+    console.log('drones', drones);
 
     const layer = new VectorLayer({
       source: new VectorSource({
         features: drones.map(drone => new Feature({
-          geometry: new Point(fromLonLat([drone.longitude, drone.latitude])),
+          geometry: new Point(fromLonLat([drone.longitude, drone.latitude], 'EPSG:3857')),
         })),
       }),
       style: new Style({
         image: new CircleStyle({
           radius: 6,
           fill: new Fill({
-            color: '#fc0',
+            color: 'orange',
           }),
         }),
       }),
+      zIndex: 9999,
     });
 
-    if (this.dronesLayer) {
-      this.map.removeLayer(this.dronesLayer);
-    }
+    const tempLayer = this.dronesLayer;
 
     this.dronesLayer = layer;
     this.map.addLayer(this.dronesLayer);
+
+    if (tempLayer) {
+      this.map.removeLayer(tempLayer);
+    }
   }
   /**
    * Updates the incidents layer to show incident markers
@@ -715,6 +720,7 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
           }),
         }),
       }),
+      zIndex: 9999,
     });
 
     const tempLayer = this.incidentsLayer;
