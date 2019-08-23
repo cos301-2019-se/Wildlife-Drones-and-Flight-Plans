@@ -19,7 +19,7 @@ User Manual: [Demo 4](Documentation/Demo4/userManual_Demo4.pdf),[Demo 3](Documen
 
 ## Group members
 ![image](https://lh4.googleusercontent.com/sYkeIXRCdnU5gPxCxJOXc_I6xD2D_OMxqu9-eRN1WwPWEg5bAW_7SZ86O5U863usmgKeCJeqAwN-Ay0bMkrIqJnZelcAtLnpRAeiHbHnukEjuPdsahIV_iJfkl8ATyYRKPP_e5_N)
-### Matthew Evans (16262949)
+### Matthew Evans (16262949) [CV](Documentation/CVS/Matthew.pdf), [LinkedIN](https://www.linkedin.com/in/matthew-evans-011a78191/),
 - __Interests__: Technology, astronomy, music, film, history
 - __Skills__: JavaScript, TypeScript, Angular 2+, Ionic Framework, PHP, SQL, NodeJS, React, 64-bit assemble, Android Play Store deployment, web development, Adobe After Effects, Blender 3D, GIMP, web scraping
 - __Previous work experience__:
@@ -28,25 +28,25 @@ User Manual: [Demo 4](Documentation/Demo4/userManual_Demo4.pdf),[Demo 3](Documen
 - __Attitudes__: curious, passionate, positive towards the future of technology
 
 
-### Andreas Louw (15048366)
+### Andreas Louw (15048366) [CV](Documentation/CVS/Andreas.pdf), [LinkedIN](https://www.linkedin.com/in/andreas-louw-182a36175),
 - __Interests__:Programming,App development,Metalwork and Woodwork
 - __Skills__: Java, Kotlin, PHP, C++, C#, JavaScript, assembly language(x64), App development, Web development, Database Management.
 - __Previous work experience__: None
 - __Attitudes__:Diligent,Honest,Positive and  I&#39;m a Friendly person.
 
-### Bryan Janse van Vuuren (16217498)
+### Bryan Janse van Vuuren (16217498) [CV](Documentation/CVS/Bryan.pdf), [LinkedIN](https://www.linkedin.com/in/bryan-janse-van-vuuren-451b8a191),
 - __Interests__:Gaming,Programming,Mobile application development,Music
 - __Skills__:Angular,Java,C#,JavaScript,Mobile App Devlopment,Database management and design,Web Devlopment
 - __Previous work experience__:Mobile application design for Rage Software,Mobile game development.
 - __Attitudes__: Devoted,Trusting,Positive,Punctual,Work-oriented,Willingness
 
-### Deane Roos (17057966)
+### Deane Roos (17057966) [CV](Documentation/CVS/Deane.pdf), [LinkedIN](https://www.linkedin.com/in/deane-roos-a7a896143),
 - __Interests__: Virtual reality, gaming and artificial intelligence
 - __Skills__: Java, C++, Assembly x64, Python
 - __Previous work experience__:  ETA operations
 - __Attitudes__: Hardworking and dedicated
 
-### Reinhardt Eiselen (14043302)
+### Reinhardt Eiselen (14043302) [CV](Documentation/CVS/Reinhardt.pdf), [LinkedIN](https://www.linkedin.com/in/reinhardt-eiselen-0071a685),
 - __Interests__: Music ,the outdoors and Technology
 - __Skills__:  Java, C++ , JavaScript, Assembler (x86) and 64 bit,PHP,SQL,Android,Nodejs, Angular,Web development and App development.
 - __Previous work experience__: no formal work experience 
