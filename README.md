@@ -9,7 +9,7 @@ SRS:  [Demo 4 Architectural design & SRS](Documentation/Demo4/Drone_Flight_Plans
 
 Architectural design: [Demo3](Documentation/Demo3/Architectural_Designs_Demo3.pdf), [Demo 2](Documentation/Demo2/Architectural_Designs_Demo2.pdf)
 
-Coding Standards: [Demo 4](/Documentation/Demo4/CodingStandards_Demo4.pdf), [Demo 3](/Documentation/Demo3/CodingStandards_Demo3.pdf), [Demo 2](/Documentation/Demo2/CodingStandards_Demo2.pdf)
+Coding Standards: [Demo 4](/Documentation/Demo4/CodingStandards_Demo4.pdf), [Demo 3](/Documentation/Demo3/CodingStandards_Demo3.pdf), [Demo 2](/Documentation/Demo2/Coding_Standards_Demo2.pdf)
 
 Testing Policy Document:  [Demo 4](/Documentation/Demo4/Testing_policy_document_Demo4.pdf),[Demo 3](/Documentation/Demo3/Testing_policy_document_Demo3.pdf), [Demo 2](/Documentation/Demo2/Testing_policy_document_Demo2.pdf)
 
