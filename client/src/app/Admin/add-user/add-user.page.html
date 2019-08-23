@@ -1,0 +1,71 @@
+<ion-header>
+  <ion-toolbar color="dark">
+    <ion-title>Add User</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button>
+      </ion-back-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <form [formGroup]="formGroup">
+    <ion-row>
+      <ion-col>
+        <ion-item>
+          <ion-label position="stacked">Name</ion-label>
+          <ion-input formControlName="name"></ion-input>
+        </ion-item>
+      </ion-col>
+      <ion-col>
+        <ion-item>
+          <ion-label position="stacked">Surname</ion-label>
+          <ion-input formControlName="surname"></ion-input>
+        </ion-item>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col>
+        <ion-item>
+          <ion-label position="stacked">Email</ion-label>
+          <ion-input formControlName="email"></ion-input>
+        </ion-item>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col>
+        <ion-item>
+          <ion-label position="stacked">Password</ion-label>
+          <ion-input type="password" formControlName="password"></ion-input>
+        </ion-item>
+      </ion-col>
+      <ion-col>
+        <ion-item>
+          <ion-label position="stacked"> Confirm Password</ion-label>
+          <ion-input type="password" formControlName="confirmPassword"></ion-input>
+        </ion-item>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col>
+        <ion-item>
+          <ion-label>Job Type</ion-label>
+          <ion-select formControlName="jobType" interface="popover">
+            <ion-select-option value="pilot">pilot</ion-select-option>
+            <ion-select-option value="administrator">administrator</ion-select-option>
+          </ion-select>
+        </ion-item>
+      </ion-col>
+    </ion-row>
+            
+    <div style="display: flex; justify-content: space-between;">
+      <div padding class="error" [class.failure]="error">
+        {{ error }}
+      </div>
+      <ion-button (click)="addUser()" color="dark">
+        Add User
+        <ion-icon name="person-add"></ion-icon>
+      </ion-button>
+    </div>
+  </form>
+</ion-content>

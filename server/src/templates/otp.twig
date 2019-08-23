@@ -1,0 +1,15 @@
+{% extends 'email.twig' %}
+{% block content %}
+  <tr>
+    <td>Use this code along with your password to log into your {{ applicationName }} account. This code is only valid for {{ timeout }} minutes.</td>
+  </tr>
+  <tr>
+    <td style="text-align: center; padding: 50px;">
+      <div style="font-weight: bold;">Your OTP code is:</div>
+      <div style="font-weight: bold; font-size: 32pt;">{{ otp }}</div>
+    </td>
+  </tr>
+  <tr>
+    <td>If you did not request a password reset, please ignore this email and contact support if you have questions.</td>
+  </tr>
+{% endblock %}

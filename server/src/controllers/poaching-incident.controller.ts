@@ -3,6 +3,7 @@ import { PoachingIncidentService } from '../services/poaching-incident.service';
 import { PoachingIncident } from '../entity/poaching-incident.entity';
 import { AuthGuard } from '@nestjs/passport';
 import { PoachingCellWeight } from '../entity/poaching-cell-weight.entity';
+import { AdminGuard } from '../auth/admin.guard';
 
 @UseGuards(AuthGuard('jwt'))
 @Controller()

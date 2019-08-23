@@ -10,14 +10,13 @@ import { DroneRouteService, DroneRouteMockService } from './services/drone-route
 import { IncidentsService, IncidentsMockService } from './services/incidents.service';
 import { DronesService, DronesMockService } from './services/drones.service';
 import { HeatmapService } from './services/heatmap.service';
-
 export const providers = [
   StatusBar,
   SplashScreen,
   MapService,
   AuthenticationService,
   { provide: GeolocationService, useClass: environment.production ? GeolocationService : GeolocationMockService },
-  { provide: DroneRouteService, useClass: environment.production ? DroneRouteService : DroneRouteMockService },
+  DroneRouteService,
   IncidentsService,
   DronesService,
   HeatmapService,

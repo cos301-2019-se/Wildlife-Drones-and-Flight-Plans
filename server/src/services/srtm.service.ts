@@ -1,11 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import * as fs from 'fs';
 import axios from 'axios';
 import * as GeoTiff from 'geotiff';
 import { MultiPromise } from '../libraries/multi-promise';
+import { MapService } from './map.service';
+import { MapFeatureType } from '../entity/map-data.entity';
+import bbox from '@turf/bbox';
+import { lengthToDegrees } from '@turf/helpers';
 
 const TIFF_WIDTH = 2048;
 const TIFF_HEIGHT = 2048;
+const LOCATION_BIAS = lengthToDegrees(300, 'meters');
 
 /**
  * Provides altitude data from NASA shuttle radar topography mission
@@ -17,6 +22,20 @@ const TIFF_HEIGHT = 2048;
 export class SRTMService {
   private mapReadyWaiter: MultiPromise = null;
 
+  constructor(
+    @Inject(forwardRef(() => MapService))
+    private mapService: MapService,
+  ) {}
+
+  public getAltitudeForPoint(latitude: number, longitude: number) {
+    return this.getAltitude([
+      longitude - LOCATION_BIAS, // left
+      latitude - LOCATION_BIAS, // bottom
+      longitude + LOCATION_BIAS, // right
+      latitude + LOCATION_BIAS, // top
+    ]);
+  }
+
   /**
    * Get the altitude for a given coordinate
    * @param point [minX, minY, maxX, maxY] or [lng0, lat0, lng1, lat1] or [left, bottom, right, top]
@@ -24,11 +43,13 @@ export class SRTMService {
    */
   public async getAltitude(
     area,
-    bounds,
   ): Promise<{
     averageAltitude: number;
     variance: number;
   }> {
+    const reserve = await this.mapService.getMapFeature(MapFeatureType.reserve);
+    const bounds = bbox(reserve);
+    
     const map = await this.download(bounds);
 
     const [oX, oY] = map.getOrigin();
@@ -41,10 +62,10 @@ export class SRTMService {
       Math.round((area[3] - oY) / imageResY),
     ];
     window = [
-      Math.min(window[0], window[2]),
-      Math.min(window[1], window[3]),
-      Math.max(window[0], window[2]),
-      Math.max(window[1], window[3]),
+      Math.min(window[0], window[2]), // left
+      Math.min(window[1], window[3]), // top
+      Math.max(window[0], window[2]), // right
+      Math.max(window[1], window[3]), // bottom
     ];
 
     const rasters = await map.readRasters({
@@ -64,7 +85,7 @@ export class SRTMService {
       -Infinity,
     );
 
-    const variance = minAltitude - maxAltitude;
+    const variance = maxAltitude - minAltitude;
 
     return {
       averageAltitude,

@@ -1,26 +1,44 @@
 import { Injectable } from '@nestjs/common';
-import { DatabaseService } from './db.service';
-import { ReserveConfiguration } from '../entity/reserve-configuration.entity';
+
+export interface Configuration {
+  applicationName: string;
+  reserveName: string;
+  cellSize: number;
+  mail: {
+    host: string;
+    port: number;
+    user: string;
+    pass: string;
+  };
+  auth: {
+    otp: {
+      pattern: string;
+      expiryTime: number;
+      attempts: number;
+    }
+  };
+}
 
 @Injectable()
 export class ConfigService {
-  constructor(
-    private databaseService: DatabaseService,
-  ) {}
-
-  async getConfig(): Promise<ReserveConfiguration> {
-    const conn = await this.databaseService.getConnection();
-    const rep = conn.getRepository(ReserveConfiguration);
-
-    const config = (await rep.find())[0];
-
-    return config;
-  }
-
-  async setConfig(config: ReserveConfiguration): Promise<void> {
-    const conn = await this.databaseService.getConnection();
-    const rep = conn.getRepository(ReserveConfiguration);
-
-    await rep.save(config);
+  getConfig(): Configuration {
+    return {
+      applicationName: process.env.APP_NAME,
+      reserveName: process.env.RESERVE_NAME,
+      cellSize: parseFloat(process.env.CELL_SIZE) / 1000,
+      mail: {
+        host: process.env.MAIL_HOST,
+        port: parseInt(process.env.MAIL_PORT, 10),
+        user: process.env.MAIL_USERNAME,
+        pass: process.env.MAIL_PASSWORD,
+      },
+      auth: {
+        otp: {
+          pattern: process.env.OTP_PATTERN,
+          expiryTime: parseInt(process.env.OTP_EXPIRES, 10) * 1000,
+          attempts: parseInt(process.env.OTP_ATTEMPTS, 10),
+        }
+      },
+    };
   }
 }

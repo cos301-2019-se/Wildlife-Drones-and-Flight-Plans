@@ -7,6 +7,8 @@ export interface Drone {
   avgFlightTime: number;
   avgSpeed: number;
   active: boolean;
+  longitude: number;
+  latitude: number;
 }
 
 @Injectable()
@@ -19,6 +21,9 @@ export class DronesService {
     return await this.authService.post('getDrones', {}) as Drone[];
   }
 
+  async getDroneRoutes(): Promise<Drone[]> {
+    return await this.authService.post('getDroneRoutes', {}) as any[];
+  }
   async updateDrones(drones: Drone[]) {
     await this.authService.post('updateDrones', {
       drones,
@@ -35,6 +40,8 @@ export class DronesMockService extends DronesService {
       avgFlightTime: 110,
       avgSpeed: 45,
       active: true,
+      longitude:0,
+      latitude:0,
     },
     {
       id: 1,
@@ -42,6 +49,8 @@ export class DronesMockService extends DronesService {
       avgFlightTime: 130,
       avgSpeed: 25,
       active: true,
+      longitude:0,
+      latitude:0,
     },
   ];
 

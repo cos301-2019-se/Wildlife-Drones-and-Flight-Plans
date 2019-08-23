@@ -1,91 +1,97 @@
-import { Controller, Get, Post, Query, Body } from '@nestjs/common';
+import { Controller, Get, Post, Query, Body,UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { AnimalLocationService } from '../services/animal-location.service';
 import { AnimalLocation } from '../entity/animal-location.entity';
+import { ModelTraining } from '../services/model-training.service';
+import { AdminGuard } from '../auth/admin.guard';
+import { AuthGuard } from '@nestjs/passport';
 
+@UseGuards(AuthGuard('jwt'))
 @Controller()
 export class AnimalController {
-  constructor(private readonly animalLocationService: AnimalLocationService) {}
+  constructor(
+    private readonly animalLocationService: AnimalLocationService,
+    private readonly modelTrainingService: ModelTraining,
+  ) {}
 
-  // @Get('addAnimalLocationData')
-  // addAnimalLocationData(
-  //   @Query('animalId') animalId: string,
-  //   @Query('date') date: Date,
-  //   @Query('long') long: number,
-  //   @Query('lat') lat: number,
-  //   @Query('animalSpecies') animalSpecies: string,
-  // ): Promise<boolean> {
-  //   return this.animalLocationService.addAnimalLocationData(
-  //     animalId,
-  //     date,
-  //     long,
-  //     lat,
-  //     animalSpecies,
-  //   );
-  // }
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   @Post('addAnimalLocationData')
   async addAnimalLocationData(@Body() body): Promise<boolean> {
-       return await this.animalLocationService.addAnimalLocationData(
-        body.animalId,
-        body.date,
-        body.lon,
-        body.lat,
-        body.animalSpecies,
-        body.temp,
-        body.habitat,
-      );
-    }
-  
-  // @Get('addAnimalLocationDataCSV')
-  // addAnimalLocationDataCSV(@Query('filename') filename: string): void {
-  //   this.animalLocationService.addAnimalLocationDataCSV(filename);
-  // }
-
-  @Post('addAnimalLocationDataCSV')
-  async addAnimalLocationDataCSV (@Body() body) :Promise<void> {
-    return await this.animalLocationService.addAnimalLocationDataCSV(body.filename);
+    return await this.animalLocationService.addAnimalLocationData(
+      body.animalId,
+      body.date,
+      body.lon,
+      body.lat,
+      body.animalSpecies,
+      body.temp,
+      body.habitat,
+    );
   }
 
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
+  @Post('csvUploader')
+  @UseInterceptors(FileInterceptor('csvFile'))
+  async csvUploader(@UploadedFile() file): Promise<boolean> {
+    var fs = require('fs');
+    
+    const fileName = this.animalLocationService.fileNameGenerator(15);
+    const path = fileName+'.csv';
+    fs.writeFileSync(path,file.buffer);
+    //Check for valid headers
+    const isValid = await this.animalLocationService.validateAnimalCSV(path);
+    if(isValid)
+    {
+      this.animalLocationService.addAnimalLocationDataCSV(path); 
+    }
+    else
+    {
+      fs.unlink(path, function (err) {
+        if (err) throw err;
+        // if no error, file has been deleted successfully
+        console.log('File deleted!');
+      });
+    }
+    return isValid;
+  }
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
+  @Post('addAnimalLocationDataCSV')
+  async addAnimalLocationDataCSV(@Body() body): Promise<void> {
+    return await this.animalLocationService.addAnimalLocationDataCSV(
+      body.filename,
+    );
+  }
 
-  // @Get('getAllAnimalLocationTableData')
-  // getAllAnimalsLocationData(): Promise<JSON> {
-  //   return this.animalLocationService.getAllAnimalsLocationTableData();
-  // }
   @Post('getAllAnimalLocationTableData')
-  async getAllAnimalLocationTableData() : Promise<boolean> {
+  async getAllAnimalLocationTableData(): Promise<boolean> {
     return await this.getAllAnimalLocationTableData();
   }
-  // async getAllAnimalsLocationData(): Promise<JSON> {
-  //   return await this.animalLocationService.getAllAnimalsLocationTableData();
-  // }
-
-  // @Get('getIndividualAnimalLocationTableData')
-  // getIndividualAnimalLocationData(
-  //   @Query('animalID') animalID: string,
-  // ): Promise<JSON> {
-  //   return this.animalLocationService.getIndividualAnimalLocationTableData(
-  //     animalID,
-  //   );
-  // }
 
   @Post('getIndividualAnimalLocationTableData')
-  async getIndividualAnimalLocationData(@Body() body ) : Promise<JSON> {
+  async getIndividualAnimalLocationData(@Body() body): Promise<AnimalLocation[]> {
     return await this.animalLocationService.getIndividualAnimalLocationTableData(
-        body.animalId,
-         );
+      body.animalId,
+    );
   }
 
-  // @Get('getSpeciesLocationTableData')
-  // getSpeciesLocationTableData(
-  //   @Query('animalSpecies') animalSpecies: string,
-  // ): Promise<JSON> {
-  //   return this.animalLocationService.getSpeciesLocationTableData(
-  //     animalSpecies,
-  //   );
-  // }
   @Post('getSpeciesLocationTableData')
   async getSpeciesLocationTableData(@Body() body): Promise<AnimalLocation[]> {
-    return await this.animalLocationService.getSpeciesLocationTableData(
+    return await this.animalLocationService.getLocationDataBySpeciesId(
       body.animalSpecies,
-      );
+    );
+  }
+
+  @Post('getAnimalIds')
+  async getAnimalIds(): Promise<string[]> {
+    return await this.animalLocationService.getAnimalIds();
+  }
+
+  @Post('getAnimalLocations')
+  async getAnimalLocations() {
+    const lastFewLocations = await this.animalLocationService.getLastFewAnimalLocations('AM105');
+
+    this.modelTrainingService.predictFutureAnimalPosition('AM105', 60);
+
+
+    return lastFewLocations;
   }
 }

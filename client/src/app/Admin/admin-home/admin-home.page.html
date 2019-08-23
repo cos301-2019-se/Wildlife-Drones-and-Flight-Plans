@@ -1,0 +1,149 @@
+<ion-content>
+  <div class="map" #map></div>
+
+  <!-- overlay tooltip -->
+  <div class="overlay-tooltip"
+    *ngIf="state.tooltip"
+    @tooltip-animation
+  >
+    <ion-icon name="information-circle-outline"></ion-icon>
+    <p>{{ state.tooltip }}</p>
+  </div>
+  <!-- end of overlay tooltip -->
+
+  <!-- set up flight overlay -->
+  <div class="form-overlay"
+    *ngIf="state === states.options"
+    @form-animation
+  >
+    <!-- options form -->
+    <ng-container *ngIf="state === states.options">
+      <ion-item no-padding>
+        <ion-label>Show hotspot heatmap</ion-label>
+        <ion-checkbox slot="end"
+          [(ngModel)]="states.options.data.enableHotspotHeatmap"
+        ></ion-checkbox>
+      </ion-item>
+      <ion-item no-padding>
+        <ion-label>Show poaching heatmap</ion-label>
+        <ion-checkbox slot="end"
+          [(ngModel)]="states.options.data.enablePoachingHeatmap"
+        ></ion-checkbox>
+      </ion-item>
+      <ion-item no-padding>
+        <ion-label>Show animal heatmap</ion-label>
+        <ion-checkbox slot="end"
+          [(ngModel)]="states.options.data.enableAnimalHeatmap"
+        ></ion-checkbox>
+      </ion-item>
+      <ng-container *ngIf="states.options.data.enableAnimalHeatmap">
+        <ion-item no-padding>
+          <ion-label position="stacked">Animal species</ion-label>
+          <ion-select [(ngModel)]="states.options.data.animalHeatmapSpecies">
+            <ion-select-option
+              *ngFor="let species of states.options.data.species"
+              [value]="species.id"
+            >
+              {{ species.species }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+        <ion-item no-padding>
+          <ion-label>Use current time?</ion-label>
+          <ion-checkbox slot="end" [(ngModel)]="states.options.data.useCurrentTime"></ion-checkbox>
+        </ion-item>
+        <ng-container *ngIf="!states.options.data.useCurrentTime">
+          <ion-item no-padding>
+            <ion-label position="stacked">Time</ion-label>
+            <ion-range [min]="0" [max]="1320" [step]="120" [ticks]="true" [snaps]="true" [pin]="false"
+              [(ngModel)]="states.options.data.time"
+            ></ion-range>
+          </ion-item>
+          {{ states.options.data.time / 60 | number:'2.0' }}:00
+        </ng-container>
+      </ng-container>
+      <ion-item no-padding>
+        <ion-label>Show all active drones</ion-label>
+        <ion-checkbox slot="end"
+          [(ngModel)]="states.options.data.enableActiveDrones"
+        ></ion-checkbox>
+      </ion-item>
+    </ng-container>
+  </div>
+  <!-- end of set up flight overlay -->
+
+  <!-- fab bottom left buttons -->
+  <ion-fab slot="fixed" vertical="bottom" horizontal="start">
+    <!-- settings fab -->
+    <ion-fab-button size="small" color="dark"
+      *ngIf="state === states.default"
+      (click)="setState(states.options)" @button-animation
+    >
+      <ion-icon name="settings"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+  
+  <!-- fab confirmation buttons -->
+  <ion-fab slot="fixed" vertical="bottom" horizontal="center"
+  class="confirmation-buttons"
+    *ngIf="state.confirmations"
+  >
+  <!-- prev button -->
+  <ion-fab-button class="confirmation-button" size="small" color="dark"
+  *ngIf="state.confirmations.prev"
+  (click)="state.confirmations.prev(state)" @button-animation
+  [disabled]="state.isAtStart(state)"
+>
+  <ion-icon name="arrow-back"></ion-icon>
+</ion-fab-button>
+
+    <!-- cancel button -->
+    <ion-fab-button class="confirmation-button" size="small" color="dark"
+    *ngIf="state.confirmations.cancel"
+      (click)="state.confirmations.cancel(state)" @button-animation
+    >
+      <ion-icon name="close"></ion-icon>
+    </ion-fab-button>
+
+    <!-- add button -->
+    <ion-fab-button class="confirmation-button confirmation-button-middle" size="small" color="dark"
+      *ngIf="state.confirmations.add"
+      (click)="state.confirmations.add(state)" @add-button-animation
+    >
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+
+    <!-- done button -->
+    <ion-fab-button class="confirmation-button" size="small" color="dark"
+      *ngIf="state.confirmations.done"
+      (click)="state.confirmations.done(state)" @button-animation
+    >
+      <ion-icon name="checkmark"></ion-icon>
+    </ion-fab-button>
+
+    <div *ngIf="state === states.default && flightPlans.length" class="flight-plan-info">
+      <div class="inner">
+        {{ flightPlanIndex + 1 }} / {{ flightPlans.length }}<br />
+        {{ flightPlans[flightPlanIndex].timestamp | date:'dd MMM \'yy' }}
+      </div>
+    </div>
+
+     <!-- next button -->
+     <ion-fab-button class="confirmation-button" size="small" color="dark"
+     *ngIf="state.confirmations.next"
+     (click)="state.confirmations.next(state)" @button-animation
+     [disabled]="state.isAtEnd(state)"
+   >
+     <ion-icon name="arrow-forward"></ion-icon>
+   </ion-fab-button>
+  </ion-fab>
+  
+  <!-- fab location button -->
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+    <ion-fab-button @button-animation (click)="goToGeolocation()" color="dark"
+      [class.active]="isFollowingGeolocation"
+    >
+      <ion-icon name="md-locate"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>

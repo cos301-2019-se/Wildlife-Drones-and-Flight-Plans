@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-
 import { Platform } from '@ionic/angular';
 import { SplashScreen } from '@ionic-native/splash-screen/ngx';
 import { StatusBar } from '@ionic-native/status-bar/ngx';
@@ -24,13 +23,18 @@ export class AppComponent {
     this.platform.ready().then(() => {
       this.statusBar.styleDefault();
       this.splashScreen.hide();
-      this.authenticationService.authenticationState.subscribe(state => {
-        if (state) {
-          this.router.navigate(['home']);
+    });
+
+    this.authenticationService.authenticationState.subscribe(state => {
+      if (state.status) {
+        if (state.jobType === 'administrator') {
+          this.router.navigate(['admin-tabs']);
         } else {
-          this.router.navigate(['login']);
+          this.router.navigate(['home']);
         }
-      });
+      } else {
+        this.router.navigate(['login']);
+      }
     });
   }
 }

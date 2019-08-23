@@ -6,16 +6,63 @@ export class DroneRouteService {
   constructor(
     private authService: AuthenticationService,
   ) {}
+  async generateIncidentRoutes(droneId: number, coords: Coordinates): Promise<any[]> {
+    const routes = await this.authService.post('drone-route/create-incident-route', {
+      droneId,
+      lon: coords.longitude,
+      lat: coords.latitude,
+    });
 
-  async generateRoute(droneId: number, coords: Coordinates): Promise<Array<[number, number]>> {
-    // TODO: fetch generated route from the server
-    return [];
+    console.log('got routes', routes);
+    return routes as any[];
+  }
+
+  async generateHotspotRoutes(droneId: number, coords: Coordinates): Promise<any[]> {
+    const routes = await this.authService.post('drone-route/create-hotspot-route', {
+      droneId,
+      lon: coords.longitude,
+      lat: coords.latitude,
+    });
+
+    console.log('got routes', routes);
+    return routes as any[];
+  }
+
+  async generatePredictiveRoutes(droneId: number, coords: Coordinates, animalIds: string[]): Promise<any> {
+    const res = await this.authService.post('drone-route/create-animal-prediction-route', {
+      droneId,
+      lon: coords.longitude,
+      lat: coords.latitude,
+      animalIds,
+    });
+
+    console.log('got routes', res);
+
+    return res;
+  }
+
+  async selectDroneRoute(droneId: number, points: any[]) {
+    return await this.authService.post('selectDroneRoute', {
+      points,
+      droneId,
+    });
+  }
+
+  /**
+   * Get all animal IDs for planning predictive route
+   */
+  async getAnimalIds(): Promise<string[]> {
+    return await this.authService.post('getAnimalIds', {}) as string[];
+  }
+
+  async getPastRoutes() {
+    return await this.authService.post('getDroneRoutes', {}) as any[];
   }
 }
 
 @Injectable()
 export class DroneRouteMockService extends DroneRouteService {
-  async generateRoute(droneId: number, coords: Coordinates): Promise<Array<[number, number]>> {
+  async generateIncidentRoutes(droneId: number, coords: Coordinates): Promise<Array<[number, number]>> {
     await new Promise(resolve => setTimeout(resolve, 500)); // artificial delay
     return [
       [

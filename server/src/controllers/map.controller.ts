@@ -1,47 +1,15 @@
 import { Controller, Get, Query, Post, Body, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-
-import { ShortestPathService } from '../services/shortest-path.service';
-import { MapUpdaterService } from '../services/map-updater.service';
-import { MapDataService } from '../services/map-data.service';
-import { MapCellDataService } from '../services/map-cell-data.service';
+import { AdminGuard } from '../auth/admin.guard';
+import { MapService } from '../services/map.service';
+import { MapFeatureType } from '../entity/map-data.entity';
 
 @Controller('map')
 @UseGuards(AuthGuard('jwt'))
 export class MapController {
   constructor(
-    private shortestPathService: ShortestPathService,
-    private mapUpdaterService: MapUpdaterService,
-    private mapDataService: MapDataService,
-    private mapCellDataService: MapCellDataService,
+    private mapService: MapService,
   ) {}
-
-  @Get('random-path')
-  getRandomPath(
-    @Query('top') top: number,
-    @Query('left') left: number,
-    @Query('bottom') bottom: number,
-    @Query('right') right: number,
-    @Query('startX') startX: number,
-    @Query('startY') startY: number,
-  ) {
-    const NUM_POINTS = 5;
-    const points = new Array(NUM_POINTS)
-      .fill(undefined)
-      .map(() => [
-        Math.random() * (right - left) + Number(left),
-        Math.random() * (top - bottom) + Number(bottom),
-      ]);
-
-    points.unshift([startX, startY]);
-
-    return this.shortestPathService.getShortestPath(points);
-  }
-
-  @Post('shortest-path')
-  shortestPath(@Body('points') points) {
-    return this.shortestPathService.getShortestPath(points);
-  }
 
   @Post('find-reserves')
   async findReserves(
@@ -52,7 +20,7 @@ export class MapController {
   ) {
     // tslint:disable-next-line:no-console
     console.log(left, bottom, right, top);
-    return await this.mapUpdaterService.findReservesInArea(
+    return await this.mapService.findReservesInArea(
       left,
       bottom,
       right,
@@ -61,25 +29,25 @@ export class MapController {
   }
 
   @Post('update')
-  async update(@Body('name') name) {
-    return await this.mapUpdaterService.updateMap(name);
+  async update() {
+    return await this.mapService.updateMap();
   }
 
   @Post('reserve')
   async getReserve() {
-    return await this.mapDataService.getMapFeature('reserve');
+    return await this.mapService.getMapFeature(MapFeatureType.reserve);
   }
 
   @Post('getMapCells')
   getMapCells() {
     console.log('calling');
-    return this.mapCellDataService.getMapCells();
+    return this.mapService.getMapCells();
   }
 
   @Post('getSpeciesWeightDataForTime')
   async getSpeciesWeightDataForTime(@Body() body) {
     console.log('calling');
-    return await this.mapCellDataService.getSpeciesWeightDataForTime(
+    return await this.mapService.getSpeciesWeightDataForTime(
       body.species,
       body.time,
     );
@@ -88,7 +56,7 @@ export class MapController {
   @Post('getCellPoachingWeight')
   async getCellPoachingWeight() {
     console.log('calling');
-    return await this.mapCellDataService.getCellPoachingWeight();
+    return await this.mapService.getCellPoachingWeight();
   }
 
   /**
@@ -96,6 +64,16 @@ export class MapController {
    */
   @Post('getCellSize')
   async getCellSize(): Promise<number> {
-    return await this.mapDataService.getCellSize();
+    return await this.mapService.getCellSize();
+  }
+
+  @Post('getCellHotspots')
+  async getCellHotspots(@Body() body): Promise<Array<{
+    lon: number;
+    lat: number;
+    cellId: number;
+    weight: number;
+  }>> {
+    return await this.mapService.getCellHotspots(body.time);
   }
 }

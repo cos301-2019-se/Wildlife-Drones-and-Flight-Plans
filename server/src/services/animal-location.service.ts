@@ -1,25 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import { DatabaseService } from './db.service';
 import { AnimalLocation } from '../entity/animal-location.entity';
-import { CsvReader } from './csv-reader.service';
-import { MapUpdaterService } from './map-updater.service';
-import { GeoService, GeoSearchSet } from './geo.service';
+import { CsvReaderService } from './csv-reader.service';
 import { SRTMService } from './srtm.service';
-import bbox from '@turf/bbox';
-import { lengthToDegrees } from '@turf/helpers';
 import { Species } from '../entity/animal-species.entity';
-import { ReserveConfiguration } from '../entity/reserve-configuration.entity';
-
-const LOCATION_BIAS = lengthToDegrees(300, 'meters');
+import { MapService } from './map.service';
+import { MapFeatureType } from '../entity/map-data.entity';
+import { UserService } from './user.service';
 
 @Injectable()
 export class AnimalLocationService {
   constructor(
     private readonly databaseService: DatabaseService,
-    private readonly csvReader: CsvReader,
-    private readonly mapUpdater: MapUpdaterService,
-    private readonly geo: GeoService,
+    private readonly csvReader: CsvReaderService,
+    private readonly mapService: MapService,
     private readonly altitude: SRTMService,
+    private readonly userService:UserService,
   ) {}
 
   async addAnimalLocationData(
@@ -38,315 +34,207 @@ export class AnimalLocationService {
       .getRepository(Species)
       .findOne({ species: animalSpecies });
 
-    if (animalSpeciseType == undefined) {
+    if (!animalSpeciseType) {
       console.log('Species not found');
       return false;
-    } else {
-      console.time('get map data');
+    }
+    console.time('feature searchers');
+    const featureSearchers = this.mapService.getFeatureSearchSets();
+    console.timeEnd('feature searchers');
 
-      const reserve = await con.getRepository(ReserveConfiguration).findOne({});
+   // console.timeEnd('get map data');
 
-      const mapData = await this.mapUpdater.getMapFeatures(reserve.reserveName); // TODO: make dynamic based on database reserve selection
+    const entryDate = new Date(date);
+    try {
+      const animalLocation = new AnimalLocation();
+      animalLocation.animalId = animalId;
+      animalLocation.latitude = lat;
+      animalLocation.longitude = lon;
+      animalLocation.timestamp = entryDate;
+      animalLocation.temperature = temp;
+      animalLocation.habitat = habitat;
+      animalLocation.month = entryDate.getMonth() + 1;
+      animalLocation.time = entryDate.getHours() * 60 + entryDate.getMinutes();
+      animalLocation.species = animalSpeciseType;
+      animalLocation.active = true;
 
-      const bounds = bbox(mapData.reserve);
-      console.time('feature searchers');
-      const featureSearchers: { [s: string]: GeoSearchSet } = Object.keys(
-        mapData.features,
-      ).reduce((searchers, featureName) => {
-        searchers[featureName] = this.geo.createFastSearchDataset(
-          mapData.features[featureName],
-        );
-        return searchers;
-      }, {});
-      console.timeEnd('feature searchers');
+      await this.calculateAnimalLocationDistances(animalLocation, lat, lon, featureSearchers);
 
-      console.timeEnd('get map data');
+      const addedAnimalLocation = await con
+        .getRepository(AnimalLocation)
+        .save(animalLocation);
 
-      const latitude = parseFloat(lat.toString());
-      const longitude = parseFloat(lon.toString());
-      const locationBounds = [
-        longitude - LOCATION_BIAS, // left
-        latitude - LOCATION_BIAS, // bottom
-        longitude + LOCATION_BIAS, // right
-        latitude + LOCATION_BIAS, // top
-      ];
-
-      const altitudeInfo = await this.altitude.getAltitude(
-        locationBounds,
-        bounds,
+      console.log(
+        'Saved a new animal loction with id: ' + animalLocation.id,
       );
 
-      const entryDate = new Date(date);
-
-      let damDis = featureSearchers.dams.getNearest(lon, lat).distance;
-      let riverDis = featureSearchers.rivers.getNearest(lon, lat)
-      .distance
-      let roadsDis = featureSearchers.roads.getNearest(lon, lat).distance;
-      let residentialDis = featureSearchers.residential.getNearest(
-        lon,
-        lat,
-      ).distance;
-      let intermittentWaterDis = featureSearchers.intermittentWater.getNearest(
-        lon,
-        lat,
-      ).distance;
-      let streamsDis = featureSearchers.dams.getNearest(lon, lat).distance;
-
-      if (damDis == null) {
-        damDis = -100;
-      }
-      if (riverDis == null) {
-        riverDis = -100;
-      }
-      if (roadsDis == null) {
-        roadsDis = -100;
-      }
-      if (residentialDis == null) {
-        residentialDis = -100;
-      }
-      if (intermittentWaterDis == null) {
-        intermittentWaterDis = -100;
-      }
-      if (streamsDis == null) {
-        streamsDis = -100;
-      }
-
-      try {
-        const animalLocations: AnimalLocation = {
-          animalId: animalId,
-          latitude: lat,
-          longitude: lon,
-          timestamp: entryDate,
-          temperature: temp,
-          habitat: habitat,
-          month: entryDate.getMonth() + 1,
-          time: entryDate.getHours() * 60 + entryDate.getMinutes(),
-          distanceToDams: damDis,
-          distanceToRivers: riverDis,
-          distanceToRoads: roadsDis,
-          distanceToResidences: residentialDis,
-          distanceToIntermittentWater: intermittentWaterDis,
-          altitude: altitudeInfo.averageAltitude,
-          slopiness: altitudeInfo.variance,
-          species: animalSpeciseType,
-          distanceStreams: streamsDis,
-          active: true,
-        };
-
-        const addedAnimalLocation = await con
-          .getRepository(AnimalLocation)
-          .save(animalLocations);
-
-        console.log(
-          'Saved a new animal loction with id: ' + animalLocations.id,
-        );
-
-        return addedAnimalLocation != null;
-      } catch (error) {
-        console.log(error);
-        console.log('animal location was not saved');
-        return false;
-      }
-    }   
+      return addedAnimalLocation != null;
+    } catch (error) {
+      console.log(error);
+      console.log('animal location was not saved');
+      return false;
+    }
   }
+
+  async validateAnimalCSV(filename): Promise<boolean>
+  {
+    const csvReader = this.csvReader.readCSV(filename);
+    const headers = csvReader.getHeaders();
+    let isValid = false;
+    //Check if headers are valid if so then remove then populate table and remove headers
+    if(headers.includes('event-id') && headers.includes('visible') && headers.includes('timestamp')
+    && headers.includes('location-long')&& headers.includes('location-lat')&& headers.includes('external-temperature')
+    && headers.includes('habitat')&& headers.includes('sensor-type')&& headers.includes('individual-taxon-canonical-name')
+    && headers.includes('tag-local-identifier')&& headers.includes('individual-local-identifier')&& headers.includes('study-name')
+    && headers.includes('species'))
+    {
+      isValid = true;
+    }
+    return isValid;
+  }
+
+  fileNameGenerator(length) {
+    var result           = '';
+    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for ( var i = 0; i < length; i++ ) {
+       result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+ }
 
   async addAnimalLocationDataCSV(filename): Promise<void> {
     const csvFile = filename;
-    const MAX_BUFFER_SIZE = 50000;
-    let buffer: AnimalLocation[] = [];
 
     const conn = await this.databaseService.getConnection();
     const animalLocations = conn.getRepository(AnimalLocation);
+    const animalSpeciesRepo = conn.getRepository(Species);
 
-    const animalSpeciesType = await JSON.parse(
-      JSON.stringify(await conn.getRepository(Species).find()),
-    );
-
-    //console.log("type: " + JSON.stringify(animalSpeciseType));
-    //console.log("type 0 id: " + JSON.stringify(animalSpeciseType[0]['id']));
-
-    console.time('get map data');
-
-    const reserve = await conn.getRepository(ReserveConfiguration).findOne({});
-
-    const mapData = await this.mapUpdater.getMapFeatures(reserve.reserveName); // TODO: make dynamic based on database reserve selection
-
-    const bounds = bbox(mapData.reserve);
     console.time('feature searchers');
-    const featureSearchers: { [s: string]: GeoSearchSet } = Object.keys(
-      mapData.features,
-    ).reduce((searchers, featureName) => {
-      searchers[featureName] = this.geo.createFastSearchDataset(
-        mapData.features[featureName],
-      );
-      return searchers;
-    }, {});
+    const featureSearchers = await this.mapService.getFeatureSearchSets();
     console.timeEnd('feature searchers');
 
-    console.timeEnd('get map data');
+    //console.timeEnd('get map data');
 
     const csvReader = this.csvReader.readCSV(csvFile);
 
     let countInserted = 0;
-
-    const insertRow = () => {
-      csvReader.pause();
-      const bufferSize = buffer.length;
-      const rowsToInsert = buffer;
-      buffer = [];
-
-      animalLocations
-        .save(rowsToInsert, {
-          chunk: 100,
-        })
-        .then(() => {
-          countInserted += bufferSize;
-          console.log('================== inserted', countInserted);
-          csvReader.resume();
-        });
-    };
-
-    let id = 0;
-    csvReader.onData(async row => {
-      id++;
-      const idCopy = id;
-      await new Promise(resolve => setTimeout(resolve, 0));
-      console.log('inserting', idCopy);
-
-      if (typeof row === 'undefined') {
-        // end of csv - insert the remaining rows
-        insertRow();
-        return;
-      }
-
-      // row = JSON.stringify(row)
-
+    await this.userService.sendEmailToAllAdmins('CSV Upload in progress',
+    'CSV upload has started!');
+    let row = csvReader.next();
+    while (typeof row !== 'undefined') {
       const lat = parseFloat(row['location-lat']);
       const lng = parseFloat(row['location-long']);
-      const locationBounds = [
-        lng - LOCATION_BIAS, // left
-        lat - LOCATION_BIAS, // bottom
-        lng + LOCATION_BIAS, // right
-        lat + LOCATION_BIAS, // top
-      ];
-
-      console.log('lat: ' + lat);
-
-      const altitudeInfo = await this.altitude.getAltitude(
-        locationBounds,
-        bounds,
-      );
 
       const rowDate = new Date(row.timestamp);
 
-      // console.log('row: ' + JSON.stringify(row) );
-
-      // console.log('row species: ' + await row['species'])
-
-      let species;
-      let leng = animalSpeciesType.length;
-
-      for (let a = 0; a < leng; a++) {
-        if (row['species'] == animalSpeciesType[a]['species']) {
-          species = animalSpeciesType[a]['id'];
-          a += leng;
-        }
-      }
-
-      let damDis = featureSearchers.dams.getNearest(lng, lat).distance;
-      let riverDis = featureSearchers.rivers.getNearest(lng, lat)
-      .distance
-      let roadsDis = featureSearchers.roads.getNearest(lng, lat).distance;
-      let residentialDis = featureSearchers.residential.getNearest(
-        lng,
-        lat,
-      ).distance;
-      let intermittentWaterDis = featureSearchers.intermittentWater.getNearest(
-        lng,
-        lat,
-      ).distance;
-      let streamsDis = featureSearchers.dams.getNearest(lng, lat).distance;
-
-      if (damDis == null) {
-        damDis = -100;
-      }
-      if (riverDis == null) {
-        riverDis = -100;
-      }
-      if (roadsDis == null) {
-        roadsDis = -100;
-      }
-      if (residentialDis == null) {
-        residentialDis = -100;
-      }
-      if (intermittentWaterDis == null) {
-        intermittentWaterDis = -100;
-      }
-      if (streamsDis == null) {
-        streamsDis = -100;
-      }
-
-      //console.log('species: ' + species);
-
       try {
-        const location: AnimalLocation = {
-          animalId: row['individual-local-identifier'],
-          latitude: lat,
-          longitude: lng,
-          timestamp: rowDate,
-          temperature: row['external-temperature'],
-          habitat: row.habitat,
-          month: rowDate.getMonth() + 1,
-          time: rowDate.getHours() * 60 + rowDate.getMinutes(),
-          id: idCopy,
-          distanceToDams: damDis,
-          distanceToRivers: riverDis,
-          distanceToRoads: roadsDis,
-          distanceToResidences: residentialDis,
-          distanceToIntermittentWater: intermittentWaterDis,
-          altitude: altitudeInfo.averageAltitude,
-          slopiness: altitudeInfo.variance,
-          species: species,
-          distanceStreams: streamsDis,
-          active: true,
-        };
+        const location = new AnimalLocation();
 
-        buffer.push(location);
-        if (buffer.length === MAX_BUFFER_SIZE) {
-          insertRow();
+        location.animalId = row['individual-local-identifier'];
+        location.latitude = lat;
+        location.longitude = lng;
+        location.timestamp = rowDate;
+        location.temperature = row['external-temperature'];
+        location.habitat = row.habitat;
+        location.month = rowDate.getMonth() + 1;
+        location.time = rowDate.getHours() * 60 + rowDate.getMinutes();
+        
+        // find the species in the database for the row
+        let species = await animalSpeciesRepo.findOne({
+          where: { species: row['species'] },
+        });
+
+        // if the species does not exist, create it
+        if (!species) {
+          species = new Species();
+          species.species = row['species'];
+          await animalSpeciesRepo.save(species);
         }
+
+        location.species = species;
+        location.active = true;
+        await this.calculateAnimalLocationDistances(location, lat, lng, featureSearchers);
+        await animalLocations.save(location);
+        console.log('inserted', ++countInserted);
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
+      row = csvReader.next();
+    }
+    await this.userService.sendEmailToAllAdmins('CSV Upload Succesful',
+      'CSV upload has completed succesfully!');
+    //Delete the file
+    var fs = require('fs');
+    fs.unlink(filename, function (err) {
+      if (err) throw err;
+      // if no error, file has been deleted successfully
+      console.log('File deleted!');
     });
   }
 
-  async getAllAnimalsLocationTableData(): Promise<JSON> {
-    const con = await this.databaseService.getConnection();
-    const animalData = JSON.parse(
-      JSON.stringify(await con.getRepository(AnimalLocation).find()),
-    );
-    return animalData;
+  private async calculateAnimalLocationDistances(location: AnimalLocation, lat, lng, featureSearchers) {
+    const altitudeInfo = await this.altitude.getAltitudeForPoint(lat, lng);
+
+    const damClosest = featureSearchers[MapFeatureType.dams].getNearest(lng, lat);
+    const riverClosest = featureSearchers[MapFeatureType.rivers].getNearest(lng, lat);
+    const roadsClosest = featureSearchers[MapFeatureType.roads].getNearest(lng, lat);
+    const residentialClosest = featureSearchers[MapFeatureType.residential].getNearest(lng, lat);
+    const intermittentWaterClosest = featureSearchers[MapFeatureType.intermittent].getNearest(lng, lat);
+
+    const damDis = damClosest.distance || -Infinity;
+    const riverDis = riverClosest.distance || -Infinity;
+    const roadsDis = roadsClosest.distance || -Infinity;
+    const residentialDis = residentialClosest.distance || -Infinity;
+    const intermittentWaterDis = intermittentWaterClosest.distance || -Infinity;
+
+    const damBearing = damClosest.getBearing();
+    const riverBearing = riverClosest.getBearing();
+    const roadsBearing = roadsClosest.getBearing();
+    const residentialBearing = residentialClosest.getBearing();
+    const intermittentWaterBearing = intermittentWaterClosest.getBearing();
+
+    location.properties = {
+      distanceToDams: damDis,
+      bearingToDams: damBearing,
+      distanceToRivers: riverDis,
+      bearingToRivers: riverBearing,
+      distanceToRoads: roadsDis,
+      bearingToRoads: roadsBearing,
+      distanceToResidences: residentialDis,
+      bearingToResidences: residentialBearing,
+      distanceToIntermittentWater: intermittentWaterDis,
+      bearingToIntermittentWater: intermittentWaterBearing,
+
+      altitude: altitudeInfo.averageAltitude,
+      slopiness: altitudeInfo.variance,
+    };
   }
 
-  async getIndividualAnimalLocationTableData(animalID): Promise<JSON> {
+  async getAllAnimalsLocationTableData(): Promise<AnimalLocation[]> {
     const con = await this.databaseService.getConnection();
-    return JSON.parse(
-      JSON.stringify(
-        await con.getRepository(AnimalLocation).find({ animalId: animalID }),
-      ),
-    );
+    return await con.getRepository(AnimalLocation).find();
   }
 
-  async getSpeciesLocationTableData(animalSpecies: string): Promise<AnimalLocation[]> {
+  async getIndividualAnimalLocationTableData(animalID): Promise<AnimalLocation[]> {
+    const con = await this.databaseService.getConnection();
+    return await con.getRepository(AnimalLocation).find({ animalId: animalID });
+  }
+
+  async getLocationDataBySpeciesId(speciesId: number): Promise<AnimalLocation[]> {
     const con = await this.databaseService.getConnection();
 
-    const animalSpeciesType = await con.getRepository(Species).findOne({ species: animalSpecies });
+    const species = await con.getRepository(Species).findOne(speciesId);
+
+    if (!species) {
+      console.error('Species does not exist');
+      return undefined;
+    }
 
     try {
       return await con
         .getRepository(AnimalLocation)
-        .find({ species: animalSpeciesType });
+        .find({where: { species }});
     } catch (error) {
       console.error(error);
       return undefined;
@@ -368,5 +256,51 @@ export class AnimalLocationService {
     } catch (error) {
       return false;
     }
+  }
+
+  async getAnimalIds(): Promise<string[]> {
+    const conn = await this.databaseService.getConnection();
+
+    const locationsRepo = conn.getRepository(AnimalLocation);
+    const res = await locationsRepo.createQueryBuilder()
+      .select('DISTINCT animalId')
+      .getRawMany();
+
+    return res.map(e => e.animalId);
+  }
+
+  /**
+   * Returns the last few animal locations for a given animal
+   * IN CHRONOLOGICAL ORDER (latest position is last in array)
+   * @param animalId The ID of the animal
+   */
+  async getLastFewAnimalLocations(animalId: string, numPositions = 10): Promise<Array<{
+    speciesId: number;
+    animalId: string;
+    month: number;
+    time: number;
+    longitude: number;
+    latitude: number;
+    timestamp: Date;
+  }>> {
+    const conn = await this.databaseService.getConnection();
+
+    const repo = conn.getRepository(AnimalLocation);
+    const res = await repo.createQueryBuilder()
+      .select('speciesId, animalId, month, time, longitude, latitude, timestamp')
+      .where(`animalId = :animalId`, { animalId })
+      .orderBy('timestamp', 'DESC')
+      .limit(numPositions)
+      .getRawMany();
+
+    return res.map(el => ({
+      speciesId: el.speciesId,
+      animalId: el.animalId,
+      month: el.month,
+      time: el.time,
+      longitude: el.longitude,
+      latitude: el.latitude,
+      timestamp: new Date(el.timestamp),
+    })).reverse();
   }
 }

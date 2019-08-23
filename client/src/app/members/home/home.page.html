@@ -21,12 +21,29 @@
   </div>
   <!-- end of add marker overlay -->
 
-  <!-- set up flight overlay -->
+  <!-- overlay form -->
   <div class="form-overlay"
-    *ngIf="state === states.setUpRoute || state === states.addMarkerDetails || state === states.options"
+    *ngIf="state === states.setUpRoute || state === states.addMarkerDetails"
     @form-animation>
-    <!-- drone information form -->
+    <!-- set up route/drone information form -->
     <ng-container *ngIf="state === states.setUpRoute">
+      <ion-item no-padding>
+        <ion-label position="stacked">Flight type</ion-label>
+        <ion-select [(ngModel)]="states.setUpRoute.data.selectedFlightType" interface="popover">
+          <ion-select-option *ngFor="let flightType of states.setUpRoute.data.flightTypes" [value]="flightType">{{ flightType }}</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <div class="animal-selection" *ngIf="states.setUpRoute.data.selectedFlightType == flightTypesEnum.ANIMAL">
+        <ion-item *ngFor="let animalId of states.setUpRoute.data.animalIds">
+          <ion-label>{{ animalId }}</ion-label>
+          <ion-checkbox slot="end"
+            [(ngModel)]="states.setUpRoute.data.selectedAnimalIds[animalId]"
+            [disabled]="!states.setUpRoute.data.selectedAnimalIds[animalId] && states.setUpRoute.hasExceededNumSelectedAnimals(states.setUpRoute)"
+          ></ion-checkbox>
+        </ion-item>
+      </div>
+
       <ion-item no-padding>
         <ion-label position="stacked">Drone name</ion-label>
         <ion-select [(ngModel)]="states.setUpRoute.data.selectedDrone" interface="popover">
@@ -67,63 +84,11 @@
         <ion-textarea [(ngModel)]="states.addMarkerDetails.data.description"></ion-textarea>
       </ion-item>
     </ng-container>
-
-    <!-- options form -->
-    <ng-container *ngIf="state === states.options">
-      <ion-item no-padding>
-        <ion-label>Show poaching heatmap</ion-label>
-        <ion-checkbox slot="end"
-          [(ngModel)]="states.options.data.enablePoachingHeatmap"
-        ></ion-checkbox>
-      </ion-item>
-      <ion-item no-padding>
-        <ion-label>Show animal heatmap</ion-label>
-        <ion-checkbox slot="end"
-          [(ngModel)]="states.options.data.enableAnimalHeatmap"
-        ></ion-checkbox>
-      </ion-item>
-      <ng-container *ngIf="states.options.data.enableAnimalHeatmap">
-        <ion-item no-padding>
-          <ion-label position="stacked">Animal species</ion-label>
-          <ion-select [(ngModel)]="states.options.data.animalHeatmapSpecies">
-            <ion-select-option
-              *ngFor="let species of states.options.data.species"
-              [value]="species.id"
-            >
-              {{ species.species }}
-            </ion-select-option>
-          </ion-select>
-        </ion-item>
-        <ion-item no-padding>
-          <ion-label>Use current time?</ion-label>
-          <ion-checkbox slot="end" [(ngModel)]="states.options.data.useCurrentTime"></ion-checkbox>
-        </ion-item>
-        <ng-container *ngIf="!states.options.data.useCurrentTime">
-          <ion-item no-padding>
-            <ion-label position="stacked">Time</ion-label>
-            <ion-range [min]="0" [max]="1320" [step]="120" [ticks]="true" [snaps]="true" [pin]="false"
-              [debounce]="2000"
-              [(ngModel)]="states.options.data.time"
-              (ionChange)="states.options.showAnimalHeatmap(states.options)"
-            ></ion-range>
-          </ion-item>
-          {{ states.options.data.time / 60 | number:'2.0' }}:00
-        </ng-container>
-      </ng-container>
-    </ng-container>
   </div>
-  <!-- end of set up flight overlay -->
+  <!-- end of overlay forms -->
 
   <!-- fab bottom left buttons -->
   <ion-fab slot="fixed" vertical="bottom" horizontal="start">
-    <!-- settings fab -->
-    <ion-fab-button size="small" color="dark"
-      *ngIf="state === states.default"
-      (click)="setState(states.options)" @button-animation
-    >
-      <ion-icon name="settings"></ion-icon>
-    </ion-fab-button>
-
     <!-- set up route fab -->
     <ion-fab-button size="small" @button-animation color="dark"
       *ngIf="state == states.default"
@@ -146,8 +111,17 @@
   class="confirmation-buttons"
     *ngIf="state.confirmations"
   >
+    <!-- prev button -->
+    <ion-fab-button class="confirmation-button prev-button" size="small" color="dark"
+      *ngIf="state.confirmations.prev"
+      (click)="state.confirmations.prev(state)" @button-animation
+      [disabled]="state.isAtStart(state)"
+    >
+      <ion-icon name="arrow-back"></ion-icon>
+    </ion-fab-button>
+    
     <!-- cancel button -->
-    <ion-fab-button class="confirmation-button" size="small" color="dark"
+    <ion-fab-button class="confirmation-button cancel-button" size="small" color="dark"
     *ngIf="state.confirmations.cancel"
       (click)="state.confirmations.cancel(state)" @button-animation
     >
@@ -155,19 +129,28 @@
     </ion-fab-button>
 
     <!-- add button -->
-    <ion-fab-button class="confirmation-button confirmation-button-middle" size="small" color="dark"
+    <ion-fab-button class="confirmation-button add-button" size="small" color="dark"
       *ngIf="state.confirmations.add"
-      (click)="state.confirmations.add(state)" @add-button-animation
+      (click)="state.confirmations.add(state)" @button-animation
     >
       <ion-icon name="add"></ion-icon>
     </ion-fab-button>
 
     <!-- done button -->
-    <ion-fab-button class="confirmation-button" size="small" color="dark"
+    <ion-fab-button class="confirmation-button done-button" size="small" color="dark"
       (click)="state.confirmations.done(state)" @button-animation
       [disabled]="state === states.addMarker && !withinReserve"
     >
       <ion-icon name="checkmark"></ion-icon>
+    </ion-fab-button>
+
+    <!-- next button -->
+    <ion-fab-button class="confirmation-button next-button" size="small" color="dark"
+      *ngIf="state.confirmations.next"
+      (click)="state.confirmations.next(state)" @button-animation
+      [disabled]="state.isAtEnd(state)"
+    >
+      <ion-icon name="arrow-forward"></ion-icon>
     </ion-fab-button>
   </ion-fab>
   

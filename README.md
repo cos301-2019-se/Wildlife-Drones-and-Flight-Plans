@@ -58,3 +58,35 @@ Mobile application/website code. Uses Ionic Framework.
 
 ### /server
 Server code. Uses Nest.js.
+
+
+
+## Envirnoment Configuration
+Development configuration can be made in the .env file.
+
+Example:
+```
+APP_NAME=Wildlife Drones
+SECRET=secretKey
+RESERVE_NAME=Kruger National Park
+CELL_SIZE=500
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=465
+MAIL_USERNAME=drbam301@gmail.com
+MAIL_PASSWORD=your top secret password
+OTP_PATTERN=[A-Z\d]{3}\-[A-Z\d]{3}
+OTP_EXPIRES=120
+OTP_ATTEMPTS=3
+```
+
+- APP_NAME - the name of the application that will be shown to the user in emails
+- SECRET - a random string used as a private key for jwt tokens. This should be sufficiently long (e.g 256 or 512 characters) and random.
+- RESERVE_NAME - the name of the reserve as per OpenStreetMaps
+- CELL_SIZE - the size (width and height) of a cell in metres
+- MAIL_HOST - the SMTP mail host (e.g. smtp.gmail.com)
+- MAIL_PORT - the mail server port (465 is recommended as TLS is always enabled)
+- MAIL_USERNAME - the email address used to log into the mail server
+- MAIL_PASSWORD - the password used to log into the mail server
+- OTP_PATTERN - A regular expression pattern to generate a random one-time-pin from
+- OTP_EXPIRES - How long (in seconds) an OTP lasts. This is also the time the user has to wait before login attempts reset.
+- OTP_ATTEMPTS - The number of login attempts the user gets before being locked out until the one time pin expires.

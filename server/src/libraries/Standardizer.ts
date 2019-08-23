@@ -16,6 +16,7 @@ export class Standardizer {
     this.sumOfSquared = numbers.reduce((sum, x) => sum + x * x, 0);
 
     this.stdev = Math.sqrt((this.sumOfSquared - (this.sum * this.sum) / this.n) / this.n);
+    //console.log('std',this.stdev);
   }
 
   /**
@@ -32,6 +33,10 @@ export class Standardizer {
    * @param existingValue A value presumed to be in the array already
    */
   standardizeExisting(existingValue: number) {
+    if(this.stdev == 0)
+    {
+      return 0;
+    }
     return (existingValue - this.sum / this.n) / this.stdev;
   }
 
@@ -86,7 +91,7 @@ export class Standardizer {
 export class IQRIfy {
   private constructor() {}
 
-  public static runOn(values: number[]): number[] {
+  public static runOn(values: number[], inverse = true): number[] {
     const sorted = values.concat([]).sort((a, b) => a - b);
     const lowerQuartile = sorted[Math.floor(sorted.length / 4)];
     const upperQuartile = sorted[sorted.length - Math.floor(sorted.length / 4)];
@@ -95,20 +100,32 @@ export class IQRIfy {
     const lower = lowerQuartile - iqr * 1.5;
     const upper = upperQuartile + iqr * 1.5;
 
-    return values.map(value => {
+    const res = values.map(value => {
       if (value < lower) {
-        return 1;
+        return 7 / 7;
+      }
+      if (value < (lower + lowerQuartile) / 2) {
+        return 6 / 7;
       }
       if (value < lowerQuartile) {
-        return 0.75;
+        return 5 / 7;
+      }
+      if (value < (lowerQuartile + upperQuartile) / 2) {
+        return 4 / 7;
       }
       if (value < upperQuartile) {
-        return 0.5;
+        return 3 / 7;
       }
       if (value < upper) {
-        return 0.1  ;
+        return 2 / 7;
       }
-      return 0;
+      return 1 / 7;
     });
+
+    if (inverse) {
+      return res;
+    }
+
+    return res.map(v => 1 - v + 1 / 7);
   }
 }

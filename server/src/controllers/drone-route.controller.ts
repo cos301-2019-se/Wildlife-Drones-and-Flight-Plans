@@ -1,46 +1,51 @@
-import { Controller, Get, Query, Post, Body } from '@nestjs/common';
+import { Controller, UseGuards, Post, Body } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { DroneRouteService } from '../services/drone-route.service';
 
-@Controller()
+// @UseGuards(AuthGuard('jwt'))
+@Controller('drone-route')
 export class DroneRouteController {
-  constructor(private readonly droneRouteService: DroneRouteService) {}
+  constructor(
+    private readonly droneRouteService: DroneRouteService,
+  ) {}
 
-  //add drone route info to drone route table in database
-  // @Get('addDroneRoute')
-  // async addDroneRoute(
-  //   @Query('routeId') id: number,
-  //   @Query('points') points: string,
-  // ): Promise<boolean> {
-  //   return this.droneRouteService.addDroneRoute(id, points);
-  // }
-
-  @Post('addDroneRoute')
-  async addDroneRoute(@Body() body): Promise<boolean>{
-    return await this.droneRouteService.addDroneRoute(body.id, body.points);
+  /**
+   * Create an incident route for the latest incidents
+   * @param body
+   */
+  @Post('create-incident-route')
+  async createIncidentRoute(@Body() body) {
+    return await this.droneRouteService.createIncidentRoutes(
+      body.droneId,
+      body.lon,
+      body.lat,
+    );
   }
 
-  //update drone route info in table
-  // @Get('updateDroneRoute')
-  // async updateDroneRoute(
-  //   @Query('routeId') id: number,
-  //   @Query('points') points: string,
-  //   @Query('percent') percent: number,
-  // ): Promise<boolean> {
-  //   return this.droneRouteService.updateDroneRoute(id, points, percent);
-  // }
-  @Post('updateDroneRoute')
-  async updateDroneRoute(@Body() body) : Promise <boolean> {
-    return await this.droneRouteService.updateDroneRoute(body.id, body.points, body.percent);
+  /**
+   * Create a hotspot route
+   * @param body
+   */
+  @Post('create-hotspot-route')
+  async createHotspotRoute(@Body() body) {
+    return await this.droneRouteService.createHotspotRoute(
+      body.droneId,
+      body.lon,
+      body.lat,
+    );
   }
 
-  //deactivate drone in table
-  // @Get('deactivateDroneRoute')
-  // async deactivateDroneRoute(@Query('routeid') id: number): Promise<boolean> {
-  //   return this.droneRouteService.deactivateDroneRoute(id);
-  // }
-  @Post('deactivateDroneRoute')
-  async deactivateDroneRoute(@Body() body) : Promise <boolean> {
-    return await this.droneRouteService.deactivateDroneRoute(body.id);
+  /**
+   * Create a route that intercepts animals where possible
+   * @param body
+   */
+  @Post('create-animal-prediction-route')
+  async createAnimalPredictionRoute(@Body() body) {
+    return await this.droneRouteService.createAnimalPredictionRoute(
+      body.droneId,
+      body.lon,
+      body.lat,
+      body.animalIds,
+    );
   }
-
 }

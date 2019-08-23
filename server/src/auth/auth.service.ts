@@ -23,6 +23,7 @@ export class AuthService {
     return await this.userService.validateUser(payload);
   }
 
+
   validateToken(token) {
     try {
       this.jwtService.verify(token);
@@ -32,3 +33,7 @@ export class AuthService {
     }
   }
 }
+
+    
+    
+

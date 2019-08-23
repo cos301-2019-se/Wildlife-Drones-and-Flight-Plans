@@ -7,7 +7,6 @@ import { Ranger } from '../entity/ranger.entity';
 import { PoachingIncident } from '../entity/poaching-incident.entity';
 import { PoachingIncidentType } from '../entity/poaching-incident-type.entity';
 import { MapData } from '../entity/map-data.entity';
-import { ReserveConfiguration } from '../entity/reserve-configuration.entity';
 import { ModelData } from '../entity/model.entity';
 import { Species } from '../entity/animal-species.entity';
 import { Drone } from '../entity/drone.entity'
@@ -46,7 +45,6 @@ export class DatabaseService {
           AnimalLocation,
           AnimalInterestPoint,
           MapData,
-          ReserveConfiguration,
           PoachingIncident,
           PoachingIncidentType,
           Ranger,

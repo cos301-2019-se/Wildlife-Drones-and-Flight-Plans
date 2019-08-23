@@ -1,25 +1,25 @@
-import { Injectable, RequestTimeoutException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { DatabaseService } from './db.service';
 import { PoachingIncident } from '../entity/poaching-incident.entity';
 import { PoachingIncidentType } from '../entity/poaching-incident-type.entity';
-import { ReserveConfiguration } from '../entity/reserve-configuration.entity';
-import { MapUpdaterService } from './map-updater.service';
 import bbox from '@turf/bbox';
 import { GeoService, GeoSearchSet } from './geo.service';
 import { SRTMService } from './srtm.service';
 import { lengthToDegrees } from '@turf/helpers';
 import { MoreThanOrEqual } from 'typeorm';
 import { PoachingCellWeight } from '../entity/poaching-cell-weight.entity';
-import { MapCellData } from '../entity/map-cell-data.entity';
+import { ConfigService } from './config.service';
+import { MapService } from './map.service';
+import { MapFeatureType } from '../entity/map-data.entity';
 
-const LOCATION_BIAS = lengthToDegrees(300, 'meters');
 @Injectable()
 export class PoachingIncidentService {
   constructor(
     private readonly databaseService: DatabaseService,
-    private readonly mapUpdater: MapUpdaterService,
+    private readonly mapService: MapService,
     private readonly geo: GeoService,
     private readonly altitude: SRTMService,
+    private readonly config: ConfigService,
   ) {}
 
   async addPoachingIncident(
@@ -29,24 +29,8 @@ export class PoachingIncidentService {
     description: string,
   ): Promise<boolean> {
     const con = await this.databaseService.getConnection();
-    //const poachingIncident = new PoachingIncident();
-
-    const reserve = await con.getRepository(ReserveConfiguration).findOne({});
-
-    console.log(reserve.reserveName);
-
-    const mapData = await this.mapUpdater.getMapFeatures(reserve.reserveName);
-
-    const bounds = bbox(mapData.reserve);
     console.time('feature searchers');
-    const featureSearchers: { [s: string]: GeoSearchSet } = Object.keys(
-      mapData.features,
-    ).reduce((searchers, featureName) => {
-      searchers[featureName] = this.geo.createFastSearchDataset(
-        mapData.features[featureName],
-      );
-      return searchers;
-    }, {});
+    const featureSearchers = await this.mapService.getFeatureSearchSets();
     console.timeEnd('feature searchers');
 
     console.timeEnd('get map data');
@@ -54,22 +38,15 @@ export class PoachingIncidentService {
     // if not parse then it gives not a number
     const latitude = parseFloat(lat.toString());
     const longitude = parseFloat(lon.toString());
-    const locationBounds = [
-      longitude - LOCATION_BIAS, // left
-      latitude - LOCATION_BIAS, // bottom
-      longitude + LOCATION_BIAS, // right
-      latitude + LOCATION_BIAS, // top
-    ];
 
-    const altitudeInfo = await this.altitude.getAltitude(
-      locationBounds,
-      bounds,
-    );
+    const altitudeInfo = await this.altitude.getAltitudeForPoint(latitude, longitude);
 
     try {
       const poachingIncidentType = await con
         .getRepository(PoachingIncidentType)
         .findOne(typeof pType === 'string' ? { type: pType } : { id: pType });
+
+      console.log('poaching incident type', poachingIncidentType);
 
       if (typeof poachingIncidentType === 'undefined') {
         console.log('The type of incident does not exist.');
@@ -77,41 +54,23 @@ export class PoachingIncidentService {
       } else {
         const date = new Date();
 
-        const poachingIncident: PoachingIncident = {
-          timestamp: date,
-          longitude: lon,
-          latitude: lat,
-          description: description,
-          type: poachingIncidentType,
-          month: date.getMonth() + 1,
-          time: date.getHours() * 60 + date.getMinutes(),
-          CoordinateData: JSON.stringify({
-            distanceToDams: featureSearchers.dams.getNearest(lon, lat).distance,
-            distanceToRivers: featureSearchers.rivers.getNearest(lon, lat)
-              .distance,
-            distanceToStream: featureSearchers.streams.getNearest(lon, lat)
-              .distance,
-            distanceToRoads: featureSearchers.roads.getNearest(lon, lat)
-              .distance,
-            distanceToResidences: featureSearchers.residential.getNearest(
-              lon,
-              lat,
-            ).distance,
-            distanceToFarm: featureSearchers.farms.getNearest(lon, lat)
-              .distance,
-            distanceToVillage: featureSearchers.villages.getNearest(lon, lat)
-              .distance,
-            distanceToTown: featureSearchers.towns.getNearest(lon, lat)
-              .distance,
-            distanceToSuburb: featureSearchers.suburbs.getNearest(lon, lat)
-              .distance,
-            distanceToIntermittentWater: featureSearchers.intermittentWater.getNearest(
-              lon,
-              lat,
-            ).distance,
-            'altitude:': altitudeInfo.averageAltitude,
-            slopiness: altitudeInfo.variance,
-          }),
+        const poachingIncident = new PoachingIncident();
+        poachingIncident.timestamp = date;
+        poachingIncident.longitude = lon;
+        poachingIncident.latitude = lat;
+        poachingIncident.description = description;
+        poachingIncident.type = poachingIncidentType;
+        poachingIncident.month = date.getMonth() + 1;
+        poachingIncident.time = date.getHours() * 60 + date.getMinutes();
+        poachingIncident.properties = {
+          distanceToDams: featureSearchers[MapFeatureType.dams].getNearest(lon, lat).distance,
+          distanceToRivers: featureSearchers[MapFeatureType.rivers].getNearest(lon, lat).distance,
+          distanceToRoads: featureSearchers[MapFeatureType.roads].getNearest(lon, lat).distance,
+          distanceToResidences: featureSearchers[MapFeatureType.residential].getNearest(lon, lat).distance,
+          distanceToExternalResidences: featureSearchers[MapFeatureType.externalResidential].getNearest(lon, lat).distance,
+          distanceToIntermittentWater: featureSearchers[MapFeatureType.intermittent].getNearest(lon, lat).distance,
+          altitude: altitudeInfo.averageAltitude,
+          slopiness: altitudeInfo.variance,
         };
 
         // tslint:disable-next-line:no-console
@@ -125,29 +84,25 @@ export class PoachingIncidentService {
         return addedPoachingIncident != null;
       }
     } catch (error) {
+      console.error(error);
       console.log('The type of incident does not exist.');
       return false;
     }
   }
 
-  async getPoachingIncidentTableData(poachingIncident): Promise<JSON> {
+  async getPoachingIncidentTableData(poachingIncident): Promise<PoachingIncident[]> {
     const con = await this.databaseService.getConnection();
 
-    const poachingIncidentType = await
-      con
-        .getRepository(PoachingIncidentType)
-        .findOne({ type: poachingIncident });
+    const poachingIncidentType = await con
+      .getRepository(PoachingIncidentType)
+      .findOne({ type: poachingIncident });
 
     try {
-      return JSON.parse(
-        JSON.stringify(
-          await con
-            .getRepository(PoachingIncident)
-            .find({ type: poachingIncidentType }),
-        ),
-      );
+      return await con
+        .getRepository(PoachingIncident)
+        .find({ type: poachingIncidentType });
     } catch (error) {
-      return JSON.parse('false');
+      return undefined;
     }
   }
 
@@ -155,9 +110,9 @@ export class PoachingIncidentService {
     const con = await this.databaseService.getConnection();
 
     try {
-         return await con
-            .getRepository(PoachingIncident)
-            .find();
+      return await con
+        .getRepository(PoachingIncident)
+        .find();
     } catch (error) {
       console.error(error);
       return undefined;

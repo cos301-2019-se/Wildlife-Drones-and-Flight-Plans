@@ -8,6 +8,17 @@ import {
 import { AnimalCellWeight } from './animal-cell-weight.entity';
 import { PoachingCellWeight } from './poaching-cell-weight.entity';
 
+export interface MapCellDataProperties {
+  distanceToRivers: number;
+  distanceToDams: number;
+  distanceToRoads: number;
+  distanceToResidences: number;
+  distanceToIntermittentWater: number;
+  distanceToExternalResidences: number;
+  altitude: number;
+  slopiness: number;
+}
+
 @Entity()
 export class MapCellData {
   @PrimaryGeneratedColumn()
@@ -23,25 +34,15 @@ export class MapCellData {
   lastVisited: Date;
 
   @Column()
-  distanceToRivers: number;
+  propertiesData: string;
 
-  @Column()
-  distanceToDams: number;
+  get properties(): MapCellDataProperties {
+    return JSON.parse(this.propertiesData);
+  }
 
-  @Column()
-  distanceToRoads: number;
-
-  @Column()
-  distanceToResidences: number;
-
-  @Column()
-  distanceToIntermittentWater: number;
-
-  @Column()
-  altitude: number;
-
-  @Column()
-  slopiness: number;
+  set properties(data: MapCellDataProperties) {
+    this.propertiesData = JSON.stringify(data);
+  }
 
   @OneToMany(
     type => AnimalCellWeight,
@@ -57,3 +58,4 @@ export class MapCellData {
   @JoinColumn()
   poachingCell: PoachingCellWeight[];
 }
+
