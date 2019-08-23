@@ -497,7 +497,7 @@ export class HomePage implements AfterViewInit, OnDestroy {
 
         const antPathUpdate = () => {
           const offset = stroke.getLineDashOffset() || 0;
-          stroke.setLineDashOffset(modulo(offset + 0.25, length));
+          stroke.setLineDashOffset(modulo(offset - 0.25, length));
           vector.refresh();
 
           if (self.data.antPathUpdate === antPathUpdate) {

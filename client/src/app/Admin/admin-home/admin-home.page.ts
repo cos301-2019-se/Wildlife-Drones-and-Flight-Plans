@@ -155,7 +155,7 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
 
         const antPathUpdate = () => {
           const offset = stroke.getLineDashOffset() || 0;
-          stroke.setLineDashOffset(modulo(offset + 0.25, length));
+          stroke.setLineDashOffset(modulo(offset - 0.25, length));
           vector.refresh();
 
           if (this.flightPathAntUpdate === antPathUpdate) {
@@ -689,7 +689,7 @@ export class AdminHomePage implements AfterViewInit, OnDestroy {
           }),
         }),
       }),
-      zIndex: 9999,
+      zIndex: 999999,
     });
 
     const tempLayer = this.dronesLayer;

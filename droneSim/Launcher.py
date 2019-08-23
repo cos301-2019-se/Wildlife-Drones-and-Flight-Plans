@@ -49,10 +49,10 @@ with open("config.json", "r") as f:
 
 print("Opening Drone-kit")
 
-subprocess.Popen("cd " + config["dronkit"] + " && dronekit-sitl copter --home=" + str(homeLong) + "," + str(homeLat) + ",500,300", shell = True)
+subprocess.Popen("cd " + config["dronkit"] + " && dronekit-sitl copter --home=" + str(homeLong) + "," + str(homeLat) + ",500,300", shell = True, creationflags=subprocess.CREATE_NEW_CONSOLE)
 time.sleep(5)
 print("Opening mavproxy")
-subprocess.Popen("cd " + config["mavproxy"] + " && mavproxy.py --master tcp:127.0.0.1:5760 --out udp:127.0.0.1:14551 --out udp:127.0.0.1:14550", shell = True)
+subprocess.Popen("cd " + config["mavproxy"] + " && mavproxy --master tcp:127.0.0.1:5760 --out udp:127.0.0.1:14551 --out udp:127.0.0.1:14550", shell = True, creationflags=subprocess.CREATE_NEW_CONSOLE)
 print("Please connect mission planner in the next 10s")
 time.sleep(10)
 
@@ -233,9 +233,9 @@ add_mission(points)
 
 arm_and_takeoff(10)
 print("Setting groundspeed to max")
-vehicle.groundspeed = 15
+vehicle.groundspeed = 150
 print("Setting airspeed to max")
-vehicle.airspeed = 10
+vehicle.airspeed = data['droneSpeed']
 
 print("Starting mission")
 # Reset mission set to first (0) waypoint
@@ -250,7 +250,7 @@ import requests
 
 
 
-url = "http://127.0.0.1:3000/updateDronePosition"
+url = config['server'] + "/updateDronePosition"
 
 
 
@@ -260,7 +260,7 @@ headers = {
 
     'Content-Type': "application/json",
 
-    'Authorization': "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImJsYXplLmN5YmVyY2VsbEBnbWFpbC5jb20iLCJpYXQiOjE1NjY1MDU1NjIsImV4cCI6MTU2NzExMDM2Mn0.Jm3r0bJMqP_aQDsAhCRod-g-m2pGDOy_Mor3KFcJo88",
+    'Authorization': "Bearer " + data['token'],
 
     'User-Agent': "PostmanRuntime/7.15.2",
 
@@ -270,7 +270,7 @@ headers = {
 
     'Postman-Token': "a1b7f85b-63eb-41a6-a654-2465740c78e7,f74eae29-6f3d-4872-a316-41b4a765138d",
 
-    'Host': "127.0.0.1:3000",
+    'Host': config['server'],
 
     'Accept-Encoding': "gzip, deflate",
 
