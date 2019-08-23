@@ -5,7 +5,7 @@ DR BAM
 
 To aid ERP rangers in anti-poaching patrolling, a system is being developed to automatically create and optimise drone flight plans based on animal tracking information and reserve features. The project aims to increase the probability of drones covering key areas with endangered wildlife, while being random enough to prevent poachers identifying patrol routes. Rangers and drone pilots will be empowered with useful information through this dynamic application.
 
-SRS: [Demo 3](Documentation/Demo3/Drone_Flight_Plans_SRS%20Demo3.pdf), [Demo 2](Documentation/Demo2/Drone_Flight_Plans_SRS%20Demo2.pdf), [Demo 1](Documentation/Demo1/Drone_Flight_Plans_SRS_Demo1.pdf)
+SRS:  [Demo 4 Architectural design & SRS](Documentation/Demo4/Drone_Flight_Plans_SRS_Demo4.pdf),[Demo 3](Documentation/Demo3/Drone_Flight_Plans_SRS%20Demo3.pdf), [Demo 2](Documentation/Demo2/Drone_Flight_Plans_SRS%20Demo2.pdf), [Demo 1](Documentation/Demo1/Drone_Flight_Plans_SRS_Demo1.pdf)
 
 Architectural design: [Demo3](Documentation/Demo3/Architectural_Designs_Demo3.pdf), [Demo 2](Documentation/Demo2/Architectural_Designs_Demo2.pdf)
 
@@ -13,7 +13,7 @@ Coding Standards: [Demo 4](/Documentation/Demo4/CodingStandards_Demo4.pdf), [Dem
 
 Testing Policy Document:  [Demo 4](/Documentation/Demo4/Testing_policy_document_Demo4.pdf),[Demo 3](/Documentation/Demo3/Testing_policy_document_Demo3.pdf), [Demo 2](/Documentation/Demo2/Testing_policy_document_Demo2.pdf)
 
-User Manual: [Demo 3](Documentation/Demo3/userManual_Demo3.pdf), [Demo 2](/Documentation/Demo2/User_Manual_Demo2.pdf)
+User Manual: [Demo 4](Documentation/Demo4/userManual_Demo4.pdf),[Demo 3](Documentation/Demo3/userManual_Demo3.pdf), [Demo 2](/Documentation/Demo2/User_Manual_Demo2.pdf)
 
 [Trello Board](https://trello.com/b/GWit5JXi/capstone)
 
