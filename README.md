@@ -9,7 +9,7 @@ SRS: [Latest](Drone_Flight_Plans_SRS.pdf), [Demo 1](Drone_Flight_Plans_SRS(1).pd
 
 Architectural design: [Latest](Architectural%20Designs.pdf), [Demo 2](Architectural%20Designs(1).pdf)
 
-Coding Standards: [Latest](/Documentation/Demo%204%20CodingStandards%20Demo4.pdf), [Demo 2](Coding%20Standards(1).pdf)
+Coding Standards: [Latest](/Documentation/Demo4/CodingStandards_Demo4.pdf), [Demo 3](/Documentation/Demo3/CodingStandards_Demo3.pdf), [Demo 2](/Documentation/Demo2/CodingStandards_Demo2.pdf)
 
 Testing Policy Document: [Latest](Testing%20policy%20document.pdf), [Demo 2](Testing%20policy%20document(1).pdf)
 
