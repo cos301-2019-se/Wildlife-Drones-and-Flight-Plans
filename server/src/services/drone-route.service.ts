@@ -55,10 +55,28 @@ export class DroneRouteService {
     const hotspotPoints = hotspots.map(hotspot => new Point(hotspot.lon, hotspot.lat, hotspot.weight));
     console.log('hotspot points', hotspotPoints.slice(0, 5));
 
-    return await this.createStaticRoute(droneId, lon, lat, hotspotPoints, 500);
+    return await this.createStaticRoute(droneId, lon, lat, hotspotPoints, 500, {
+      adjacency: 1.0,
+      asymmetry: 0.3,
+      demand: 0,
+      minSavings: 0.05,
+    });
   }
 
-  private async createStaticRoute(droneId: number, lon: number, lat: number, points: Point[], sampleSize = 0) {
+  /**
+   * Generates a route for some static points
+   * @param droneId The Id of the drone being used
+   * @param lon The longitude of the starting position
+   * @param lat The latitude of the starting position
+   * @param points The points to visit
+   * @param sampleSize The maximum number of points to visit (0 = infinity)
+   */
+  private async createStaticRoute(droneId: number, lon: number, lat: number, points: Point[], sampleSize = 0, weights = {
+    adjacency: 1.0,
+    asymmetry: 0.2,
+    demand: 0.4,
+    minSavings: 0.1,
+  }) {
     const droneInfo = await this.getDroneInfo(droneId);
 
     if (!droneInfo) {
@@ -73,7 +91,7 @@ export class DroneRouteService {
         [point.x, point.y],
         { units: 'degrees' }) <= droneInfo.maxPointDistanceDegrees
       );
-    
+
     if (sampleSize > 0) {
       points = points.sort(() => 0.5 - Math.random()).slice(0, sampleSize);
     }
@@ -88,12 +106,7 @@ export class DroneRouteService {
     const problem = new ClarkeWrightProblem(points, depot, droneInfo.maxFlightDistanceDegrees);
 
     // solve the problem
-    const routes = problem.solve({
-      adjacency: 1.0,
-      asymmetry: 0.2,
-      demand: 0.4,
-      minSavings: 0.1,
-    });
+    const routes = problem.solve(weights);
 
     return routes
       .map(route => [route.depot, ...route.points, route.depot].map(point => [point.x, point.y]));

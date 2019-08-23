@@ -1,18 +1,16 @@
-import { Injectable, RequestTimeoutException } from '@nestjs/common';
-//import { NodeCache } from 'node-cache';
-const NodeCache = require( "node-cache" );
+import { Injectable } from '@nestjs/common';
+import * as NodeCache from 'node-cache';
 
 @Injectable()
-export class CacheService {   
+export class CacheService {
     private cache;
 
-    constructor(
-        //private readonly key: string,
-       // private readonly nodeCashe: NodeCache
-        ) {
-        this.cache = new NodeCache({ stdTTL: 60*60/*ttl in seconds this is an hour*/ 
-            , checkperiod:  60*60 * 0.2, useClones: false });
-        //    this.cache.set(key,)
+    constructor() {
+        this.cache = new NodeCache({
+            stdTTL: 60 * 60,
+            checkperiod: 60 * 60 * 2,
+            useClones: false,
+        });
     }
 
     /**
@@ -27,8 +25,11 @@ export class CacheService {
     public async getKey(key, storeFunction) {
         const value = this.cache.get(key);
         if (value) {
+            console.log('cache hit', key);
             return Promise.resolve(value);
         }
+
+        console.log('cache miss', key);
 
         return storeFunction().then((result) => {
             this.cache.set(key, result);
@@ -44,19 +45,6 @@ export class CacheService {
         this.cache.del(keys);
     }
 
-    // public async delStartWith(startStr = '') {
-    //     if (!startStr) {
-    //         return;
-    //     }
-
-    //     const keys = this.cache.keys();
-    //     for (const key of keys) {
-    //         if (key.indexOf(startStr) === 0) {
-    //             this.deleteKey(key);
-    //         }
-    //     }
-    // }
-
     /**
      * Delete all keys, and flush the cache.
      */
@@ -64,6 +52,3 @@ export class CacheService {
         this.cache.flushAll();
     }
 }
-
-
-//export default Cache;

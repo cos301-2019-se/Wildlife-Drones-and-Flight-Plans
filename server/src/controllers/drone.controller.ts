@@ -10,13 +10,13 @@ import { AuthService } from '../auth/auth.service';
 import { controllers } from 'src/app.controllers';
 import { MapService } from '../services/map.service'
 
- @UseGuards(AuthGuard('jwt'))
+@UseGuards(AuthGuard('jwt'))
 @Controller()
 export class DroneController {
   constructor(private readonly droneService: DroneService,
-              private readonly mailService : MailService,
-              private readonly authService : AuthService,
-              private readonly mapService : MapService, ) {}
+    private readonly mailService: MailService,
+    private readonly authService: AuthService,
+    private readonly mapService: MapService, ) { }
 
   @Post('addDrone')
   async addDrone(@Body() body): Promise<boolean> {
@@ -55,47 +55,48 @@ export class DroneController {
     return await this.droneService.updateDrones(body.drones);
   }
 
+  /**
+   * Called when the user selects a drone route. Saves the route to the
+   * database and sends the route to the user's email for mission planner.
+   * @param body
+   * @param req
+   */
   @Post('selectDroneRoute')
   async selectDroneRoute(@Body() body, @Request() req): Promise<boolean> {
     const user = req.user;
-    
-  
-     let res = await this.droneService.selectDroneRoute(body.droneId, body.points);
-     console.log('The info extracted from the request  ',user)
 
-     const droneT = await this.droneService.getDrone(body.droneId)
+    const res = await this.droneService.selectDroneRoute(body.droneId, body.points);
+    console.log('The info extracted from the request  ', user);
 
-    if(res){
-      this.mapService.updateCellLastVisited(body.points);
-      let tokenT = await this.authService.createToken(user.email)
-     
-      
-      let cArray = {
-          droneId : body.droneId,
-          token : tokenT.accessToken,
-          points : body.points,
-          droneSpeed : droneT.avgSpeed,
-      }    
+    const droneT = await this.droneService.getDrone(body.droneId);
 
-        console.log('The drone array ',cArray)
-      //console.log('The drone  ',droneT)
-      //console.log(Buffer.from('Hello World!').toString('base64'));
-      var encodedString = Buffer.from(JSON.stringify(cArray)).toString('base64')
-
-      await this.mailService.send({
-        subject: `You route is ready`,
-        template: 'route.twig',
-        templateParams: {
-          routeString : encodedString,
-        },
-        to: user.email,
-      });
-      return true;
-      
-    }
-    else {
+    if (!res) {
       return false;
     }
+
+    this.mapService.updateCellLastVisited(body.points);
+    const tokenT = await this.authService.createToken(user.email);
+
+
+    const cArray = {
+      droneId: body.droneId,
+      token: tokenT.accessToken,
+      points: body.points,
+      droneSpeed: droneT.avgSpeed,
+    };
+
+    console.log('The drone array ', cArray)
+    const encodedString = Buffer.from(JSON.stringify(cArray)).toString('base64')
+
+    await this.mailService.send({
+      subject: `You route is ready`,
+      template: 'route.twig',
+      templateParams: {
+        routeString: encodedString,
+      },
+      to: user.email,
+    });
+    return true;
   }
 
   @Post('updateDroneRoute')

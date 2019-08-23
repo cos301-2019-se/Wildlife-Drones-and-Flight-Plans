@@ -54,6 +54,10 @@ export class DroneRouteService {
   async getAnimalIds(): Promise<string[]> {
     return await this.authService.post('getAnimalIds', {}) as string[];
   }
+
+  async getPastRoutes() {
+    return await this.authService.post('getDroneRoutes', {}) as any[];
+  }
 }
 
 @Injectable()
