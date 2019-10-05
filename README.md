@@ -89,7 +89,7 @@ $ npm run start:dev
 ### Building the client
 ```
 # go to the client directory
-$ cd clint
+$ cd client
 
 # install dependencies
 $ npm install
