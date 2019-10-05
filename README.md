@@ -66,7 +66,7 @@ First download the project then configure the project environment - see the envi
 
 Required software: Node JS for server and client. 
 
-## Downloading the project
+### Downloading the project
 
 Downloading Wildlife Drones and Flight Plan <br/>
 - Clone or download the repository on the GitHub page. <br/>
