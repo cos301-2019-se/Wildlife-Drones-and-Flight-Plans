@@ -18,13 +18,10 @@ To aid ERP rangers in anti-poaching monitoring, a system is being developed to a
 ## Group Members
 ![image](https://lh4.googleusercontent.com/sYkeIXRCdnU5gPxCxJOXc_I6xD2D_OMxqu9-eRN1WwPWEg5bAW_7SZ86O5U863usmgKeCJeqAwN-Ay0bMkrIqJnZelcAtLnpRAeiHbHnukEjuPdsahIV_iJfkl8ATyYRKPP_e5_N)
 
-
-<details><summary><b>Group Members</b></summary>
-<p>
-  
-</hr>
-
 ### Matthew Evans (16262949) [GitHub Profile](https://github.com/EvansMatthew97), [CV](Documentation/CVS/Matthew.pdf), [LinkedIN](https://www.linkedin.com/in/matthew-evans-011a78191/)
+
+<details><summary>Expand details</summary>
+  
 - __Interests__: Technology, astronomy, music, film, history
 - __Skills__: JavaScript, TypeScript, Angular 2+, Ionic Framework, PHP, SQL, NodeJS, React, 64-bit assembly, Android Play Store deployment, web development, Adobe After Effects, Blender 3D, GIMP, web scraping
 - __Previous work experience__:
@@ -32,13 +29,23 @@ To aid ERP rangers in anti-poaching monitoring, a system is being developed to a
   - Teaching Assistant for IMY department, 2017
 - __Attitudes__: Curious, passionate and positive towards the future of technology
 
+</details>
+
 ### Andreas Louw (15048366) [GitHub Profile](https://github.com/ASLouw), [CV](Documentation/CVS/Andreas.pdf), [LinkedIN](https://www.linkedin.com/in/andreas-louw-182a36175)
+
+<details><summary>Expand details</summary>
+  
 - __Interests__: Programming, app development, metalwork and woodwork
 - __Skills__: Java, Kotlin, PHP, C++, C#, JavaScript, Assembly (x64), App development, Web development, Database Management
 - __Previous work experience__: None
 - __Attitudes__: Diligent, honest, positive and a people person
 
+</details>
+
 ### Bryan Janse van Vuuren (16217498) [GitHub Profile](https://github.com/Viidas96), [CV](Documentation/CVS/Bryan.pdf), [LinkedIN](https://www.linkedin.com/in/bryan-janse-van-vuuren-451b8a191)
+
+<details><summary>Expand details</summary>
+  
 - __Interests__: Gaming, programming, mobile application development and music
 - __Skills__: Angular, Java, C#, JavaScript, Mobile App Devlopment, Database management and design, Web Devlopment
 - __Previous work experience__: 
@@ -46,33 +53,39 @@ To aid ERP rangers in anti-poaching monitoring, a system is being developed to a
   - Mobile game development
 - __Attitudes__: Devoted, trusting, positive, punctual, work-oriented and willingness
 
+</details>
+
 ### Deane Roos (17057966) [GitHub Profile](https://github.com/BCybercell), [CV](Documentation/CVS/Deane.pdf), [LinkedIN](https://www.linkedin.com/in/deane-roos-a7a896143)
+
+<details><summary>Expand details</summary>
+  
 - __Interests__: Virtual reality, gaming and artificial intelligence
 - __Skills__: Java, C++, Assembly x64, Python
 - __Previous work experience__:  ETA operations
 - __Attitudes__: Hardworking, positive and dedicated
 
+</details>
 
 ### Reinhardt Eiselen (14043302) [GitHub Profile](https://github.com/EiselenR), [CV](Documentation/CVS/Reinhardt.pdf), [LinkedIN](https://www.linkedin.com/in/reinhardt-eiselen-0071a685)
+
+<details><summary>Expand details</summary>
+  
 - __Interests__: Music ,the outdoors and technology
 - __Skills__:  Java, C++ , JavaScript, Assembly (x86) and 64 bit, PHP, SQL, Android, Nodejs, Angular, Web development and App development
 - __Previous work experience__: No formal work experience 
 - __Attitudes__: Always up for a challenge, curious about the unkown and hardworking
-</p>
-</details>
-</hr>
-</br> 
+
+</details> 
+
+
+
+
 
 ## Running the project
 
 - First download the project then configure the project environment - see the environment configuration section below.
 
 - Required software: Node JS for server and client. 
-
-
-</br>
-
-</hr>
 
 <details><summary><b>Downloading the project</b></summary>
 <p>
