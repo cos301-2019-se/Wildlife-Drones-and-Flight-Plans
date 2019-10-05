@@ -69,6 +69,8 @@ First download the project then configure the project environment - see the envi
 
 Required software: Node JS for server and client. 
 
+<br/>
+
 
 </hr>
 
@@ -82,11 +84,10 @@ Downloading Wildlife Drones and Flight Plan <br/>
 
 </p>
 </details>
+</hr></br>
 
-</hr>
 
-
-<details><summary><b><font size="30px">Starting the server</font></b></summary>
+<details><summary><b>Starting the server</b></summary>
 <p>
   
 ```
@@ -104,7 +105,8 @@ $ npm run start:dev
 ```
 </p>
 </details>
-</hr>
+
+</hr></br>
 
 
 <details><summary><b>Building the Client</b></summary>
@@ -132,7 +134,6 @@ $ ionic cordova run ios
 </p>
 </details>
 </hr>
-</br> 
 
 <details><summary><b>Change the server URL</b></summary>
 <p>
@@ -142,9 +143,6 @@ Edit ```/client/src/environments/{environment.prod.ts|environment.ts}``` and cha
 We recommend using an https scheme.
 </p>
 </details>
-</hr>
-</br> 
-
 
 <details><summary><b>Environment Configuration</b></summary>
 <p>
