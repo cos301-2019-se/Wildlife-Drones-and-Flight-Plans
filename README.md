@@ -8,7 +8,8 @@ To aid ERP rangers in anti-poaching monitoring, a system is being developed to a
 
 ## System Presentation
 [System presentation](/Documentation/Wildlife%20Drones%20and%20Flight%20Plans%20Virtual%20Presentation.pdf)
-[Video demo](https://youtu.be/vnIvxsNr3tk)
+
+[Short video demo](https://youtu.be/vnIvxsNr3tk)
 
 <table>
   <tr>
