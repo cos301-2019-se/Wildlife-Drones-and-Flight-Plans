@@ -67,7 +67,7 @@ To aid ERP rangers in anti-poaching monitoring, a system is being developed to a
 
 - First download the project then configure the project environment - see the environment configuration section below.
 
-Required software: Node JS for server and client. 
+- Required software: Node JS for server and client. 
 
 
 </br>
