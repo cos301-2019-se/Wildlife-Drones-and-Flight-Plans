@@ -11,12 +11,18 @@ import { SRTMService } from './srtm.service';
 import getDistance from '@turf/distance';
 import { lineString } from '@turf/helpers';
 import lineSliceAlong from '@turf/line-slice-along';
+import { DatabaseService } from './db.service';
+import { Species } from 'src/entity/animal-species.entity';
+import { UserService } from './user.service';
 
 /**
  * Handles training of models and saving them to the database
  */
 @Injectable()
 export class ModelTraining {
+  private isTrainingAnimalClassifierModels = false;
+  private isTrainingPoachingClassifierModel = false;
+
   constructor(
     private readonly animalLocationService: AnimalLocationService,
     private readonly mapService: MapService,
@@ -25,6 +31,8 @@ export class ModelTraining {
     private readonly poachingCell: PoachingCellWeightService,
     private readonly regressionService: RegressionService,
     private readonly altitudeService: SRTMService,
+    private readonly databaseService: DatabaseService,
+    private readonly userService: UserService,
   ) {}
 
   /**
@@ -211,6 +219,31 @@ export class ModelTraining {
   }
 
   /**
+   * Trains all animal classifier models
+   */
+  async trainAnimalClassifierModels() {
+    if (this.isTrainingAnimalClassifierModels) {
+      return;
+    }
+    this.isTrainingAnimalClassifierModels = true;
+
+    const conn = await this.databaseService.getConnection();
+    const allSpecies = await conn.getRepository(Species).find();
+    const speciesIds = allSpecies.map(species => species.id);
+
+    for (const id of speciesIds) {
+      const res = await this.trainAnimalClassifierModel(id);
+      if (!res) {
+        this.isTrainingAnimalClassifierModels = false;
+        return false;
+      }
+    }
+    
+    this.isTrainingAnimalClassifierModels = false;
+    return true;
+  }
+
+  /**
    * Train an animal classifier and predict map cells.
    * Saves weights to database for each map cell.
    * @param speciesId The id of the species
@@ -241,7 +274,7 @@ export class ModelTraining {
 
     //  Populate classifier with teaching data
     console.time('Populate Classifier');
-    const classifier = new Classifier(teachingData, 200000);
+    const classifier = new Classifier(teachingData, 20000);
     console.timeEnd('Populate Classifier');
     //  Once classifier is done being taught we need to fetch all map cell data midpoints from the database.
     console.time('Fetch Cell Data');
@@ -249,7 +282,9 @@ export class ModelTraining {
     console.timeEnd('Fetch Cell Data');
 
     const month = new Date().getMonth() + 1;
+    let i = 0;
     for (const cell of cellData) {
+      console.time('train cell');
       const animalCellWeight = {
         cellId: cell.id,
         speciesId,
@@ -266,21 +301,23 @@ export class ModelTraining {
           distanceToIntermittentWater: cell.properties.distanceToIntermittentWater,
           slopiness: cell.properties.slopiness,
         };
-        //console.log('Meant to display',JSON.stringify(cellDistances));
+
         animalCellWeight[`weight${time}`] = classifier.getDistance(
           cellDistances,
         );
       }
+      console.timeEnd('train cell');
 
-      console.log(`trained cell ${cell.id} / ${cellData.length}`);
+      console.log(`trained cell ${++i} / ${cellData.length}`);
 
-      this.animalCellService.addAnimalCellsWeight(animalCellWeight).then(() => {
+      await this.animalCellService.addAnimalCellsWeight(animalCellWeight).then(() => {
         console.log(`saved cell ${cell.id} / ${cellData.length}`);
       });
-      if (cell.id % 100 === 0) {
-        await new Promise(resolve => setTimeout(resolve, 0)); // breathe for a bit to let other functions run
-      }
+
+      await new Promise(resolve => setTimeout(resolve, 0)); // breathe for a bit to let other functions run
     }
+
+    this.notifyTrainingDone('animal species classifier');
     return true;
   }
 
@@ -289,8 +326,18 @@ export class ModelTraining {
    * Then classifies cells and saves weights to the database for each cell.
    */
   async trainPoachingClassifierModel() {
-    //  fetch data by species name
+    if (this.isTrainingPoachingClassifierModel) {
+      console.log('already training');
+      return;
+    }
+    this.isTrainingPoachingClassifierModel = true;
+
     const poachingData = await this.poachingIncidentService.getAllPoachingIncidentTableData();
+
+    if (!poachingData.length) {
+      this.isTrainingPoachingClassifierModel = false;
+      return;
+    }
 
     const teachingData = poachingData.map(incident => ({
       distanceToRivers: incident.properties.distanceToRivers,
@@ -331,6 +378,9 @@ export class ModelTraining {
       await this.poachingCell.addPoachingCellsWeight([poachingCellWeight]);
       await new Promise(resolve => setTimeout(resolve, 0));
     }
+
+    this.isTrainingPoachingClassifierModel = false;
+    this.notifyTrainingDone('poaching classifier');
     return true;
   }
 
@@ -374,5 +424,9 @@ export class ModelTraining {
       altitudeData.averageAltitude,
       altitudeData.variance,
     ];
+  }
+
+  private notifyTrainingDone(name: string) {
+    this.userService.sendEmailToAllAdmins(`Trained ${name} model`, 'Training has completed');
   }
 }

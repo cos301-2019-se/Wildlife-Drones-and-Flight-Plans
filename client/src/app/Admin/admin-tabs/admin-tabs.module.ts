@@ -14,6 +14,7 @@ const routes: Routes = [
       { path: 'users', loadChildren: '../users/users.module#UsersPageModule' },
       { path: 'admin-home', loadChildren: '../admin-home/admin-home.module#AdminHomePageModule'},
       { path: 'csvreader', loadChildren: '../csvreader/csvreader.module#CSVReaderPageModule' },
+      { path: 'admin-updater', loadChildren: '../admin-updater/admin-updater.module#AdminUpdaterPageModule' }
      // { path: 'home', loadChildren: '../members/home/home.module#HomePageModule' },
     ]
   },

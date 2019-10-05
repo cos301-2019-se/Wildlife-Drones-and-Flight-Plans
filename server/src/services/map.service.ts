@@ -13,6 +13,7 @@ import { IQRIfy, Standardizer } from '../libraries/Standardizer';
 import { PoachingCellWeight } from '../entity/poaching-cell-weight.entity';
 import { CacheService } from './cashe.service';
 import { Species } from 'src/entity/animal-species.entity';
+import { UserService } from './user.service';
 
 @Injectable()
 export class MapService {
@@ -26,8 +27,10 @@ export class MapService {
     @Inject(forwardRef(() => SRTMService))
     private readonly altitudeService: SRTMService,
     private readonly cache: CacheService,
+    private readonly userService: UserService,
   ) {
     this.loadFeatureSearchSets();
+    this.updateMapIfNeeded();
   }
 
   /**
@@ -299,37 +302,26 @@ export class MapService {
     const searchDatasets = await this.getFeatureSearchSets();
 
     // update cell distances
-    for (const cell of cells) {
+    cells.forEach(cell => {
       const lng = cell.cellMidLongitude;
       const lat = cell.cellMidLatitude;
       cell.properties = {
         altitude: cell.properties.altitude,
         slopiness: cell.properties.slopiness,
-        distanceToRivers: searchDatasets[MapFeatureType.rivers].getNearest(
-          lng,
-          lat,
-        ).distance,
-        distanceToRoads: searchDatasets[MapFeatureType.roads].getNearest(
-          lng,
-          lat,
-        ).distance,
-        distanceToDams: searchDatasets[MapFeatureType.dams].getNearest(lng, lat)
-          .distance,
-        distanceToExternalResidences: searchDatasets[
-          MapFeatureType.externalResidential
-        ].getNearest(lng, lat).distance,
-        distanceToResidences: searchDatasets[
-          MapFeatureType.residential
-        ].getNearest(lng, lat).distance,
-        distanceToIntermittentWater: searchDatasets[
-          MapFeatureType.intermittent
-        ].getNearest(lng, lat).distance,
+        distanceToRivers: searchDatasets[MapFeatureType.rivers].getNearest(lng, lat).distance,
+        distanceToRoads: searchDatasets[MapFeatureType.roads].getNearest(lng, lat).distance,
+        distanceToDams: searchDatasets[MapFeatureType.dams].getNearest(lng, lat).distance,
+        distanceToExternalResidences: searchDatasets[MapFeatureType.externalResidential].getNearest(lng, lat).distance,
+        distanceToResidences: searchDatasets[MapFeatureType.residential].getNearest(lng, lat).distance,
+        distanceToIntermittentWater: searchDatasets[MapFeatureType.intermittent].getNearest(lng, lat).distance,
       };
+    });
 
-      await cellsRepo.save(cell);
-      console.log(cell.id, '/', cells.length);
-    }
-    console.timeEnd('distances');
+    console.time('save to db');
+    cellsRepo.save(cells, {
+      chunk: 100,
+    });
+    console.timeEnd('save to db');
   }
 
   /**
@@ -734,5 +726,15 @@ export class MapService {
         await con.getRepository(MapCellData).save(cell);
       }
     }
+  }
+
+  private async updateMapIfNeeded() {
+    const cells = await this.getMapCells();
+    if (cells.length) {
+      return;
+    }
+    await this.updateMap();
+
+    this.userService.sendEmailToAllAdmins('Map updated', 'Map has been updated');
   }
 }

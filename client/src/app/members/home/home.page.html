@@ -101,6 +101,7 @@
     <ion-fab-button size="small" color="dark"
       *ngIf="state === states.default"
       (click)="setState(states.addMarker)" @button-animation
+      [disabled]="states.addMarkerDetails.data.incidentTypes.length == 0"
     >
       <ion-icon name="ios-pin"></ion-icon>
     </ion-fab-button>

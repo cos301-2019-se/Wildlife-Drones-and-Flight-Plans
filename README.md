@@ -52,7 +52,9 @@ User Manual: [Demo 3](Documentation/Demo3/userManual_Demo3.pdf), [Demo 2](/Docum
 - __Previous work experience__: no formal work experience 
 - __Attitudes__: Always Up for a challenge and Curious about the unkown and I&#39;m a hardwoker.
 
-## Project Structure
+## Project Structure overview
+For more information see our documentation.
+
 ### /client
 Mobile application/website code. Uses Ionic Framework.
 
@@ -60,29 +62,95 @@ Mobile application/website code. Uses Ionic Framework.
 Server code. Uses Nest.js.
 
 
+## Running the project
+First configure the project environment - see the environment configuration section below.
 
-## Envirnoment Configuration
-Development configuration can be made in the .env file.
+### Starting the server
+```
+# go to the server directory
+$ cd server
+
+# install dependencies
+$ npm install
+
+# run a production server
+$ prestart:prod && npm run start:prod
+
+# run a development server (localhost:3000)
+$ npm run start:dev
+```
+
+### Building the client
+```
+# go to the client directory
+$ cd clint
+
+# install dependencies
+$ npm install
+
+# run a development server, livereload (localhost:4200)
+$ npm run start
+
+# or to run a server that can be accessed by mobile devices using Ionic DevApp
+$ ionic serve --devapp
+
+# or to run on android
+$ ionic cordova run android
+
+# or to run on ios (requires MacOS device)
+$ ionic cordova run ios
+```
+
+
+## Change the server URL
+Edit ```/client/src/environments/{environment.prod.ts|environment.ts}``` and change the server key to your url.
+
+We recommend using an https scheme.
+
+
+## Environment Configuration
+Development configuration can be made in a .env file. The easiest way to set it up is to copy-paste the .env.example file and rename it to .env.
+
+In production, a .env file should not exist. The environment variables should be set as actual environment variables wherever your production server provides this functionality.
 
 Example:
 ```
 APP_NAME=Wildlife Drones
+PORT=3000
 SECRET=secretKey
+TOKEN_EXPIRES=7d
 RESERVE_NAME=Kruger National Park
 CELL_SIZE=500
+ADMIN_EMAIL=drbam301@gmail.com
+DEFAULT_ADMIN_PASSWORD=password
+DB_TYPE=postgres
+DB_USER=postgres
+DB_HOST=localhost
+DB_PORT=5432
+DB_PASS=password
+DB_DATABASE=drones
 MAIL_HOST=smtp.gmail.com
 MAIL_PORT=465
 MAIL_USERNAME=drbam301@gmail.com
-MAIL_PASSWORD=your top secret password
-OTP_PATTERN=[A-Z\d]{3}\-[A-Z\d]{3}
+MAIL_PASSWORD=shhhhhh
+OTP_PATTERN=[a-z\d]{3}-[a-z\d]{3}
 OTP_EXPIRES=120
 OTP_ATTEMPTS=3
 ```
 
 - APP_NAME - the name of the application that will be shown to the user in emails
+- PORT - the port the server should listen on
 - SECRET - a random string used as a private key for jwt tokens. This should be sufficiently long (e.g 256 or 512 characters) and random.
 - RESERVE_NAME - the name of the reserve as per OpenStreetMaps
 - CELL_SIZE - the size (width and height) of a cell in metres
+- ADMIN_EMAIL - the default administrator email. This account can be used to create other accounts.
+- DEFAULT_ADMIN_PASSWORD - the default administrator password - can be changed in future.
+- DB_TYPE - database type. E.g. "postgres" or "mysql" or "sqlite"
+- DB_USER - database username
+- DB_HOST - database host. Use 127.0.0.1 over localhost to eliminate DNS overhead.
+- DB_PORT - database port
+- DB_PASS - database user password
+- DB_DATABASE - name of the database
 - MAIL_HOST - the SMTP mail host (e.g. smtp.gmail.com)
 - MAIL_PORT - the mail server port (465 is recommended as TLS is always enabled)
 - MAIL_USERNAME - the email address used to log into the mail server

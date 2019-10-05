@@ -20,10 +20,10 @@ export class PoachingIncident {
   @Column()
   timestamp: Date;
 
-  @Column()
+  @Column('float')
   longitude: number;
 
-  @Column()
+  @Column('float')
   latitude: number;
 
   @Column()

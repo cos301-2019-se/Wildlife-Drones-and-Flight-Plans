@@ -16,7 +16,9 @@ export class UserService {
     private readonly databaseService: DatabaseService,
     private readonly mailService: MailService,
     private readonly config: ConfigService,
-  ) {}
+  ) {
+    this.createDefaultUser();
+  }
 
   /**
    * gets all users that are active, returns the users id,name,surname,email and job title
@@ -173,72 +175,69 @@ export class UserService {
     };
   }
 
-    async reset(email,otpTemp): Promise<boolean> {
-     
-      const con = await this.databaseService.getConnection();
-      const usersRepo = con.getRepository(User);
-  
-      const existingUser = await usersRepo.findOne({
-        where: {
-          email,
-          active : '1',
-          code : otpTemp
-        },
-      });
-      //console.log('The entered otp ',otpTemp)
+  async reset(email, otpTemp): Promise<boolean> {
+    const con = await this.databaseService.getConnection();
+    const usersRepo = con.getRepository(User);
 
-     // console.log('The entered otp ',existingUser.code)
-  
-      // if the email does not match a user, return false
-      if (!existingUser) {
-        return false;
-      }
-  
-  
-      // check that the user is within their number of login attempts
-      // if the epiry date of the code has passed, we can create a new OTP
-      // otherwise, we re-send the assigned OTP
-      let reSending = true;
-      if (existingUser.codeExpires <= new Date()) {
-        existingUser.loginAttemptsRemaining = this.NUM_LOGIN_ATTEMPTS;
-        reSending = false;
-      }
-  
-      console.log("The old expiry time",existingUser.codeExpires)
-      // generate an OTP
-      const otpPattern = new RandExp(this.config.getConfig().auth.otp.pattern);
-      console.log("The new expiry time",existingUser.codeExpires)
-      await usersRepo.save(existingUser);
-      //const passwordPattern = new RandExp(/(?=^.{8,}$)(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\s)[0-9a-zA-Z!@#$%^&*()]*$/);
-      const otp = reSending
-        ? existingUser.code
-        : otpPattern.gen() 
-  
-        let tempPass =  Math.floor(10000 + Math.random() * 90000);
-        const newPass = tempPass.toString();
-      // set the user's OTP in the database
-      existingUser.code = otp;
-      // send th email out
-      await this.mailService.send({
-        subject: `Your new password is : ${newPass}`,
-        template: 'reset.twig',
-        templateParams: {
-          otp: otp,
-          pass : newPass,
-        },
-        to: email,
-      });
-  
-      existingUser.codeExpires = new Date(new Date().getTime() + this.EXPIRY_TIME);
-      const temp = bcrypt.hashSync(newPass, 10);
-      existingUser.password = temp;
-      console.log("The newly hashed password ", temp);
-      await usersRepo.save(existingUser);
-  
-      return true;
+    const existingUser = await usersRepo.findOne({
+      where: {
+        email,
+        active: '1',
+        code: otpTemp
+      },
+    });
+
+    // if the email does not match a user, return false
+    if (!existingUser) {
+      return false;
     }
-  
-  
+
+
+    // check that the user is within their number of login attempts
+    // if the epiry date of the code has passed, we can create a new OTP
+    // otherwise, we re-send the assigned OTP
+    let reSending = true;
+    if (existingUser.codeExpires <= new Date()) {
+      existingUser.loginAttemptsRemaining = this.NUM_LOGIN_ATTEMPTS;
+      reSending = false;
+    }
+
+    console.log("The old expiry time", existingUser.codeExpires)
+    // generate an OTP
+    const otpPattern = new RandExp(this.config.getConfig().auth.otp.pattern);
+    console.log("The new expiry time", existingUser.codeExpires)
+    await usersRepo.save(existingUser);
+
+    const otp = reSending
+      ? existingUser.code
+      : otpPattern.gen()
+
+    const newPass = this.createPassword();
+
+    // set the user's OTP in the database
+    existingUser.code = otp;
+
+    // send the email out
+    await this.mailService.send({
+      subject: `Your new password is : ${newPass}`,
+      template: 'reset.twig',
+      templateParams: {
+        otp: otp,
+        pass: newPass,
+      },
+      to: email,
+    });
+
+    existingUser.codeExpires = new Date(new Date().getTime() + this.EXPIRY_TIME);
+    const temp = bcrypt.hashSync(newPass, 10);
+    existingUser.password = temp;
+    console.log("The newly hashed password ", temp);
+    await usersRepo.save(existingUser);
+
+    return true;
+  }
+
+
 
   /**
    * Validates the received password against the minimum password requirements.
@@ -265,48 +264,60 @@ export class UserService {
    * @param job
    * @param surname
    */
-  async addUser(name, email, password, job, surname): Promise<boolean> {
-    if (this.passRequirements(password)) {
-      const con = await this.databaseService.getConnection();
-      const user = new User();
-      user.name = name;
-      user.email = email;
-      user.password = password;
-      user.jobType = job;
-      user.surname = surname;
-      user.loginAttemptsRemaining = 3;
-      user.active = true;
-
-      const insertedUser = await con.getRepository(User).save(user);
-
-      return !!insertedUser;
-    } else {
+  async addUser(name, email, password, job, surname, considerPassRequirements = true): Promise<boolean> {
+    if (considerPassRequirements && !this.passRequirements(password)) {
       return false;
     }
+
+    const con = await this.databaseService.getConnection();
+    const user = new User();
+    user.name = name;
+    user.email = email;
+    user.password = password;
+    user.jobType = job;
+    user.surname = surname;
+    user.loginAttemptsRemaining = 3;
+    user.active = true;
+
+    const insertedUser = await con.getRepository(User).save(user);
+
+    if (!insertedUser) {
+      return false;
+    }
+
+    this.mailService.send({
+      to: email,
+      subject: 'Account created',
+      template: 'defaultEmail',
+      templateParams: {
+        message: `You have been registered with password "${password}"`,
+      },
+    });
+
+    return true;
   }
 
-  async sendEmailToAllAdmins(subject,message)
-  {
+  async sendEmailToAllAdmins(subject, message) {
     const con = await this.databaseService.getConnection();
     const admins = await con
       .getRepository(User)
-      .createQueryBuilder('user')
-      .select([
-        'user.email',
-      ])
-      .where('user.active = true and user.jobType="administrator"')
-      .getMany();
-
-      admins.forEach(async admin => {
-        await this.mailService.send({
-          subject: subject,
-          template: 'defaultEmail.twig',
-          templateParams: {
-            message,
-          },
-          to: admin.email,
-        });
+      .find({
+        where: {
+          active: true,
+          jobType: 'administrator',
+        },
       });
+
+    admins.forEach(async admin => {
+      await this.mailService.send({
+        subject: subject,
+        template: 'defaultEmail.twig',
+        templateParams: {
+          message,
+        },
+        to: admin.email,
+      });
+    });
 
   }
 
@@ -381,5 +392,32 @@ export class UserService {
         email: payload.email,
       },
     });
+  }
+
+  private createPassword(): string {
+    return Math.floor(10000 + Math.random() * 90000).toString();
+  }
+
+  /**
+   * Ensure that a default admin account exists. If the account does
+   * not exist, creates the account with a random password and sends
+   * an email to the user.
+   */
+  async createDefaultUser() {
+    const conn = await this.databaseService.getConnection();
+
+    const { defaultAdminEmail, defaultAdminPassword } = this.config.getConfig().auth;
+
+    // ensure that users have been created
+    const users = await conn.getRepository(User).find({
+      where: { email: defaultAdminEmail },
+    });
+
+    if (users.length) {
+      return; // the user already exists
+    }
+
+    // create the new user
+    this.addUser('admin', defaultAdminEmail, defaultAdminPassword, 'administrator', '', false);
   }
 }

@@ -24,10 +24,10 @@ export class MapCellData {
   @PrimaryGeneratedColumn()
   id?: number;
 
-  @Column()
+  @Column('float')
   cellMidLongitude: number;
 
-  @Column()
+  @Column('float')
   cellMidLatitude: number;
 
   @Column()

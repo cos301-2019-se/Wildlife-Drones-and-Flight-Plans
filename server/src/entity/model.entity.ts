@@ -5,6 +5,6 @@ export class ModelData {
   @PrimaryColumn('text')
   name: string;
 
-  @Column('blob')
+  @Column()
   data: string;
 }

@@ -10,6 +10,7 @@ import { DroneRouteService, DroneRouteMockService } from './services/drone-route
 import { IncidentsService, IncidentsMockService } from './services/incidents.service';
 import { DronesService, DronesMockService } from './services/drones.service';
 import { HeatmapService } from './services/heatmap.service';
+import { UpdaterService } from './services/updater.service';
 export const providers = [
   StatusBar,
   SplashScreen,
@@ -20,5 +21,6 @@ export const providers = [
   IncidentsService,
   DronesService,
   HeatmapService,
+  UpdaterService,
   { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }
 ];

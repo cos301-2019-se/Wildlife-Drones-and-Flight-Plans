@@ -26,7 +26,7 @@ export class Classifier {
     this.kd = new kdTree(
       points,
       (a, b) => {
-        return Object.keys(a).reduce((sum, key, keyIdx, keys) => {
+        return Object.keys(a).reduce((sum, key) => {
           let value;
 
           if (key === 'time') {

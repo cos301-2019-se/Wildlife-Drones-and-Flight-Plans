@@ -15,7 +15,7 @@ export class MapData {
   @PrimaryColumn('text')
   feature: string;
 
-  @Column('blob')
+  @Column()
   propertiesData: string;
 
   get properties(): any {

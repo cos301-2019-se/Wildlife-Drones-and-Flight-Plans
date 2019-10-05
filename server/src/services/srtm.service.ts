@@ -20,7 +20,7 @@ const LOCATION_BIAS = lengthToDegrees(300, 'meters');
  */
 @Injectable()
 export class SRTMService {
-  private mapReadyWaiter: MultiPromise = null;
+  private mapReadyWaiter: Promise<any> = null;
 
   constructor(
     @Inject(forwardRef(() => MapService))
@@ -47,10 +47,7 @@ export class SRTMService {
     averageAltitude: number;
     variance: number;
   }> {
-    const reserve = await this.mapService.getMapFeature(MapFeatureType.reserve);
-    const bounds = bbox(reserve);
-    
-    const map = await this.download(bounds);
+    const map = await this.download();
 
     const [oX, oY] = map.getOrigin();
     const [imageResX, imageResY] = map.getResolution();
@@ -97,24 +94,31 @@ export class SRTMService {
    * Downloads and caches an srtm tile for the given bounds
    * @param bounds The bounds
    */
-  private async download(bounds): Promise<any> {
-    const cacheDir = this.getCacheDir(bounds);
-    if (this.mapReadyWaiter === null) {
-      this.mapReadyWaiter = new MultiPromise(async () => {
-        if (!fs.existsSync(cacheDir)) {
-          const mapData = await axios.get(this.buildUrl(bounds), {
-            responseType: 'arraybuffer',
-          });
-
-          fs.writeFileSync(cacheDir, mapData.data);
-        }
-
-        const tiff = await GeoTiff.fromFile(cacheDir);
-        return await tiff.getImage();
-      });
+  private async download(): Promise<any> {
+    if (this.mapReadyWaiter) {
+      return this.mapReadyWaiter;
     }
 
-    return await this.mapReadyWaiter.ready();
+    const reserve = await this.mapService.getMapFeature(MapFeatureType.reserve);
+    const bounds = bbox(reserve);
+
+    this.mapReadyWaiter = new Promise(async (resolve, reject) => {
+      const cacheDir = this.getCacheDir(bounds);
+      const cacheHit = await new Promise(resolve => fs.exists(cacheDir, resolve));
+      
+      if (!cacheHit) {
+        const mapData = await axios.get(this.buildUrl(bounds), {
+          responseType: 'arraybuffer',
+        });
+
+        await new Promise(resolve => fs.writeFile(cacheDir, mapData.data, resolve));
+      }
+
+      const tiff = await GeoTiff.fromFile(cacheDir);
+      resolve(tiff.getImage());
+    });
+
+    return this.mapReadyWaiter;
   }
 
   /**
