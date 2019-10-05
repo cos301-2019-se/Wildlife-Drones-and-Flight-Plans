@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { UpdaterService } from 'src/app/services/updater.service';
+import { UpdaterService } from '../../services/updater.service';
 import { ToastController } from '@ionic/angular';
-import { IncidentsService } from 'src/app/services/incidents.service';
+import { IncidentsService } from '../../services/incidents.service';
 
 @Component({
   selector: 'app-admin-updater',

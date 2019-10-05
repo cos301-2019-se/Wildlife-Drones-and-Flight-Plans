@@ -12,7 +12,7 @@ import getDistance from '@turf/distance';
 import { lineString } from '@turf/helpers';
 import lineSliceAlong from '@turf/line-slice-along';
 import { DatabaseService } from './db.service';
-import { Species } from 'src/entity/animal-species.entity';
+import { Species } from '../entity/animal-species.entity';
 import { UserService } from './user.service';
 
 /**
