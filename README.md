@@ -5,8 +5,22 @@
 
 To aid ERP rangers in anti-poaching monitoring, a system is being developed to automatically create and optimise drone flight plans based on animal tracking information and reserve features. The project aims to increase the probability of drones covering key areas with endangered wildlife, while being random enough to prevent poachers identifying patrol routes. Rangers and drone pilots will be empowered with useful information through this dynamic application.
 
+
+## System Presentation
 [System presentation](/Documentation/Wildlife%20Drones%20and%20Flight%20Plans%20Virtual%20Presentation.pdf)
 
+[Short video demo](https://youtu.be/vnIvxsNr3tk)
+
+<table>
+  <tr>
+    <td><img src="https://i.imgur.com/BGSGkqa.png" width="200px" /></td>
+    <td><img src="https://i.imgur.com/83ZQjFU.png" width="200px" /></td>
+    <td><img src="https://i.imgur.com/dW1kwGn.png" width="200px" /></td>
+  </tr>
+</table>
+
+
+## Documents
 | Document                         	| Link                                                                                        	|
 |----------------------------------	|---------------------------------------------------------------------------------------------	|
 | SRS                              	| [Software Requirements Specification](Documentation/Demo4/Drone_Flight_Plans_SRS_Demo4.pdf) 	|
@@ -17,65 +31,28 @@ To aid ERP rangers in anti-poaching monitoring, a system is being developed to a
 
 
 
-## Group members
-![image](https://lh4.googleusercontent.com/sYkeIXRCdnU5gPxCxJOXc_I6xD2D_OMxqu9-eRN1WwPWEg5bAW_7SZ86O5U863usmgKeCJeqAwN-Ay0bMkrIqJnZelcAtLnpRAeiHbHnukEjuPdsahIV_iJfkl8ATyYRKPP_e5_N)
-
-### Matthew Evans (16262949) [GitHub Profile](https://github.com/EvansMatthew97), [CV](Documentation/CVS/Matthew.pdf), [LinkedIN](https://www.linkedin.com/in/matthew-evans-011a78191/)
-- __Interests__: Technology, astronomy, music, film, history
-- __Skills__: JavaScript, TypeScript, Angular 2+, Ionic Framework, PHP, SQL, NodeJS, React, 64-bit assembly, Android Play Store deployment, web development, Adobe After Effects, Blender 3D, GIMP, web scraping
-- __Previous work experience__:
-  - Teaching Assistant for the CS Department, 2016
-  - Teaching Assistant for IMY department, 2017
-- __Attitudes__: Curious, passionate and positive towards the future of technology
-
-<hr />
-
-### Andreas Louw (15048366) [GitHub Profile](https://github.com/ASLouw), [CV](Documentation/CVS/Andreas.pdf), [LinkedIN](https://www.linkedin.com/in/andreas-louw-182a36175)
-- __Interests__: Programming, app development, metalwork and woodwork
-- __Skills__: Java, Kotlin, PHP, C++, C#, JavaScript, Assembly (x64), App development, Web development, Database Management
-- __Previous work experience__: None
-- __Attitudes__: Diligent, honest, positive and a people person
-
-<hr />
-
-### Bryan Janse van Vuuren (16217498) [GitHub Profile](https://github.com/Viidas96), [CV](Documentation/CVS/Bryan.pdf), [LinkedIN](https://www.linkedin.com/in/bryan-janse-van-vuuren-451b8a191)
-- __Interests__: Gaming, programming, mobile application development and music
-- __Skills__: Angular, Java, C#, JavaScript, Mobile App Devlopment, Database management and design, Web Devlopment
-- __Previous work experience__: 
-  - Mobile application design for Rage Software
-  - Mobile game development
-- __Attitudes__: Devoted, trusting, positive, punctual, work-oriented and willingness
-
-<hr />
-
-### Deane Roos (17057966) [GitHub Profile](https://github.com/BCybercell), [CV](Documentation/CVS/Deane.pdf), [LinkedIN](https://www.linkedin.com/in/deane-roos-a7a896143)
-- __Interests__: Virtual reality, gaming and artificial intelligence
-- __Skills__: Java, C++, Assembly x64, Python
-- __Previous work experience__:  ETA operations
-- __Attitudes__: Hardworking, positive and dedicated
-
-<hr />
-
-### Reinhardt Eiselen (14043302) [GitHub Profile](https://github.com/EiselenR), [CV](Documentation/CVS/Reinhardt.pdf), [LinkedIN](https://www.linkedin.com/in/reinhardt-eiselen-0071a685)
-- __Interests__: Music ,the outdoors and technology
-- __Skills__:  Java, C++ , JavaScript, Assembly (x86) and 64 bit, PHP, SQL, Android, Nodejs, Angular, Web development and App development
-- __Previous work experience__: No formal work experience 
-- __Attitudes__: Always up for a challenge, curious about the unkown and hardworking
-
-
 ## Running the project
-First download the project then configure the project environment - see the environment configuration section below.
 
-Required software: Node JS for server and client. 
+- First download the project then configure the project environment - see the environment configuration section below.
 
-### Downloading the project
+- Required software: Node JS for server and client. 
 
+<details><summary><b>Downloading the project</b></summary>
+<p>
+  
 Downloading Wildlife Drones and Flight Plan <br/>
 - Clone or download the repository on the GitHub page. <br/>
 - Select Download ZIP. <br/>
 - Once the zip file has been downloaded unzip the folder. <br/>
 
-### Starting the server
+</p>
+</details>
+</hr>
+
+
+<details><summary><b>Starting the server</b></summary>
+<p>
+  
 ```
 # go to the server directory
 $ cd server
@@ -89,8 +66,15 @@ $ prestart:prod && npm run start:prod
 # run a development server (localhost:3000)
 $ npm run start:dev
 ```
+</p>
+</details>
 
-### Building the client
+</hr>
+
+
+<details><summary><b>Building the Client</b></summary>
+<p>
+  
 ```
 # go to the client directory
 $ cd client
@@ -110,15 +94,22 @@ $ ionic cordova run android
 # or to run on ios (requires MacOS device)
 $ ionic cordova run ios
 ```
+</p>
+</details>
+</hr>
 
-
-## Change the server URL
+<details><summary><b>Change the server URL</b></summary>
+<p>
+  
 Edit ```/client/src/environments/{environment.prod.ts|environment.ts}``` and change the server key to your url.
 
 We recommend using an https scheme.
+</p>
+</details>
 
-
-## Environment Configuration
+<details><summary><b>Environment Configuration</b></summary>
+<p>
+  
 Development configuration can be made in a .env file. The easiest way to set it up is to copy-paste the .env.example file and rename it to .env.
 
 In production, a .env file should not exist. The environment variables should be set as actual environment variables wherever your production server provides this functionality.
@@ -168,3 +159,70 @@ OTP_ATTEMPTS=3
 - OTP_PATTERN - A regular expression pattern to generate a random one-time-pin from
 - OTP_EXPIRES - How long (in seconds) an OTP lasts. This is also the time the user has to wait before login attempts reset.
 - OTP_ATTEMPTS - The number of login attempts the user gets before being locked out until the one time pin expires.
+
+</p>
+</details>
+
+
+
+## Group Members
+<img src="https://lh4.googleusercontent.com/sYkeIXRCdnU5gPxCxJOXc_I6xD2D_OMxqu9-eRN1WwPWEg5bAW_7SZ86O5U863usmgKeCJeqAwN-Ay0bMkrIqJnZelcAtLnpRAeiHbHnukEjuPdsahIV_iJfkl8ATyYRKPP_e5_N" width="600px" />
+
+#### Matthew Evans (16262949) [GitHub Profile](https://github.com/EvansMatthew97), [CV](Documentation/CVS/Matthew.pdf), [LinkedIN](https://www.linkedin.com/in/matthew-evans-011a78191/)
+
+<details><summary>Expand details</summary>
+  
+- __Interests__: Technology, astronomy, music, film, history
+- __Skills__: JavaScript, TypeScript, Angular 2+, Ionic Framework, PHP, SQL, NodeJS, React, 64-bit assembly, Android Play Store deployment, web development, Adobe After Effects, Blender 3D, GIMP, web scraping
+- __Previous work experience__:
+  - Teaching Assistant for the CS Department, 2016
+  - Teaching Assistant for IMY department, 2017
+- __Attitudes__: Curious, passionate and positive towards the future of technology
+
+</details>
+
+#### Andreas Louw (15048366) [GitHub Profile](https://github.com/ASLouw), [CV](Documentation/CVS/Andreas.pdf), [LinkedIN](https://www.linkedin.com/in/andreas-louw-182a36175)
+
+<details><summary>Expand details</summary>
+  
+- __Interests__: Programming, app development, metalwork and woodwork
+- __Skills__: Java, Kotlin, PHP, C++, C#, JavaScript, Assembly (x64), App development, Web development, Database Management
+- __Previous work experience__: None
+- __Attitudes__: Diligent, honest, positive and a people person
+
+</details>
+
+#### Bryan Janse van Vuuren (16217498) [GitHub Profile](https://github.com/Viidas96), [CV](Documentation/CVS/Bryan.pdf), [LinkedIN](https://www.linkedin.com/in/bryan-janse-van-vuuren-451b8a191)
+
+<details><summary>Expand details</summary>
+  
+- __Interests__: Gaming, programming, mobile application development and music
+- __Skills__: Angular, Java, C#, JavaScript, Mobile App Devlopment, Database management and design, Web Devlopment
+- __Previous work experience__: 
+  - Mobile application design for Rage Software
+  - Mobile game development
+- __Attitudes__: Devoted, trusting, positive, punctual, work-oriented and willingness
+
+</details>
+
+#### Deane Roos (17057966) [GitHub Profile](https://github.com/BCybercell), [CV](Documentation/CVS/Deane.pdf), [LinkedIN](https://www.linkedin.com/in/deane-roos-a7a896143)
+
+<details><summary>Expand details</summary>
+  
+- __Interests__: Virtual reality, gaming and artificial intelligence
+- __Skills__: Java, C++, Assembly x64, Python
+- __Previous work experience__:  ETA operations
+- __Attitudes__: Hardworking, positive and dedicated
+
+</details>
+
+#### Reinhardt Eiselen (14043302) [GitHub Profile](https://github.com/EiselenR), [CV](Documentation/CVS/Reinhardt.pdf), [LinkedIN](https://www.linkedin.com/in/reinhardt-eiselen-0071a685)
+
+<details><summary>Expand details</summary>
+  
+- __Interests__: Music ,the outdoors and technology
+- __Skills__:  Java, C++ , JavaScript, Assembly (x86) and 64 bit, PHP, SQL, Android, Nodejs, Angular, Web development and App development
+- __Previous work experience__: No formal work experience 
+- __Attitudes__: Always up for a challenge, curious about the unkown and hardworking
+
+</details> 
