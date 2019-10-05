@@ -226,4 +226,3 @@ OTP_ATTEMPTS=3
 - __Attitudes__: Always up for a challenge, curious about the unkown and hardworking
 
 </details> 
-

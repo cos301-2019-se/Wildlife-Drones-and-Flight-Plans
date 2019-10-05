@@ -33,7 +33,10 @@ export class UpdatePage implements OnInit {
   logout() {
     this.authentication.logout();
   }
-
+  routes()
+  {
+    this.router.navigate(['routes']);
+  }
   ngOnInit() {
   }
 
@@ -92,8 +95,8 @@ export class UpdatePage implements OnInit {
             text: 'Select',
             handler: async (data) => {
               console.log(data);
-              await this.mapService.updateMap(data);
-              this.router.navigate(['home']);
+              // TODO: Tell server to update the map
+              // this.router.navigate(['home']);
             }
           }
         ]

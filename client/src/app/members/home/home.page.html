@@ -1,15 +1,166 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>
-      Shortest Path
-    </ion-title>
-  </ion-toolbar>
-</ion-header>
-
 <ion-content>
-  <div class="map"
-    leaflet #leaflet
-    (leafletMapReady)="mapReady($event)"
-    [leafletOptions]="mapOptions"
-  ></div>
+  <div class="map" #map></div>
+
+  <!-- overlay tooltip -->
+  <div class="overlay-tooltip"
+    *ngIf="state.tooltip"
+    @tooltip-animation
+  >
+    <ion-icon name="information-circle-outline"></ion-icon>
+    <p>{{ state.tooltip }}</p>
+  </div>
+  <!-- end of overlay tooltip -->
+
+  <!-- add marker overlay -->
+  <div class="add-marker-overlay"
+    *ngIf="state == states.addMarker"
+    @place-marker-animation
+  >
+    <ion-icon name="ios-pin" class="add-marker-icon-shadow"></ion-icon>
+    <ion-icon name="ios-pin" class="add-marker-icon" [class.disabled]="!withinReserve"></ion-icon>
+  </div>
+  <!-- end of add marker overlay -->
+
+  <!-- overlay form -->
+  <div class="form-overlay"
+    *ngIf="state === states.setUpRoute || state === states.addMarkerDetails"
+    @form-animation>
+    <!-- set up route/drone information form -->
+    <ng-container *ngIf="state === states.setUpRoute">
+      <ion-item no-padding>
+        <ion-label position="stacked">Flight type</ion-label>
+        <ion-select [(ngModel)]="states.setUpRoute.data.selectedFlightType" interface="popover">
+          <ion-select-option *ngFor="let flightType of states.setUpRoute.data.flightTypes" [value]="flightType">{{ flightType }}</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <div class="animal-selection" *ngIf="states.setUpRoute.data.selectedFlightType == flightTypesEnum.ANIMAL">
+        <ion-item *ngFor="let animalId of states.setUpRoute.data.animalIds">
+          <ion-label>{{ animalId }}</ion-label>
+          <ion-checkbox slot="end"
+            [(ngModel)]="states.setUpRoute.data.selectedAnimalIds[animalId]"
+            [disabled]="!states.setUpRoute.data.selectedAnimalIds[animalId] && states.setUpRoute.hasExceededNumSelectedAnimals(states.setUpRoute)"
+          ></ion-checkbox>
+        </ion-item>
+      </div>
+
+      <ion-item no-padding>
+        <ion-label position="stacked">Drone name</ion-label>
+        <ion-select [(ngModel)]="states.setUpRoute.data.selectedDrone" interface="popover">
+          <ion-select-option *ngFor="let drone of states.setUpRoute.data.drones" [value]="drone">{{ drone.name }}</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item no-padding>
+        <ion-label position="stacked">Drone name</ion-label>
+        <ion-input type="text" [(ngModel)]="states.setUpRoute.data.selectedDrone.name" (ionChange)="refresh()"></ion-input>
+      </ion-item>
+
+      <ion-item no-padding>
+        <ion-label position="stacked">Average flight time (minutes)</ion-label>
+        <ion-input type="number" min="5" step="5" [(ngModel)]="states.setUpRoute.data.selectedDrone.avgFlightTime"></ion-input>
+      </ion-item>
+
+      <ion-item no-padding>
+        <ion-label position="stacked">Average speed (km/h)</ion-label>
+        <ion-input type="number" min="5" step="5" [(ngModel)]="states.setUpRoute.data.selectedDrone.avgSpeed"></ion-input>
+      </ion-item>
+    </ng-container>
+
+    <!-- poaching incident form -->
+    <ng-container *ngIf="state === states.addMarkerDetails">
+      <ion-item no-padding>
+        <ion-label position="stacked">Incident type</ion-label>
+        <ion-select [(ngModel)]="states.addMarkerDetails.data.typeId" interface="popover">
+          <ion-select-option
+            *ngFor="let incidentType of states.addMarkerDetails.data.incidentTypes"
+            [value]="incidentType.id"
+          >{{ incidentType.type }}</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item no-padding>
+        <ion-label position="stacked">Description</ion-label>
+        <ion-textarea [(ngModel)]="states.addMarkerDetails.data.description"></ion-textarea>
+      </ion-item>
+    </ng-container>
+  </div>
+  <!-- end of overlay forms -->
+
+  <!-- fab bottom left buttons -->
+  <ion-fab slot="fixed" vertical="bottom" horizontal="start">
+    <!-- set up route fab -->
+    <ion-fab-button size="small" @button-animation color="dark"
+      *ngIf="state == states.default"
+      (click)="setState(states.setUpRoute)"
+    >
+      <ion-icon name="ios-send"></ion-icon>
+    </ion-fab-button>
+    
+    <!-- add marker fab -->
+    <ion-fab-button size="small" color="dark"
+      *ngIf="state === states.default"
+      (click)="setState(states.addMarker)" @button-animation
+      [disabled]="states.addMarkerDetails.data.incidentTypes.length == 0"
+    >
+      <ion-icon name="ios-pin"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+  
+  <!-- fab confirmation buttons -->
+  <ion-fab slot="fixed" vertical="bottom" horizontal="center"
+  class="confirmation-buttons"
+    *ngIf="state.confirmations"
+  >
+    <!-- prev button -->
+    <ion-fab-button class="confirmation-button prev-button" size="small" color="dark"
+      *ngIf="state.confirmations.prev"
+      (click)="state.confirmations.prev(state)" @button-animation
+      [disabled]="state.isAtStart(state)"
+    >
+      <ion-icon name="arrow-back"></ion-icon>
+    </ion-fab-button>
+    
+    <!-- cancel button -->
+    <ion-fab-button class="confirmation-button cancel-button" size="small" color="dark"
+    *ngIf="state.confirmations.cancel"
+      (click)="state.confirmations.cancel(state)" @button-animation
+    >
+      <ion-icon name="close"></ion-icon>
+    </ion-fab-button>
+
+    <!-- add button -->
+    <ion-fab-button class="confirmation-button add-button" size="small" color="dark"
+      *ngIf="state.confirmations.add"
+      (click)="state.confirmations.add(state)" @button-animation
+    >
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+
+    <!-- done button -->
+    <ion-fab-button class="confirmation-button done-button" size="small" color="dark"
+      (click)="state.confirmations.done(state)" @button-animation
+      [disabled]="state === states.addMarker && !withinReserve"
+    >
+      <ion-icon name="checkmark"></ion-icon>
+    </ion-fab-button>
+
+    <!-- next button -->
+    <ion-fab-button class="confirmation-button next-button" size="small" color="dark"
+      *ngIf="state.confirmations.next"
+      (click)="state.confirmations.next(state)" @button-animation
+      [disabled]="state.isAtEnd(state)"
+    >
+      <ion-icon name="arrow-forward"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+  
+  <!-- fab location button -->
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+    <ion-fab-button @button-animation (click)="goToGeolocation()" color="dark"
+      [class.active]="isFollowingGeolocation"
+    >
+      <ion-icon name="md-locate"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
 </ion-content>

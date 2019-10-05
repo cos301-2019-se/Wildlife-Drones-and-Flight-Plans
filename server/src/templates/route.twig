@@ -1,0 +1,14 @@
+{% extends 'email.twig' %}
+{% block content %}
+  <tr>
+    <td>Your drone route is ready:</td>
+  </tr>
+  <tr>
+    <td style="text-align: center; padding: 50px;">
+      <div style="font-weight: bold; font-size: 10pt; font-family: monospace; background-color: #fafafa; border: 1px solid #999; border-radius: 5px; margin: 40px; padding: 20px;">{{ routeString }}</div>
+    </td>
+  </tr>
+  <tr>
+    <td>Copy and paste the code above into the drone flight script</td>
+  </tr>
+{% endblock %}

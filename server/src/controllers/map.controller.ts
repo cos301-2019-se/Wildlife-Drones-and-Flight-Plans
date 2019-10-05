@@ -1,54 +1,79 @@
-import { Controller, Get, Param, Query, Post, Body, UseGuards } from '@nestjs/common';
-import { ShortestPathService } from '../providers/shortest-path.service';
-import { MapUpdaterService } from '../providers/map-updater.service';
+import { Controller, Get, Query, Post, Body, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-
-// jest.setTimeout(-1);
-// jest.useFakeTimers();
+import { AdminGuard } from '../auth/admin.guard';
+import { MapService } from '../services/map.service';
+import { MapFeatureType } from '../entity/map-data.entity';
 
 @Controller('map')
 @UseGuards(AuthGuard('jwt'))
 export class MapController {
+  constructor(
+    private mapService: MapService,
+  ) {}
 
-    constructor(
-        private shortestPathService: ShortestPathService,
-        private mapUpdaterService: MapUpdaterService,
-    ) {}
+  @Post('find-reserves')
+  async findReserves(
+    @Body('top') top,
+    @Body('left') left,
+    @Body('bottom') bottom,
+    @Body('right') right,
+  ) {
+    // tslint:disable-next-line:no-console
+    console.log(left, bottom, right, top);
+    return await this.mapService.findReservesInArea(
+      left,
+      bottom,
+      right,
+      top,
+    );
+  }
 
-    @Get('random-path')
-    getRandomPath(@Query('top') top: number,
-                  @Query('left') left: number,
-                  @Query('bottom') bottom: number,
-                  @Query('right') right: number,
-                  @Query('startX') startX: number,
-                  @Query('startY') startY: number) {
-        const NUM_POINTS = 5;
-        const points = new Array(NUM_POINTS).fill(undefined)
-          .map(() => [
-                (Math.random() * (right - left)) + Number(left),
-                (Math.random() * (top - bottom)) + Number(bottom)
-            ]);
+  @Post('update')
+  async update() {
+    return await this.mapService.updateMap();
+  }
 
-        points.unshift([startX, startY]);
+  @Post('reserve')
+  async getReserve() {
+    return await this.mapService.getMapFeature(MapFeatureType.reserve);
+  }
 
-        return this.shortestPathService.getShortestPath(points);
-    }
+  @Post('getMapCells')
+  getMapCells() {
+    console.log('calling');
+    return this.mapService.getMapCells();
+  }
 
-    @Post('shortest-path')
-    shortestPath(@Body('points') points) {
-        return this.shortestPathService.getShortestPath(points);
-    }
+  @Post('getSpeciesWeightDataForTime')
+  async getSpeciesWeightDataForTime(@Body() body) {
+    console.log('calling');
+    return await this.mapService.getSpeciesWeightDataForTime(
+      body.species,
+      body.time,
+    );
+  }
 
-    @Post('find-reserves')
-    async findReserves(@Body('top') top, @Body('left') left, @Body('bottom') bottom, @Body('right') right) {
-        // tslint:disable-next-line:no-console
-        console.log(left, bottom, right, top);
-        return await this.mapUpdaterService.findReservesInArea(left, bottom, right, top);
-    }
+  @Post('getCellPoachingWeight')
+  async getCellPoachingWeight() {
+    console.log('calling');
+    return await this.mapService.getCellPoachingWeight();
+  }
 
-    @Post('update')
-    async update(@Body('name') name) {
-        // console.log(mapFeatures);
-        return await this.mapUpdaterService.updateMap(name);
-    }
+  /**
+   * Gets the size of a map cell from the database
+   */
+  @Post('getCellSize')
+  async getCellSize(): Promise<number> {
+    return await this.mapService.getCellSize();
+  }
+
+  @Post('getCellHotspots')
+  async getCellHotspots(@Body() body): Promise<Array<{
+    lon: number;
+    lat: number;
+    cellId: number;
+    weight: number;
+  }>> {
+    return await this.mapService.getCellHotspots(body.time);
+  }
 }

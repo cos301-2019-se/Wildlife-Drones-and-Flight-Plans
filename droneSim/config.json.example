@@ -1,0 +1,5 @@
+{
+  "dronkit" : "/home/deane/dronekit-python/",
+  "mavproxy" : "/home/deane/apm_planner/",
+  "server" : "http://127.0.0.1:3000"
+}

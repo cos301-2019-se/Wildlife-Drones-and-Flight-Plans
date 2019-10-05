@@ -1,0 +1,27 @@
+<ion-content>
+  <ion-grid>
+    <ion-row>
+      <ion-col style="display: flex; align-items: center; justify-content: space-between;">
+        <p>
+          <ng-container *ngIf="!this.users.length">
+            No users have been added.
+          </ng-container>
+        </p>
+        <ion-button (click)="addUser()" color="dark" size="medium">
+          Add User
+          <ion-icon name="person-add"></ion-icon>
+        </ion-button>
+      </ion-col>
+    </ion-row>
+    <ion-list>
+      <ion-item *ngFor="let user of this.users; let i = index" (click)="selectUser(i)">
+        <app-user-component
+          [name]="user.name"
+          [surname] = "user.surname"
+          [job]="user.jobType"
+          [id]="user.id"
+        ></app-user-component>
+      </ion-item>
+    </ion-list>
+  </ion-grid>
+</ion-content>

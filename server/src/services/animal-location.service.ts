@@ -1,160 +1,306 @@
-import { Injectable} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { DatabaseService } from './db.service';
-import { AnimalLocation } from '../entity/animal-location';
-import { CsvReader } from './csv-reader.service';
-import { MapUpdaterService } from '../providers/map-updater.service';
-import { GeoService, GeoSearchSet } from '../providers/geo.service';
-import { SRTMService } from '../providers/srtm.service';
-import bbox from '@turf/bbox';
-import { lengthToDegrees } from '@turf/helpers';
-
-const LOCATION_BIAS = lengthToDegrees(300, 'meters');
+import { AnimalLocation } from '../entity/animal-location.entity';
+import { CsvReaderService } from './csv-reader.service';
+import { SRTMService } from './srtm.service';
+import { Species } from '../entity/animal-species.entity';
+import { MapService } from './map.service';
+import { MapFeatureType } from '../entity/map-data.entity';
+import { UserService } from './user.service';
 
 @Injectable()
 export class AnimalLocationService {
+  constructor(
+    private readonly databaseService: DatabaseService,
+    private readonly csvReader: CsvReaderService,
+    private readonly mapService: MapService,
+    private readonly altitude: SRTMService,
+    private readonly userService:UserService,
+  ) {}
 
-    constructor(
-        private readonly databaseService: DatabaseService,
-        private readonly csvReader: CsvReader,
-        private readonly mapUpdater: MapUpdaterService,
-        private readonly geo: GeoService,
-        private readonly altitude: SRTMService,
-    ) { }
+  async addAnimalLocationData(
+    animalId: string,
+    date: Date,
+    lon: number,
+    lat: number,
+    animalSpecies: string,
+    temp: number,
+    habitat: string,
+  ): Promise<boolean> {
+    const con = await this.databaseService.getConnection();
+    // let animalLocations = new AnimalLocation();
 
-    addAnimalLocationData(): boolean {
+    const animalSpeciseType = await con
+      .getRepository(Species)
+      .findOne({ species: animalSpecies });
 
-        // const con = this.databaseService.getConnection();
-        // let addAnimal = con.then(async (data) => {
-        //     let animalLocations = new AnimalLocation();
-        //             animalLocations.id = 1;
-        //             animalLocations.date = '2007/08/13';
-        //             animalLocations.year = '2007';
-        //             animalLocations.month = '08';
-        //             animalLocations.day = '13';
-        //             animalLocations.time = '02:00:00.000';
-        //             animalLocations.hour = '02';
-        //             animalLocations.minute = '00';
-        //             animalLocations.second = '00.000';
-        //             animalLocations.longitude = '31.87399';
-        //             animalLocations.latitude = '-24.81483';
-        //         return data.manager.save(animalLocations).then(animalLocations =>
-        //         { console.log('Saved a new animal loction with id: ' + animalLocations.id) });
-        //     });
-
-
-        // if (addAnimal != null) {
-        //     return true;
-        // }
-        // else {
-
-        //     return false;
-        // }
-
-        return false;
+    if (!animalSpeciseType) {
+      console.log('Species not found');
+      return false;
     }
+    console.time('feature searchers');
+    const featureSearchers = this.mapService.getFeatureSearchSets();
+    console.timeEnd('feature searchers');
 
-    async addAnimalLocationDataCSV(filename): Promise<void> {
-        const csvFile = filename;
-        const MAX_BUFFER_SIZE = 50000;
-        let buffer: AnimalLocation[] = [];
+   // console.timeEnd('get map data');
 
-        const conn = await this.databaseService.getConnection();
-        const animalLocations = conn.getRepository(AnimalLocation);
+    const entryDate = new Date(date);
+    try {
+      const animalLocation = new AnimalLocation();
+      animalLocation.animalId = animalId;
+      animalLocation.latitude = lat;
+      animalLocation.longitude = lon;
+      animalLocation.timestamp = entryDate;
+      animalLocation.temperature = temp;
+      animalLocation.habitat = habitat;
+      animalLocation.month = entryDate.getMonth() + 1;
+      animalLocation.time = entryDate.getHours() * 60 + entryDate.getMinutes();
+      animalLocation.species = animalSpeciseType;
+      animalLocation.active = true;
 
-        console.time('get map data');
-        const mapData = await this.mapUpdater.getMapFeatures('Kruger National Park'); // TODO: make dynamic based on database reserve selection
+      await this.calculateAnimalLocationDistances(animalLocation, lat, lon, featureSearchers);
 
-        const bounds = bbox(mapData.reserve);
-        console.time('feature searchers');
-        const featureSearchers: {[s: string]: GeoSearchSet} = Object.keys(mapData.features)
-            .reduce((searchers, featureName) => {
-                searchers[featureName] = this.geo.createFastSearchDataset(mapData.features[featureName]);
-                return searchers;
-            }, {});
-        console.timeEnd('feature searchers');
+      const addedAnimalLocation = await con
+        .getRepository(AnimalLocation)
+        .save(animalLocation);
 
-        console.timeEnd('get map data');
+      console.log(
+        'Saved a new animal loction with id: ' + animalLocation.id,
+      );
 
-        const csvReader = this.csvReader.readCSV(csvFile);
+      return addedAnimalLocation != null;
+    } catch (error) {
+      console.log(error);
+      console.log('animal location was not saved');
+      return false;
+    }
+  }
 
-        let countInserted = 0;
+  async validateAnimalCSV(filename): Promise<boolean>
+  {
+    const csvReader = this.csvReader.readCSV(filename);
+    const headers = csvReader.getHeaders();
+    let isValid = false;
+    //Check if headers are valid if so then remove then populate table and remove headers
+    if(headers.includes('event-id') && headers.includes('visible') && headers.includes('timestamp')
+    && headers.includes('location-long')&& headers.includes('location-lat')&& headers.includes('external-temperature')
+    && headers.includes('habitat')&& headers.includes('sensor-type')&& headers.includes('individual-taxon-canonical-name')
+    && headers.includes('tag-local-identifier')&& headers.includes('individual-local-identifier')&& headers.includes('study-name')
+    && headers.includes('species'))
+    {
+      isValid = true;
+    }
+    return isValid;
+  }
 
-        const insertRow = () => {
-            csvReader.pause();
-            const bufferSize = buffer.length;
-            const rowsToInsert = buffer;
-            buffer = [];
+  fileNameGenerator(length) {
+    var result           = '';
+    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for ( var i = 0; i < length; i++ ) {
+       result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+ }
 
-            animalLocations.save(rowsToInsert, {
-                chunk: 100,
-            }).then(() => {
-                countInserted += bufferSize;
-                console.log('================== inserted', countInserted);
-                csvReader.resume();
-            });
-        };
+  async addAnimalLocationDataCSV(filename): Promise<void> {
+    const csvFile = filename;
 
-        let id = 0;
-        csvReader.onData(async row => {
-            id++;
-            let idCopy = id;
-            await new Promise(resolve => setTimeout(resolve, 0));
-            console.log('inserting', idCopy);
+    const conn = await this.databaseService.getConnection();
+    const animalLocations = conn.getRepository(AnimalLocation);
+    const animalSpeciesRepo = conn.getRepository(Species);
 
-            if (typeof row === 'undefined') {
-                // end of csv - insert the remaining rows
-                insertRow();
-                return;
-            }
+    console.time('feature searchers');
+    const featureSearchers = await this.mapService.getFeatureSearchSets();
+    console.timeEnd('feature searchers');
 
-            const lat = parseFloat(row['location-lat']);
-            const lng = parseFloat(row['location-long']);
-            const locationBounds = [
-                lng - LOCATION_BIAS, // left
-                lat - LOCATION_BIAS, // bottom
-                lng + LOCATION_BIAS, // right
-                lat + LOCATION_BIAS, // top
-            ];
+    //console.timeEnd('get map data');
 
-            const altitudeInfo = await this.altitude.getAltitude(locationBounds, bounds);
+    const csvReader = this.csvReader.readCSV(csvFile);
 
-            const rowDate = new Date(row.timestamp);
+    let countInserted = 0;
+    await this.userService.sendEmailToAllAdmins('CSV Upload in progress',
+    'CSV upload has started!');
+    let row = csvReader.next();
+    while (typeof row !== 'undefined') {
+      const lat = parseFloat(row['location-lat']);
+      const lng = parseFloat(row['location-long']);
 
-            const location: AnimalLocation = {
-                animalId: row['individual-local-identifier'],
-                latitude: lat,
-                longitude: lng,
-                timestamp: rowDate,
-                temperature: row['external-temperature'],
-                habitat: row.habitat,
-                month: rowDate.getMonth() + 1,
-                time: rowDate.getHours() * 60 + rowDate.getMinutes(),
-                id: idCopy,
-                distanceToDams: featureSearchers.dams.getNearest(lng, lat).distance,
-                distanceToRivers: featureSearchers.rivers.getNearest(lng, lat).distance,
-                distanceToRoads: featureSearchers.roads.getNearest(lng, lat).distance,
-                distanceToResidences: featureSearchers.residential.getNearest(lng, lat).distance,
-                distanceToIntermittentWater: featureSearchers.intermittentWater.getNearest(lng, lat).distance,
-                altitude: altitudeInfo.averageAltitude,
-                slopiness: altitudeInfo.variance,
-            };
+      const rowDate = new Date(row.timestamp);
 
-            buffer.push(location);
-            if (buffer.length === MAX_BUFFER_SIZE) {
-                insertRow();
-            }
+      try {
+        const location = new AnimalLocation();
+
+        location.animalId = row['individual-local-identifier'];
+        location.latitude = lat;
+        location.longitude = lng;
+        location.timestamp = rowDate;
+        location.temperature = row['external-temperature'];
+        location.habitat = row.habitat;
+        location.month = rowDate.getMonth() + 1;
+        location.time = rowDate.getHours() * 60 + rowDate.getMinutes();
+        
+        // find the species in the database for the row
+        let species = await animalSpeciesRepo.findOne({
+          where: { species: row['species'] },
         });
+
+        // if the species does not exist, create it
+        if (!species) {
+          species = new Species();
+          species.species = row['species'];
+          await animalSpeciesRepo.save(species);
+        }
+
+        location.species = species;
+        location.active = true;
+        await this.calculateAnimalLocationDistances(location, lat, lng, featureSearchers);
+        await animalLocations.save(location);
+        console.log('inserted', ++countInserted);
+      } catch (error) {
+        console.error(error);
+      }
+      row = csvReader.next();
+    }
+    await this.userService.sendEmailToAllAdmins('CSV Upload Succesful',
+      'CSV upload has completed succesfully!');
+    //Delete the file
+    var fs = require('fs');
+    fs.unlink(filename, function (err) {
+      if (err) throw err;
+      // if no error, file has been deleted successfully
+      console.log('File deleted!');
+    });
+  }
+
+  private async calculateAnimalLocationDistances(location: AnimalLocation, lat, lng, featureSearchers) {
+    const altitudeInfo = await this.altitude.getAltitudeForPoint(lat, lng);
+
+    const damClosest = featureSearchers[MapFeatureType.dams].getNearest(lng, lat);
+    const riverClosest = featureSearchers[MapFeatureType.rivers].getNearest(lng, lat);
+    const roadsClosest = featureSearchers[MapFeatureType.roads].getNearest(lng, lat);
+    const residentialClosest = featureSearchers[MapFeatureType.residential].getNearest(lng, lat);
+    const intermittentWaterClosest = featureSearchers[MapFeatureType.intermittent].getNearest(lng, lat);
+
+    const damDis = damClosest.distance || -Infinity;
+    const riverDis = riverClosest.distance || -Infinity;
+    const roadsDis = roadsClosest.distance || -Infinity;
+    const residentialDis = residentialClosest.distance || -Infinity;
+    const intermittentWaterDis = intermittentWaterClosest.distance || -Infinity;
+
+    const damBearing = damClosest.getBearing();
+    const riverBearing = riverClosest.getBearing();
+    const roadsBearing = roadsClosest.getBearing();
+    const residentialBearing = residentialClosest.getBearing();
+    const intermittentWaterBearing = intermittentWaterClosest.getBearing();
+
+    location.properties = {
+      distanceToDams: damDis,
+      bearingToDams: damBearing,
+      distanceToRivers: riverDis,
+      bearingToRivers: riverBearing,
+      distanceToRoads: roadsDis,
+      bearingToRoads: roadsBearing,
+      distanceToResidences: residentialDis,
+      bearingToResidences: residentialBearing,
+      distanceToIntermittentWater: intermittentWaterDis,
+      bearingToIntermittentWater: intermittentWaterBearing,
+
+      altitude: altitudeInfo.averageAltitude,
+      slopiness: altitudeInfo.variance,
+    };
+  }
+
+  async getAllAnimalsLocationTableData(): Promise<AnimalLocation[]> {
+    const con = await this.databaseService.getConnection();
+    return await con.getRepository(AnimalLocation).find();
+  }
+
+  async getIndividualAnimalLocationTableData(animalID): Promise<AnimalLocation[]> {
+    const con = await this.databaseService.getConnection();
+    return await con.getRepository(AnimalLocation).find({ animalId: animalID });
+  }
+
+  async getLocationDataBySpeciesId(speciesId: number): Promise<AnimalLocation[]> {
+    const con = await this.databaseService.getConnection();
+
+    const species = await con.getRepository(Species).findOne(speciesId);
+
+    if (!species) {
+      console.error('Species does not exist');
+      return undefined;
     }
 
-    async getAllAnimalsLocationTableData(): Promise<JSON> {
-        const con = await this.databaseService.getConnection();
-        let animaldata = JSON.parse(JSON.stringify( await con.getRepository(AnimalLocation).find()));
-        return animaldata;
+    try {
+      return await con
+        .getRepository(AnimalLocation)
+        .find({where: { species }});
+    } catch (error) {
+      console.error(error);
+      return undefined;
     }
+  }
 
-    async getIndividualAnimalLocationTableData(animalID): Promise<JSON> {
-        const con = await this.databaseService.getConnection();
-        return JSON.parse(JSON.stringify( await con.getRepository(AnimalLocation).find({ animalId : animalID })));
+  async deactivateAnimal(animalId): Promise<Boolean> {
+    const con = await this.databaseService.getConnection();
+
+    const animal = await con
+      .getRepository(AnimalLocation)
+      .findOne({ id: animalId });
+
+    try {
+      animal.active = false;
+
+      const addedAnimal = await con.getRepository(AnimalLocation).save(animal);
+      return true;
+    } catch (error) {
+      return false;
     }
+  }
 
+  async getAnimalIds(): Promise<string[]> {
+    const conn = await this.databaseService.getConnection();
+
+    const locationsRepo = conn.getRepository(AnimalLocation);
+    const res = await locationsRepo.createQueryBuilder()
+      .select('DISTINCT "animalId"')
+      .getRawMany();
+
+    return res.map(e => e.animalId);
+  }
+
+  /**
+   * Returns the last few animal locations for a given animal
+   * IN CHRONOLOGICAL ORDER (latest position is last in array)
+   * @param animalId The ID of the animal
+   */
+  async getLastFewAnimalLocations(animalId: string, numPositions = 10): Promise<Array<{
+    speciesId: number;
+    animalId: string;
+    month: number;
+    time: number;
+    longitude: number;
+    latitude: number;
+    timestamp: Date;
+  }>> {
+    const conn = await this.databaseService.getConnection();
+
+    const repo = conn.getRepository(AnimalLocation);
+    const res = await repo.createQueryBuilder()
+      .select('speciesId, animalId, month, time, longitude, latitude, timestamp')
+      .where(`"animalId" = :animalId`, { animalId })
+      .orderBy('timestamp', 'DESC')
+      .limit(numPositions)
+      .getRawMany();
+
+    return res.map(el => ({
+      speciesId: el.speciesId,
+      animalId: el.animalId,
+      month: el.month,
+      time: el.time,
+      longitude: el.longitude,
+      latitude: el.latitude,
+      timestamp: new Date(el.timestamp),
+    })).reverse();
+  }
 }
