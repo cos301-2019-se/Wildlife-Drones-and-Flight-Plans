@@ -6,19 +6,14 @@ DR BAM
 To aid ERP rangers in anti-poaching monitoring, a system is being developed to automatically create and optimise drone flight plans based on animal tracking information and reserve features. The project aims to increase the probability of drones covering key areas with endangered wildlife, while being random enough to prevent poachers identifying patrol routes. Rangers and drone pilots will be empowered with useful information through this dynamic application.
 
 SRS:  [Software Requirements Specification](Documentation/Demo4/Drone_Flight_Plans_SRS_Demo4.pdf)
-
 Coding Standards: [Coding Standards](/Documentation/Demo4/CodingStandards_Demo4.pdf)
-
 Testing Policy Document:  [Testing Policy](/Documentation/Demo4/Testing_policy_document_Demo4.pdf)
-
 User Manual: [User Manual](Documentation/Demo4/userManual_Demo4.pdf)
-
 Project Management: [Trello Board](https://trello.com/b/GWit5JXi/capstone)
-
 ## Group members
 ![image](https://lh4.googleusercontent.com/sYkeIXRCdnU5gPxCxJOXc_I6xD2D_OMxqu9-eRN1WwPWEg5bAW_7SZ86O5U863usmgKeCJeqAwN-Ay0bMkrIqJnZelcAtLnpRAeiHbHnukEjuPdsahIV_iJfkl8ATyYRKPP_e5_N)
 
-### Matthew Evans (16262949) [GitHub Profile](https://github.com/EvansMatthew97), [CV](Documentation/CVS/Matthew.pdf), [LinkedIN](https://www.linkedin.com/in/matthew-evans-011a78191/),
+### Matthew Evans (16262949) [GitHub Profile](https://github.com/EvansMatthew97), [CV](Documentation/CVS/Matthew.pdf), [LinkedIN](https://www.linkedin.com/in/matthew-evans-011a78191/)
 - __Interests__: Technology, astronomy, music, film, history
 - __Skills__: JavaScript, TypeScript, Angular 2+, Ionic Framework, PHP, SQL, NodeJS, React, 64-bit assemble, Android Play Store deployment, web development, Adobe After Effects, Blender 3D, GIMP, web scraping
 - __Previous work experience__:
@@ -28,7 +23,7 @@ Project Management: [Trello Board](https://trello.com/b/GWit5JXi/capstone)
 
 <hr />
 
-### Andreas Louw (15048366) [GitHub Profile](https://github.com/ASLouw), [CV](Documentation/CVS/Andreas.pdf), [LinkedIN](https://www.linkedin.com/in/andreas-louw-182a36175),
+### Andreas Louw (15048366) [GitHub Profile](https://github.com/ASLouw), [CV](Documentation/CVS/Andreas.pdf), [LinkedIN](https://www.linkedin.com/in/andreas-louw-182a36175)
 - __Interests__:Programming,App development,Metalwork and Woodwork
 - __Skills__: Java, Kotlin, PHP, C++, C#, JavaScript, assembly language(x64), App development, Web development, Database Management.
 - __Previous work experience__: None
@@ -36,7 +31,7 @@ Project Management: [Trello Board](https://trello.com/b/GWit5JXi/capstone)
 
 <hr />
 
-### Bryan Janse van Vuuren (16217498) [GitHub Profile](https://github.com/Viidas96), [CV](Documentation/CVS/Bryan.pdf), [LinkedIN](https://www.linkedin.com/in/bryan-janse-van-vuuren-451b8a191),
+### Bryan Janse van Vuuren (16217498) [GitHub Profile](https://github.com/Viidas96), [CV](Documentation/CVS/Bryan.pdf), [LinkedIN](https://www.linkedin.com/in/bryan-janse-van-vuuren-451b8a191)
 - __Interests__:Gaming,Programming,Mobile application development,Music
 - __Skills__:Angular,Java,C#,JavaScript,Mobile App Devlopment,Database management and design,Web Devlopment
 - __Previous work experience__:Mobile application design for Rage Software,Mobile game development.
@@ -44,7 +39,7 @@ Project Management: [Trello Board](https://trello.com/b/GWit5JXi/capstone)
 
 <hr />
 
-### Deane Roos (17057966) [GitHub Profile](https://github.com/BCybercell), [CV](Documentation/CVS/Deane.pdf), [LinkedIN](https://www.linkedin.com/in/deane-roos-a7a896143),
+### Deane Roos (17057966) [GitHub Profile](https://github.com/BCybercell), [CV](Documentation/CVS/Deane.pdf), [LinkedIN](https://www.linkedin.com/in/deane-roos-a7a896143)
 - __Interests__: Virtual reality, gaming and artificial intelligence
 - __Skills__: Java, C++, Assembly x64, Python
 - __Previous work experience__:  ETA operations
@@ -52,7 +47,7 @@ Project Management: [Trello Board](https://trello.com/b/GWit5JXi/capstone)
 
 <hr />
 
-### Reinhardt Eiselen (14043302) [GitHub Profile](https://github.com/EiselenR), [CV](Documentation/CVS/Reinhardt.pdf), [LinkedIN](https://www.linkedin.com/in/reinhardt-eiselen-0071a685),
+### Reinhardt Eiselen (14043302) [GitHub Profile](https://github.com/EiselenR), [CV](Documentation/CVS/Reinhardt.pdf), [LinkedIN](https://www.linkedin.com/in/reinhardt-eiselen-0071a685)
 - __Interests__: Music ,the outdoors and Technology
 - __Skills__:  Java, C++ , JavaScript, Assembler (x86) and 64 bit,PHP,SQL,Android,Nodejs, Angular,Web development and App development.
 - __Previous work experience__: no formal work experience 
