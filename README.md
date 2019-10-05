@@ -69,7 +69,7 @@ First download the project then configure the project environment - see the envi
 
 Required software: Node JS for server and client. 
 
-<br/>
+
 
 
 </hr>
@@ -84,7 +84,7 @@ Downloading Wildlife Drones and Flight Plan <br/>
 
 </p>
 </details>
-</hr></br>
+</hr>
 
 
 <details><summary><b>Starting the server</b></summary>
