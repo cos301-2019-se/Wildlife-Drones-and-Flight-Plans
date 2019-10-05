@@ -65,12 +65,12 @@ To aid ERP rangers in anti-poaching monitoring, a system is being developed to a
 
 ## Running the project
 
-First download the project then configure the project environment - see the environment configuration section below.
+- First download the project then configure the project environment - see the environment configuration section below.
 
 Required software: Node JS for server and client. 
 
 
-
+</br>
 
 </hr>
 
@@ -106,7 +106,7 @@ $ npm run start:dev
 </p>
 </details>
 
-</hr></br>
+</hr>
 
 
 <details><summary><b>Building the Client</b></summary>
