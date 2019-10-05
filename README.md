@@ -1,14 +1,13 @@
 # Wildlife Drones and Flight Plans
-DR BAM
-
+DR BAM<br/>
 [![Build Status](https://travis-ci.com/cos301-2019-se/Wildlife-Drones-and-Flight-Plans.svg?branch=master)](https://travis-ci.com/cos301-2019-se/Wildlife-Drones-and-Flight-Plans)
 
 To aid ERP rangers in anti-poaching monitoring, a system is being developed to automatically create and optimise drone flight plans based on animal tracking information and reserve features. The project aims to increase the probability of drones covering key areas with endangered wildlife, while being random enough to prevent poachers identifying patrol routes. Rangers and drone pilots will be empowered with useful information through this dynamic application.
 
-SRS:  [Software Requirements Specification](Documentation/Demo4/Drone_Flight_Plans_SRS_Demo4.pdf)
-Coding Standards: [Coding Standards](/Documentation/Demo4/CodingStandards_Demo4.pdf)
-Testing Policy Document:  [Testing Policy](/Documentation/Demo4/Testing_policy_document_Demo4.pdf)
-User Manual: [User Manual](Documentation/Demo4/userManual_Demo4.pdf)
+SRS:  [Software Requirements Specification](Documentation/Demo4/Drone_Flight_Plans_SRS_Demo4.pdf)<br/>
+Coding Standards: [Coding Standards](/Documentation/Demo4/CodingStandards_Demo4.pdf)<br/>
+Testing Policy Document:  [Testing Policy](/Documentation/Demo4/Testing_policy_document_Demo4.pdf)<br/>
+User Manual: [User Manual](Documentation/Demo4/userManual_Demo4.pdf)<br/>
 Project Management: [Trello Board](https://trello.com/b/GWit5JXi/capstone)
 ## Group members
 ![image](https://lh4.googleusercontent.com/sYkeIXRCdnU5gPxCxJOXc_I6xD2D_OMxqu9-eRN1WwPWEg5bAW_7SZ86O5U863usmgKeCJeqAwN-Ay0bMkrIqJnZelcAtLnpRAeiHbHnukEjuPdsahIV_iJfkl8ATyYRKPP_e5_N)
