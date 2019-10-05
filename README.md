@@ -14,27 +14,29 @@ Project Management: [Trello Board](https://trello.com/b/GWit5JXi/capstone)
 
 ### Matthew Evans (16262949) [GitHub Profile](https://github.com/EvansMatthew97), [CV](Documentation/CVS/Matthew.pdf), [LinkedIN](https://www.linkedin.com/in/matthew-evans-011a78191/)
 - __Interests__: Technology, astronomy, music, film, history
-- __Skills__: JavaScript, TypeScript, Angular 2+, Ionic Framework, PHP, SQL, NodeJS, React, 64-bit assemble, Android Play Store deployment, web development, Adobe After Effects, Blender 3D, GIMP, web scraping
+- __Skills__: JavaScript, TypeScript, Angular 2+, Ionic Framework, PHP, SQL, NodeJS, React, 64-bit assembly, Android Play Store deployment, web development, Adobe After Effects, Blender 3D, GIMP, web scraping
 - __Previous work experience__:
   - Teaching Assistant for the CS Department, 2016
   - Teaching Assistant for IMY department, 2017
-- __Attitudes__: curious, passionate, positive towards the future of technology
+- __Attitudes__: Curious, passionate and positive towards the future of technology
 
 <hr />
 
 ### Andreas Louw (15048366) [GitHub Profile](https://github.com/ASLouw), [CV](Documentation/CVS/Andreas.pdf), [LinkedIN](https://www.linkedin.com/in/andreas-louw-182a36175)
-- __Interests__: Programming,App development,Metalwork and Woodwork
-- __Skills__: Java, Kotlin, PHP, C++, C#, JavaScript, assembly language(x64), App development, Web development, Database Management.
+- __Interests__: Programming, app development, metalwork and woodwork
+- __Skills__: Java, Kotlin, PHP, C++, C#, JavaScript, Assembly (x64), App development, Web development, Database Management
 - __Previous work experience__: None
-- __Attitudes__: Diligent,Honest,Positive and  I&#39;m a Friendly person.
+- __Attitudes__: Diligent, honest, positive and a people person
 
 <hr />
 
 ### Bryan Janse van Vuuren (16217498) [GitHub Profile](https://github.com/Viidas96), [CV](Documentation/CVS/Bryan.pdf), [LinkedIN](https://www.linkedin.com/in/bryan-janse-van-vuuren-451b8a191)
-- __Interests__: Gaming,Programming,Mobile application development,Music
-- __Skills__: Angular,Java,C#,JavaScript,Mobile App Devlopment,Database management and design,Web Devlopment
-- __Previous work experience__: Mobile application design for Rage Software,Mobile game development.
-- __Attitudes__: Devoted,Trusting,Positive,Punctual,Work-oriented,Willingness
+- __Interests__: Gaming, programming, mobile application development and music
+- __Skills__: Angular, Java, C#, JavaScript, Mobile App Devlopment, Database management and design, Web Devlopment
+- __Previous work experience__: 
+  - Mobile application design for Rage Software
+  - Mobile game development
+- __Attitudes__: Devoted, trusting, positive, punctual, work-oriented and willingness
 
 <hr />
 
@@ -42,28 +44,28 @@ Project Management: [Trello Board](https://trello.com/b/GWit5JXi/capstone)
 - __Interests__: Virtual reality, gaming and artificial intelligence
 - __Skills__: Java, C++, Assembly x64, Python
 - __Previous work experience__:  ETA operations
-- __Attitudes__: Hardworking and dedicated
+- __Attitudes__: Hardworking, positive and dedicated
 
 <hr />
 
 ### Reinhardt Eiselen (14043302) [GitHub Profile](https://github.com/EiselenR), [CV](Documentation/CVS/Reinhardt.pdf), [LinkedIN](https://www.linkedin.com/in/reinhardt-eiselen-0071a685)
-- __Interests__: Music ,the outdoors and Technology
-- __Skills__:  Java, C++ , JavaScript, Assembler (x86) and 64 bit,PHP,SQL,Android,Nodejs, Angular,Web development and App development.
+- __Interests__: Music ,the outdoors and technology
+- __Skills__:  Java, C++ , JavaScript, Assembly (x86) and 64 bit, PHP, SQL, Android, Nodejs, Angular, Web development and App development
 - __Previous work experience__: No formal work experience 
-- __Attitudes__: Always Up for a challenge and Curious about the unkown and I&#39;m a hardwoker.
-
-## Project Structure overview
-For more information see our documentation.
-
-### /client
-Mobile application/website code. Uses Ionic Framework.
-
-### /server
-Server code. Uses Nest.js.
+- __Attitudes__: Always up for a challenge, curious about the unkown and hardworking
 
 
 ## Running the project
-First configure the project environment - see the environment configuration section below.
+First download the project then configure the project environment - see the environment configuration section below.
+
+Required software: Node JS for server and client. 
+
+### Downloading the project
+
+Downloading Wildlife Drones and Flight Plan <br/>
+- Clone or download the repository on the GitHub page. <br/>
+- Select Download ZIP. <br/>
+- Once the zip file has been downloaded unzip the folder. <br/>
 
 ### Starting the server
 ```
