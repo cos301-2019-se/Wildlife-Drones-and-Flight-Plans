@@ -13,10 +13,7 @@ To aid ERP rangers in anti-poaching monitoring, a system is being developed to a
   <tr>
     <td><img src="https://i.imgur.com/BGSGkqa.png" width="200px" /></td>
     <td><img src="https://i.imgur.com/83ZQjFU.png" width="200px" /></td>
-  </tr>
-  <tr>
     <td><img src="https://i.imgur.com/dW1kwGn.png" width="200px" /></td>
-    <td><img src="https://i.imgur.com/ZWQuj2A.png" width="200px" /></td>
   </tr>
 </table>
 
