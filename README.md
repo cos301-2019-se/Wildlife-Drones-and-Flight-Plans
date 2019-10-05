@@ -3,23 +3,22 @@ DR BAM
 
 [![Build Status](https://travis-ci.com/cos301-2019-se/Wildlife-Drones-and-Flight-Plans.svg?branch=master)](https://travis-ci.com/cos301-2019-se/Wildlife-Drones-and-Flight-Plans)
 
-To aid ERP rangers in anti-poaching patrolling, a system is being developed to automatically create and optimise drone flight plans based on animal tracking information and reserve features. The project aims to increase the probability of drones covering key areas with endangered wildlife, while being random enough to prevent poachers identifying patrol routes. Rangers and drone pilots will be empowered with useful information through this dynamic application.
+To aid ERP rangers in anti-poaching monitoring, a system is being developed to automatically create and optimise drone flight plans based on animal tracking information and reserve features. The project aims to increase the probability of drones covering key areas with endangered wildlife, while being random enough to prevent poachers identifying patrol routes. Rangers and drone pilots will be empowered with useful information through this dynamic application.
 
-SRS: [Demo 3](Documentation/Demo3/Drone_Flight_Plans_SRS%20Demo3.pdf), [Demo 2](Documentation/Demo2/Drone_Flight_Plans_SRS%20Demo2.pdf), [Demo 1](Documentation/Demo1/Drone_Flight_Plans_SRS_Demo1.pdf)
+SRS:  [Software Requirements Specification](Documentation/Demo4/Drone_Flight_Plans_SRS_Demo4.pdf)
 
-Architectural design: [Demo3](Documentation/Demo3/Architectural_Designs_Demo3.pdf), [Demo 2](Documentation/Demo2/Architectural_Designs_Demo2.pdf)
+Coding Standards: [Coding Standards](/Documentation/Demo4/CodingStandards_Demo4.pdf)
 
-Coding Standards: [Demo 4](/Documentation/Demo4/CodingStandards_Demo4.pdf), [Demo 3](/Documentation/Demo3/CodingStandards_Demo3.pdf), [Demo 2](/Documentation/Demo2/CodingStandards_Demo2.pdf)
+Testing Policy Document:  [Testing Policy](/Documentation/Demo4/Testing_policy_document_Demo4.pdf)
 
-Testing Policy Document:  [Demo 4](/Documentation/Demo4/Testing_policy_document_Demo4.pdf),[Demo 3](/Documentation/Demo3/Testing_policy_document_Demo3.pdf), [Demo 2](/Documentation/Demo2/Testing_policy_document_Demo2.pdf)
+User Manual: [User Manual](Documentation/Demo4/userManual_Demo4.pdf)
 
-User Manual: [Demo 3](Documentation/Demo3/userManual_Demo3.pdf), [Demo 2](/Documentation/Demo2/User_Manual_Demo2.pdf)
-
-[Trello Board](https://trello.com/b/GWit5JXi/capstone)
+Project Management: [Trello Board](https://trello.com/b/GWit5JXi/capstone)
 
 ## Group members
 ![image](https://lh4.googleusercontent.com/sYkeIXRCdnU5gPxCxJOXc_I6xD2D_OMxqu9-eRN1WwPWEg5bAW_7SZ86O5U863usmgKeCJeqAwN-Ay0bMkrIqJnZelcAtLnpRAeiHbHnukEjuPdsahIV_iJfkl8ATyYRKPP_e5_N)
-### Matthew Evans (16262949)
+
+### Matthew Evans (16262949) [GitHub Profile](https://github.com/EvansMatthew97), [CV](Documentation/CVS/Matthew.pdf), [LinkedIN](https://www.linkedin.com/in/matthew-evans-011a78191/),
 - __Interests__: Technology, astronomy, music, film, history
 - __Skills__: JavaScript, TypeScript, Angular 2+, Ionic Framework, PHP, SQL, NodeJS, React, 64-bit assemble, Android Play Store deployment, web development, Adobe After Effects, Blender 3D, GIMP, web scraping
 - __Previous work experience__:
@@ -27,26 +26,33 @@ User Manual: [Demo 3](Documentation/Demo3/userManual_Demo3.pdf), [Demo 2](/Docum
   - Teaching Assistant for IMY department, 2017
 - __Attitudes__: curious, passionate, positive towards the future of technology
 
+<hr />
 
-### Andreas Louw (15048366)
+### Andreas Louw (15048366) [GitHub Profile](https://github.com/ASLouw), [CV](Documentation/CVS/Andreas.pdf), [LinkedIN](https://www.linkedin.com/in/andreas-louw-182a36175),
 - __Interests__:Programming,App development,Metalwork and Woodwork
 - __Skills__: Java, Kotlin, PHP, C++, C#, JavaScript, assembly language(x64), App development, Web development, Database Management.
 - __Previous work experience__: None
 - __Attitudes__:Diligent,Honest,Positive and  I&#39;m a Friendly person.
 
-### Bryan Janse van Vuuren (16217498)
+<hr />
+
+### Bryan Janse van Vuuren (16217498) [GitHub Profile](https://github.com/Viidas96), [CV](Documentation/CVS/Bryan.pdf), [LinkedIN](https://www.linkedin.com/in/bryan-janse-van-vuuren-451b8a191),
 - __Interests__:Gaming,Programming,Mobile application development,Music
 - __Skills__:Angular,Java,C#,JavaScript,Mobile App Devlopment,Database management and design,Web Devlopment
 - __Previous work experience__:Mobile application design for Rage Software,Mobile game development.
 - __Attitudes__: Devoted,Trusting,Positive,Punctual,Work-oriented,Willingness
 
-### Deane Roos (17057966)
+<hr />
+
+### Deane Roos (17057966) [GitHub Profile](https://github.com/BCybercell), [CV](Documentation/CVS/Deane.pdf), [LinkedIN](https://www.linkedin.com/in/deane-roos-a7a896143),
 - __Interests__: Virtual reality, gaming and artificial intelligence
 - __Skills__: Java, C++, Assembly x64, Python
 - __Previous work experience__:  ETA operations
 - __Attitudes__: Hardworking and dedicated
 
-### Reinhardt Eiselen (14043302)
+<hr />
+
+### Reinhardt Eiselen (14043302) [GitHub Profile](https://github.com/EiselenR), [CV](Documentation/CVS/Reinhardt.pdf), [LinkedIN](https://www.linkedin.com/in/reinhardt-eiselen-0071a685),
 - __Interests__: Music ,the outdoors and Technology
 - __Skills__:  Java, C++ , JavaScript, Assembler (x86) and 64 bit,PHP,SQL,Android,Nodejs, Angular,Web development and App development.
 - __Previous work experience__: no formal work experience 

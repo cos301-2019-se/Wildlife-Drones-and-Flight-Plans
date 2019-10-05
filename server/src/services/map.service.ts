@@ -12,7 +12,7 @@ import { AnimalCellWeight } from '../entity/animal-cell-weight.entity';
 import { IQRIfy, Standardizer } from '../libraries/Standardizer';
 import { PoachingCellWeight } from '../entity/poaching-cell-weight.entity';
 import { CacheService } from './cashe.service';
-import { Species } from 'src/entity/animal-species.entity';
+import { Species } from '../entity/animal-species.entity';
 import { UserService } from './user.service';
 
 @Injectable()
