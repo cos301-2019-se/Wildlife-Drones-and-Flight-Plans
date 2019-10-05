@@ -15,7 +15,7 @@ Testing Policy Document:  [Demo 4](/Documentation/Demo4/Testing_policy_document_
 
 User Manual: [Demo 4](Documentation/Demo4/userManual_Demo4.pdf),[Demo 3](Documentation/Demo3/userManual_Demo3.pdf), [Demo 2](/Documentation/Demo2/User_Manual_Demo2.pdf)
 
-[Trello Board](https://trello.com/b/GWit5JXi/capstone)
+Project Management: [Trello Board](https://trello.com/b/GWit5JXi/capstone)
 
 ## Group members
 ![image](https://lh4.googleusercontent.com/sYkeIXRCdnU5gPxCxJOXc_I6xD2D_OMxqu9-eRN1WwPWEg5bAW_7SZ86O5U863usmgKeCJeqAwN-Ay0bMkrIqJnZelcAtLnpRAeiHbHnukEjuPdsahIV_iJfkl8ATyYRKPP_e5_N)
