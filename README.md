@@ -61,18 +61,17 @@ Mobile application/website code. Uses Ionic Framework.
 ### /server
 Server code. Uses Nest.js.
 
-## Installing the project
-Required software: Node JS for server. 
+## Running the project
+First download the project then configure the project environment - see the environment configuration section below.
+
+Required software: Node JS for server and client. 
+
+## Downloading the project
 
 Downloading Wildlife Drones and Flight Plan <br/>
-- Go to the link https://github.com/cos301-2019-se/Wildlife-Drones-andFlight-Plans.git.<br/>
-- On the GitHub page click on Clone or download. <br/>
+- Clone or download the repository on the GitHub page. <br/>
 - Select Download ZIP. <br/>
 - Once the zip file has been downloaded unzip the folder. <br/>
-
-
-## Running the project
-First configure the project environment - see the environment configuration section below.
 
 ### Starting the server
 ```
