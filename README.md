@@ -64,7 +64,7 @@ To aid ERP rangers in anti-poaching monitoring, a system is being developed to a
 </p>
 </details>
 
-<details><summary><b>Group Members</b></summary>
+<details><summary><b>Running the project</b></summary>
 <p>
 
 ## Running the project
