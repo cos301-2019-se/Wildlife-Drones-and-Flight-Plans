@@ -64,11 +64,11 @@ Server code. Uses Nest.js.
 ## Installing the project
 Required software: Node JS for server. 
 
-Downloading Wildlife Drones and Flight Plan 
-#Go to the link https://github.com/cos301-2019-se/Wildlife-Drones-andFlight-Plans.git
-#On the GitHub page click on Clone or download. 
-#Select Download ZIP. 
-#Once the zip file has been downloaded unzip the folder. 
+Downloading Wildlife Drones and Flight Plan <br/>
+#Go to the link https://github.com/cos301-2019-se/Wildlife-Drones-andFlight-Plans.git.<br/>
+#On the GitHub page click on Clone or download. <br/>
+#Select Download ZIP. <br/>
+#Once the zip file has been downloaded unzip the folder. <br/>
 
 
 ## Running the project
