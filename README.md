@@ -23,17 +23,17 @@ Project Management: [Trello Board](https://trello.com/b/GWit5JXi/capstone)
 <hr />
 
 ### Andreas Louw (15048366) [GitHub Profile](https://github.com/ASLouw), [CV](Documentation/CVS/Andreas.pdf), [LinkedIN](https://www.linkedin.com/in/andreas-louw-182a36175)
-- __Interests__:Programming,App development,Metalwork and Woodwork
+- __Interests__: Programming,App development,Metalwork and Woodwork
 - __Skills__: Java, Kotlin, PHP, C++, C#, JavaScript, assembly language(x64), App development, Web development, Database Management.
 - __Previous work experience__: None
-- __Attitudes__:Diligent,Honest,Positive and  I&#39;m a Friendly person.
+- __Attitudes__: Diligent,Honest,Positive and  I&#39;m a Friendly person.
 
 <hr />
 
 ### Bryan Janse van Vuuren (16217498) [GitHub Profile](https://github.com/Viidas96), [CV](Documentation/CVS/Bryan.pdf), [LinkedIN](https://www.linkedin.com/in/bryan-janse-van-vuuren-451b8a191)
-- __Interests__:Gaming,Programming,Mobile application development,Music
-- __Skills__:Angular,Java,C#,JavaScript,Mobile App Devlopment,Database management and design,Web Devlopment
-- __Previous work experience__:Mobile application design for Rage Software,Mobile game development.
+- __Interests__: Gaming,Programming,Mobile application development,Music
+- __Skills__: Angular,Java,C#,JavaScript,Mobile App Devlopment,Database management and design,Web Devlopment
+- __Previous work experience__: Mobile application design for Rage Software,Mobile game development.
 - __Attitudes__: Devoted,Trusting,Positive,Punctual,Work-oriented,Willingness
 
 <hr />
@@ -49,7 +49,7 @@ Project Management: [Trello Board](https://trello.com/b/GWit5JXi/capstone)
 ### Reinhardt Eiselen (14043302) [GitHub Profile](https://github.com/EiselenR), [CV](Documentation/CVS/Reinhardt.pdf), [LinkedIN](https://www.linkedin.com/in/reinhardt-eiselen-0071a685)
 - __Interests__: Music ,the outdoors and Technology
 - __Skills__:  Java, C++ , JavaScript, Assembler (x86) and 64 bit,PHP,SQL,Android,Nodejs, Angular,Web development and App development.
-- __Previous work experience__: no formal work experience 
+- __Previous work experience__: No formal work experience 
 - __Attitudes__: Always Up for a challenge and Curious about the unkown and I&#39;m a hardwoker.
 
 ## Project Structure overview
