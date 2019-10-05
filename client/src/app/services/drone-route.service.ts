@@ -52,7 +52,13 @@ export class DroneRouteService {
    * Get all animal IDs for planning predictive route
    */
   async getAnimalIds(): Promise<string[]> {
-    return await this.authService.post('getAnimalIds', {}) as string[];
+    const animalIds = await this.authService.post('getAnimalIds', {}) as string[];
+    return animalIds.sort((a, b) => {
+      const al = a.toLowerCase();
+      const bl = b.toLowerCase();
+
+      return al < bl ? -1 : al > bl ? 1 : 0;
+    });
   }
 
   async getPastRoutes() {

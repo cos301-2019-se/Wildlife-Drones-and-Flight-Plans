@@ -287,7 +287,7 @@ export class AnimalLocationService {
 
     const repo = conn.getRepository(AnimalLocation);
     const res = await repo.createQueryBuilder()
-      .select('speciesId, animalId, month, time, longitude, latitude, timestamp')
+      .select('"speciesId", "animalId", month, time, longitude, latitude, timestamp')
       .where(`"animalId" = :animalId`, { animalId })
       .orderBy('timestamp', 'DESC')
       .limit(numPositions)
