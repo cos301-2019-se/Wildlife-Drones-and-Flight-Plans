@@ -64,13 +64,11 @@ To aid ERP rangers in anti-poaching monitoring, a system is being developed to a
 </br> 
 
 ## Running the project
-<details><summary><b></b></summary>
-<p>
+
 First download the project then configure the project environment - see the environment configuration section below.
 
 Required software: Node JS for server and client. 
-</p>
-</details>
+
 
 </hr>
 
@@ -136,8 +134,7 @@ $ ionic cordova run ios
 </hr>
 </br> 
 
-## Change the server URL
-<details><summary><b>Building the Client</b></summary>
+<details><summary><b>Change the server URL</b></summary>
 <p>
   
 Edit ```/client/src/environments/{environment.prod.ts|environment.ts}``` and change the server key to your url.
@@ -148,8 +145,8 @@ We recommend using an https scheme.
 </hr>
 </br> 
 
-## Environment Configuration
-<details><summary><b>Building the Client</b></summary>
+
+<details><summary><b>Environment Configuration</b></summary>
 <p>
   
 Development configuration can be made in a .env file. The easiest way to set it up is to copy-paste the .env.example file and rename it to .env.
