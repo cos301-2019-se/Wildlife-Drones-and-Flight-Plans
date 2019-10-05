@@ -15,8 +15,7 @@ To aid ERP rangers in anti-poaching monitoring, a system is being developed to a
 | User Manual                      	| [User Manual](Documentation/Demo4/userManual_Demo4.pdf)                                     	|
 | Project management tool (Trello) 	| [Trello Board](https://trello.com/b/GWit5JXi/capstone)                                      	|
 
-
-<details><summary><bold> Group members</bold></summary>
+<details><summary><b>Group Members</b></summary>
 <p>
 
 ![image](https://lh4.googleusercontent.com/sYkeIXRCdnU5gPxCxJOXc_I6xD2D_OMxqu9-eRN1WwPWEg5bAW_7SZ86O5U863usmgKeCJeqAwN-Ay0bMkrIqJnZelcAtLnpRAeiHbHnukEjuPdsahIV_iJfkl8ATyYRKPP_e5_N)
@@ -65,7 +64,11 @@ To aid ERP rangers in anti-poaching monitoring, a system is being developed to a
 </p>
 </details>
 
+<details><summary><b>Group Members</b></summary>
+<p>
+
 ## Running the project
+
 First download the project then configure the project environment - see the environment configuration section below.
 
 Required software: Node JS for server and client. 
@@ -170,3 +173,5 @@ OTP_ATTEMPTS=3
 - OTP_PATTERN - A regular expression pattern to generate a random one-time-pin from
 - OTP_EXPIRES - How long (in seconds) an OTP lasts. This is also the time the user has to wait before login attempts reset.
 - OTP_ATTEMPTS - The number of login attempts the user gets before being locked out until the one time pin expires.
+</p>
+</details>
