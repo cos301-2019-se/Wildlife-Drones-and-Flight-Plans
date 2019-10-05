@@ -5,6 +5,8 @@
 
 To aid ERP rangers in anti-poaching monitoring, a system is being developed to automatically create and optimise drone flight plans based on animal tracking information and reserve features. The project aims to increase the probability of drones covering key areas with endangered wildlife, while being random enough to prevent poachers identifying patrol routes. Rangers and drone pilots will be empowered with useful information through this dynamic application.
 
+[System presentation](/Documentation/Wildlife%20Drones%20and%20Flight%20Plans%20Virtual%20Presentation.pdf)
+
 | Document                         	| Link                                                                                        	|
 |----------------------------------	|---------------------------------------------------------------------------------------------	|
 | SRS                              	| [Software Requirements Specification](Documentation/Demo4/Drone_Flight_Plans_SRS_Demo4.pdf) 	|
@@ -12,6 +14,8 @@ To aid ERP rangers in anti-poaching monitoring, a system is being developed to a
 | Testing Policy                   	| [Testing Policy](/Documentation/Demo4/Testing_policy_document_Demo4.pdf)                    	|
 | User Manual                      	| [User Manual](Documentation/Demo4/userManual_Demo4.pdf)                                     	|
 | Project management tool (Trello) 	| [Trello Board](https://trello.com/b/GWit5JXi/capstone)                                      	|
+
+
 
 ## Group members
 ![image](https://lh4.googleusercontent.com/sYkeIXRCdnU5gPxCxJOXc_I6xD2D_OMxqu9-eRN1WwPWEg5bAW_7SZ86O5U863usmgKeCJeqAwN-Ay0bMkrIqJnZelcAtLnpRAeiHbHnukEjuPdsahIV_iJfkl8ATyYRKPP_e5_N)
