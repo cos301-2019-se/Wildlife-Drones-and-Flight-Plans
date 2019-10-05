@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Storage } from '@ionic/storage';
 import { BehaviorSubject } from 'rxjs';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
+import { environment } from '../../environments/environment';
 
 const TOKEN_KEY = 'accessToken';
 const EMAIL_KEY = 'email';
@@ -19,7 +20,7 @@ export class AuthenticationService {
     status: true,
     jobType: 'pilot',
   }); // assume logged in by default
-  private readonly url = 'http://localhost:3000';
+  private readonly url = environment.server;
 
   constructor(
     private storage: Storage,

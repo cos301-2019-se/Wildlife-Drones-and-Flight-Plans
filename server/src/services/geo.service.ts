@@ -12,6 +12,7 @@ import simplify from '@turf/simplify';
 import squareGrid from '@turf/square-grid';
 import explode from '@turf/explode';
 import bearing from '@turf/bearing';
+import bboxPolygon from '@turf/bbox-polygon';
 
 /**
  * Provides helped functions for geometry calculation
@@ -113,7 +114,9 @@ export class GeoService {
    * @param cellSizeKm The length of a cell's edge in kilometres
    */
   public partitionIntoGrid(polygon, cellSizeKm) {
-    // polygon = this.simplifyGeometry(polygon, 0.1);
+    const cellSizeDeg = convertLength(cellSizeKm, 'kilometers', 'degrees');
+    polygon = this.simplifyGeometry(polygon, cellSizeDeg);
+
     const bounds = this.getBoundingBox(polygon);
     let cellsFound = 0;
     const cells = squareGrid(bounds, cellSizeKm, {

@@ -13,39 +13,39 @@ export class AnimalCellWeight {
   @ManyToOne(type => Species, species => species.id)
   species: Species;
 
-  @Column()
+  @Column('float')
   time0Weight: number;
 
-  @Column()
+  @Column('float')
   time120Weight: number;
 
-  @Column()
+  @Column('float')
   time240Weight: number;
 
-  @Column()
+  @Column('float')
   time360Weight: number;
 
-  @Column()
+  @Column('float')
   time480Weight: number;
 
-  @Column()
+  @Column('float')
   time600Weight: number;
 
-  @Column()
+  @Column('float')
   time720Weight: number;
 
-  @Column()
+  @Column('float')
   time840Weight: number;
 
-  @Column()
+  @Column('float')
   time960Weight: number;
 
-  @Column()
+  @Column('float')
   time1080Weight: number;
 
-  @Column()
+  @Column('float')
   time1200Weight: number;
 
-  @Column()
+  @Column('float')
   time1320Weight: number;
 }

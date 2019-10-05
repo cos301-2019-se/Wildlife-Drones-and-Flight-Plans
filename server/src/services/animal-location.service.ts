@@ -263,7 +263,7 @@ export class AnimalLocationService {
 
     const locationsRepo = conn.getRepository(AnimalLocation);
     const res = await locationsRepo.createQueryBuilder()
-      .select('DISTINCT animalId')
+      .select('DISTINCT "animalId"')
       .getRawMany();
 
     return res.map(e => e.animalId);
@@ -288,7 +288,7 @@ export class AnimalLocationService {
     const repo = conn.getRepository(AnimalLocation);
     const res = await repo.createQueryBuilder()
       .select('speciesId, animalId, month, time, longitude, latitude, timestamp')
-      .where(`animalId = :animalId`, { animalId })
+      .where(`"animalId" = :animalId`, { animalId })
       .orderBy('timestamp', 'DESC')
       .limit(numPositions)
       .getRawMany();

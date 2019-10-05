@@ -109,11 +109,8 @@ export class ModelPrediction {
   }
 
   @Get('trainClassificationModel')
-  trainClassificationModel(
-    @Query('species') species: number,
-  ): Promise<boolean> {
-    console.log('the species id is ', species);
-    return this.modelTraining.trainAnimalClassifierModel(species);
+  trainClassificationModel(): Promise<boolean> {
+    return this.modelTraining.trainAnimalClassifierModels();
   }
 
   @Get('trainClassificationModelPoaching')

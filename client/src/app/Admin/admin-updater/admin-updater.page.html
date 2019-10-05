@@ -1,0 +1,21 @@
+<ion-content>
+  <ion-grid fixed>
+    <ion-row>
+      <ion-button (click)="updatePoachingModel()">
+        Update poaching model
+      </ion-button>
+      <ion-button (click)="updateAnimalModel()">
+        Update animal model
+      </ion-button>
+    </ion-row>
+    <ion-row>
+      <ion-col>
+        <h2>Poaching incident types</h2>
+        <ion-item>
+          <ion-input type="text" placeholder="E.g. snare" [(ngModel)]="newIncidentType"></ion-input>
+        </ion-item>
+        <ion-button (click)="addNewIncidentType()">Add</ion-button>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

@@ -9,28 +9,32 @@ export class Drone {
   @Column('text')
   name: string;
 
-  @Column()
+  @Column('float')
   avgSpeed: number;
 
-  @Column()
+  @Column('float')
   avgFlightTime: number;
 
   @Column({
+    type: 'float',
     nullable: true,
   })
   speed: number;
 
   @Column({
+    type: 'float',
     nullable: true,
   })
   flightTime: number;
 
   @Column({
+    type: 'float',
     nullable: true,
   })
   longitude: number;
 
   @Column({
+    type: 'float',
     nullable: true,
   })
   latitude: number;

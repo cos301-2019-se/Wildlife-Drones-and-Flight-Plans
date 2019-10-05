@@ -7,7 +7,7 @@ import { DroneRoute } from '../entity/drone-route.entity';
 import { MailService } from '../services/mail.service';
 import { options } from 'superagent';
 import { AuthService } from '../auth/auth.service';
-import { controllers } from 'src/app.controllers';
+import { controllers } from '../app.controllers';
 import { MapService } from '../services/map.service'
 
 @UseGuards(AuthGuard('jwt'))

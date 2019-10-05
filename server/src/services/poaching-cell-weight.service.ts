@@ -46,9 +46,7 @@ export class PoachingCellWeightService {
   async addPoachingCellsWeight(data: any[]): Promise<boolean> {
     const con = await this.databaseService.getConnection();
 
-
-
-    data.forEach(async cellData => {
+    for (const cellData of data) {
       const mapCellIdExist = await con
         .getRepository(MapCellData)
         .findOne({ id: cellData.cellId });
@@ -99,7 +97,7 @@ export class PoachingCellWeightService {
           return false;
         }
       }
-    });
+    }
 
 
     return false;

@@ -20,9 +20,9 @@ export class Ranger {
   @Column()
   time: Date;
 
-  @Column()
+  @Column('float')
   longitude: number;
 
-  @Column()
+  @Column('float')
   latitude: number;
 }

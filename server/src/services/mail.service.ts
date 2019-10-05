@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from './config.service';
 import * as mailer from 'nodemailer';
 import * as Twig from 'twig';
-import * as fs from 'fs';
 import * as path from 'path';
 
 @Injectable()
@@ -46,9 +45,7 @@ export class MailService {
 
     // const body = `Your PIN is ${details.templateParams.otp}`;
 
-    const body = await new Promise((resolve, reject) => {
-      console.log('awaiting promise', `../templates/${details.template}`);
-
+    const body: string = await new Promise((resolve, reject) => {
       const templatePath = path.join(process.cwd(), `src/templates/${details.template}`);
 
       Twig.renderFile(
@@ -73,6 +70,11 @@ export class MailService {
       subject: details.subject,
       html: body,
     };
+
+    console.log('sending message', {
+      ...message,
+      html: message.html.substring(0, 100),
+    });
 
     this.tp.sendMail(message);
   }

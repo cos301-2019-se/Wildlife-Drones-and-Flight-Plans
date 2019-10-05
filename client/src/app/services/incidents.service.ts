@@ -47,6 +47,12 @@ export class IncidentsService {
     const res = await this.authService.post('getPoachingIncidentTypes', {});
     return res as IncidentType[];
   }
+
+  async addIncidentType(name: string): Promise<boolean> {
+    return await this.authService.post('addPoachingIncidentType', {
+      poachingType: name,
+    }) as boolean;
+  }
 }
 
 @Injectable()

@@ -14,32 +14,37 @@ import { DroneRoute } from '../entity/drone-route.entity';
 import { MapCellData } from '../entity/map-cell-data.entity';
 import { AnimalCellWeight } from '../entity/animal-cell-weight.entity';
 import { PoachingCellWeight } from '../entity/poaching-cell-weight.entity';
+import { ConfigService } from './config.service';
 
 @Injectable()
 export class DatabaseService {
   private connection: Connection;
-  private readyListeners = [];
-  private isInitialising = false;
+  private readyPromise: Promise<Connection> = null;
+
+  constructor(
+    private config: ConfigService,
+  ) {}
 
   /**
    * Usage:
    * const users = (await new DatabaseService().getConnection()).getRepository(User);
    */
   getConnection(): Promise<Connection> {
-    return new Promise(async resolve => {
-      if (this.connection) {
-        return resolve(this.connection);
-      }
+    if (this.readyPromise) {
+      return this.readyPromise;
+    }
 
-      this.readyListeners.push(resolve);
-      if (this.isInitialising) {
-        return;
-      }
-      this.isInitialising = true;
+    const { db: dbConfig } = this.config.getConfig();
 
+    this.readyPromise = new Promise(async resolve => {
       this.connection = await createConnection({
-        type: 'sqlite',
-        database: 'database.sqlite',
+        type: dbConfig.type,
+        host: dbConfig.host,
+        port: dbConfig.port,
+        username: dbConfig.user,
+        password: dbConfig.pass,
+        database: dbConfig.database,
+
         entities: [
           User,
           AnimalLocation,
@@ -60,10 +65,9 @@ export class DatabaseService {
         logging: false,
       });
 
-      while (this.readyListeners.length) {
-        this.readyListeners[0](this.connection);
-        this.readyListeners.shift();
-      }
+      resolve(this.connection);
     });
+
+    return this.readyPromise;
   }
 }

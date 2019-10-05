@@ -36,13 +36,13 @@ export class AnimalLocation {
   @Column()
   time: number;
 
-  @Column()
+  @Column('float')
   longitude: number;
 
-  @Column()
+  @Column('float')
   latitude: number;
 
-  @Column()
+  @Column('float')
   temperature: number;
 
   @Column()

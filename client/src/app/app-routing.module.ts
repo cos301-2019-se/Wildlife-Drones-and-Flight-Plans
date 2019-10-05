@@ -12,6 +12,7 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     loadChildren: './members/member-routing.module#MemberRoutingModule'
   },
+  { path: 'admin-updater', loadChildren: './Admin/admin-updater/admin-updater.module#AdminUpdaterPageModule' },
 ];
 
 @NgModule({

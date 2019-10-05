@@ -9,6 +9,6 @@ export class PoachingCellWeight {
   @ManyToOne(type => MapCellData, mapCellData => mapCellData.id)
   cell: MapCellData;
 
-  @Column()
+  @Column('float')
   weight: number;
 }
