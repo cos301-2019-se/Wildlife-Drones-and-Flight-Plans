@@ -164,6 +164,37 @@ OTP_ATTEMPTS=3
 </details>
 
 
+## Contributing
+
+<details><summary><b>Add features</b></summary>
+  
+Please follow our [coding standards](/Documentation/Demo4/CodingStandards_Demo4.pdf) and [testing policy](/Documentation/Demo4/Testing_policy_document_Demo4.pdf).
+
+Create a pull request with your changes. Please include a justification for your changes, include a description of what the changes are and point to any changes made.
+  
+</details>
+
+<details><summary><b>Submit bugs</b></summary>
+  Use the GitHub issues feature to let us know about bugs.
+
+  Please include the following:
+  1. A summary of the bug
+  2. Your environment (OS, database, etc.)
+  3. Conditions to replicate the bug
+  4. Expected behaviour
+  5. Actual behaviour
+</details>
+
+<details><summary><b>Review the documentation</b></summary>
+  Create pull requests or create issues to fix typos or add content to our documentation.
+</details>
+
+<details><summary><b>Features and suggestions</b></summary>
+  Create an issue with a feature request tag.
+  Give examples and include as many details as possible.
+  Include justification for any new features or changes.
+</details>
+
 
 ## Group Members
 <img src="https://lh4.googleusercontent.com/sYkeIXRCdnU5gPxCxJOXc_I6xD2D_OMxqu9-eRN1WwPWEg5bAW_7SZ86O5U863usmgKeCJeqAwN-Ay0bMkrIqJnZelcAtLnpRAeiHbHnukEjuPdsahIV_iJfkl8ATyYRKPP_e5_N" width="600px" />
