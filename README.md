@@ -1,5 +1,5 @@
 # Wildlife Drones and Flight Plans
-<img src="https://imgur.com/DnqO6b0.png" />
+<img src="https://imgur.com/38kDt19.png" />
 
 [![Build Status](https://travis-ci.com/cos301-2019-se/Wildlife-Drones-and-Flight-Plans.svg?branch=master)](https://travis-ci.com/cos301-2019-se/Wildlife-Drones-and-Flight-Plans)
 
