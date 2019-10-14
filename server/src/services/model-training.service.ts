@@ -9,7 +9,7 @@ import { RegressionService } from './regression.service';
 import { MapFeatureType } from '../entity/map-data.entity';
 import { SRTMService } from './srtm.service';
 import getDistance from '@turf/distance';
-import { lineString } from '@turf/helpers';
+import { lineString, convertLength } from '@turf/helpers';
 import lineSliceAlong from '@turf/line-slice-along';
 import { DatabaseService } from './db.service';
 import { Species } from '../entity/animal-species.entity';
@@ -108,6 +108,7 @@ export class ModelTraining {
    * @param animalId The animal ID
    * @param timeInMinutes How long (in minutes) to predict in future
    * @param startingPoint The starting point of the animal
+   * Returns a list of positions (lon, lat pairs) and speed in degrees per second
    */
   async predictFutureAnimalPosition(animalId: string, timeInMinutes: number): Promise<{
     speed: number;
@@ -198,11 +199,10 @@ export class ModelTraining {
       );
 
       elapsedDistance += distance;
-      console.log(elapsedDistance);
     }
 
     return {
-      speed: averageSpeed,
+      speed: convertLength(averageSpeed, 'kilometers', 'degrees') / 60,
       positions: futurePath,
     };
   }
@@ -249,15 +249,13 @@ export class ModelTraining {
    * @param speciesId The id of the species
    */
   async trainAnimalClassifierModel(speciesId: number) {
-    console.log('species id is', speciesId);
-
     const locationsForSpecies = await this.animalLocationService.getLocationDataBySpeciesId(speciesId);
 
     if (!locationsForSpecies || !locationsForSpecies.length) {
       console.error('No data for species');
       return;
     }
-    console.log('My points',locationsForSpecies.length);
+
     const teachingData = locationsForSpecies
       .map(tp => ({
         month: tp.month,

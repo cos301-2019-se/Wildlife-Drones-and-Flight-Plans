@@ -2,18 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { DroneService } from './drone.service';
 import { PoachingIncidentService } from './poaching-incident.service';
 import { ClarkeWrightProblem, Point } from '../libraries/savings-solver';
+import { PredictiveSolver } from '../libraries/predictive-solver';
 import { convertLength } from '@turf/helpers';
 
 import distance from '@turf/distance';
 import { AnimalLocationService } from './animal-location.service';
 import { ModelTraining } from './model-training.service';
-import getDistance from '@turf/distance';
-import { lineString } from '@turf/helpers';
-import lineSliceAlong from '@turf/line-slice-along';
-import getBearing from '@turf/bearing';
 import { MapService } from './map.service';
-const Victor = require('victor');
-// import * as Victor from 'victor';
 
 @Injectable()
 export class DroneRouteService {
@@ -109,7 +104,7 @@ export class DroneRouteService {
     const routes = problem.solve(weights);
 
     return routes
-      .map(route => [route.depot, ...route.points, route.depot].map(point => [point.x, point.y]));
+      .map(route => [...route.points, route.depot].map(point => [point.x, point.y]));
   }
 
   /**
@@ -127,15 +122,7 @@ export class DroneRouteService {
       return false;
     }
 
-    // cannot find a route if the drone does not move
-    if (droneInfo.speed <= 0) {
-      return [];
-    }
-
-    console.log('drone info', droneInfo);
-
-    // find future locations for all chosen animals
-    const predictions = [];
+    let predictions = [];
     for (const animalId of animalIds) {
       const nextPositions = await this.modelTrainingService.predictFutureAnimalPosition(animalId, droneInfo.flightTime);
       if (nextPositions && nextPositions.positions.length) {
@@ -143,211 +130,19 @@ export class DroneRouteService {
       }
     }
 
-    console.log('predictions', predictions.map(p => p.positions));
+    const predictiveSolver = new PredictiveSolver();
 
-    // find intercept
-    const getIntercept = (dronePosition: [number, number], timeElapsed, droneSpeedDeg, animalSpeed, animalPositions): [number, number] => {
-      const animalDistanceTravelled = timeElapsed * animalSpeed;
-      const animalSpeedDeg = convertLength(animalSpeed, 'kilometers', 'degrees');
-
-      // first, account for the distance along the line the elephant has moved
-      const geoLine = lineString(animalPositions);
-      let offsetLine;
-      try {
-        offsetLine = lineSliceAlong(
-          geoLine,
-          animalDistanceTravelled,
-          Infinity,
-          { units: 'kilometers' },
-        );
-      } catch (err) {
-        console.error('line error', err);
-        return undefined;
-      }
-
-      const points: any[] = offsetLine.geometry.coordinates;
-
-      // find the interception point
-      const lines = points.reduce((acc, p, i) => {
-        if (i === points.length - 1) {
-          return acc;
-        }
-        acc.push([p, points[i + 1]]);
-        return acc;
-      }, []);
-
-      // to solve quadratic equation
-      const solveQuadratic = (a, b, c, multiplier = 1) => (
-        -1 * b + multiplier * Math.sqrt(b * b - 4 * a * c)
-      ) / (2 * a);
-
-      /*
-        To calculate the intercept, we treat the path the animal goes on
-        as multiple lines. Each of these lines is tested for an intersection
-        point. If there is no intersection point, it tests the next line
-        segment in the path.
-
-        We find the intercept as follows:
-        We know where the animal line starting point is and what its direction
-        is and its velocity.
-        We also know where the drone starts and what its velocity is. We treat
-        the area the drone can reach as a circle.
-        We then find the intercept between the circle and the animal's path.
-      */
-      for (const line of lines) {
-        // get bearing of the line, where the x axis is 0 degrees
-        const bearing = 90 - getBearing(line[0], line[1]);
-        // calculate the animal's movement vector ("gradient" * speed)
-        const animalMovementVector = new Victor(
-          Math.cos(bearing / 180 * Math.PI),
-          Math.sin(bearing / 180 * Math.PI)
-        ).multiplyScalar(animalSpeedDeg); // velocity vector of target
-
-        // the starting points of the animal and drone
-        const animalStart = new Victor(line[0][0], line[0][1]); // starting point of the target
-        const droneStart = new Victor(dronePosition[0], dronePosition[1]); // starting drone position
-
-        const a = animalMovementVector.clone().dot(animalMovementVector) - droneSpeedDeg * droneSpeedDeg;
-        const b = 2 * animalStart.clone().subtract(droneStart).dot(animalMovementVector);
-        const c = animalStart.clone().subtract(droneStart).dot(animalStart.clone().subtract(droneStart));
-
-        // solve quadratic equation for a, b, c to find time
-        const solutionA = solveQuadratic(a, b, c, 1);
-        const solutionB = solveQuadratic(a, b, c, -1);
-
-        // only positive solution is the correct one (time cannot be negative)
-        const t = Math.max(solutionA, solutionB);
-        // find the point along the line the animal would be at for the found time
-        const interception = animalStart.clone().add(animalMovementVector.clone().multiplyScalar(t));
-
-        // check that the intercept point is actually on the line
-        const lineDistance = getDistance(line[0], line[1], { units: 'degrees' });
-        const interceptionDistance = getDistance(line[0], [interception.x, interception.y], { units: 'degrees' });
-
-        // if the point isn't on the line, then try the next line segment
-        if (interceptionDistance > lineDistance) {
-          continue;
-        }
-
-        // if the point is on the line, then return the interception point
-        return [interception.x, interception.y];
-      }
-
-      return undefined;
-    };
-
-    // calculate all permutations of predictions (i.e. for each animal)
-    const permutations = [];
-    const permute = (arr, m = []) => {
-      if (arr.length === 0) {
-        permutations.push(m);
-        return;
-      }
-      for (let i = 0; i < arr.length; i++) {
-        const curr = arr.slice();
-        const next = curr.splice(i, 1);
-        permute(curr.slice(), m.concat(next));
-      }
-    };
-    permute(predictions);
-
-    console.log('permutations', permutations.length);
-
-    const droneSpeedDeg = convertLength(droneInfo.speed / 60, 'kilometers', 'degrees');
-
-    let bestPointsReached = -Infinity;
-    let bestDistance = Infinity;
-    let bestPath = null;
-
-    // now try find paths from depot to points, taking into account maximum distance
-    for (const permutation of permutations) {
-      const paths = [];
-      let totalDistance = 0;
-      let distanceElapsed = 0;
-
-      let activePath: Array<[number, number]> = [[depotLon, depotLat]];
-      let lastPosition = activePath[0];
-
-      for (const predictedPath of permutation) {
-        const interceptPoint = getIntercept(
-          lastPosition,
-          distanceElapsed / droneSpeedDeg,
-          droneSpeedDeg,
-          predictedPath.speed,
-          predictedPath.positions,
-        );
-
-        if (typeof interceptPoint === 'undefined') {
-          continue; // the point cannot be reached
-        }
-
-        // distance from last point to the predicted point
-        // if the distance to the point from the last point and then back to the depo
-        // is too great, then return to the depot and start a new route
-        const pointDistance = getDistance(lastPosition, interceptPoint, { units: 'degrees'});
-        const distanceBackToDepot = getDistance(interceptPoint, [depotLon, depotLat], { units: 'degrees' });
-
-        if (distanceElapsed + pointDistance + distanceBackToDepot > droneInfo.maxFlightDistanceDegrees) {
-          // end this path
-          activePath.push([depotLon, depotLat]);
-          paths.push(activePath);
-
-          // create a new path
-          activePath = [[depotLon, depotLat], interceptPoint];
-          lastPosition = [depotLon, depotLat];
-          distanceElapsed = 0;
-
-          totalDistance += pointDistance + distanceBackToDepot;
-        } else {
-          activePath.push(interceptPoint);
-          lastPosition = interceptPoint;
-          distanceElapsed += pointDistance;
-          totalDistance += pointDistance;
-        }
-      }
-
-      // if the last path did not exceed the maximum distance, add it
-      if (paths.indexOf(activePath) === -1 && activePath.length > 1) {
-        activePath.push([depotLon, depotLat]);
-        paths.push(activePath);
-      }
-
-      const feasiblePaths = paths.filter(route => {
-        if (route.length <= 2) {
-          // if it's only depot to depot, don't count it
-          return false;
-        }
-
-        const routeDistance = route.reduce((sum, point, index) => {
-          if (index === route.length - 1) {
-            return sum;
-          }
-          const pointDistance = getDistance(point, route[index + 1], { units: 'degrees' });
-          return sum + pointDistance;
-        }, 0);
-
-        return routeDistance < droneInfo.maxFlightDistanceDegrees;
-      });
-
-      const numPointsReached = feasiblePaths.reduce((total, route) => {
-        return total + route.length - 2; // - 2 to exclude depots
-      }, 0);
-
-      // if it visits more points, then it is better
-      if (
-        bestPath === null ||
-        numPointsReached > bestPointsReached ||
-        (numPointsReached === bestPointsReached && totalDistance < bestDistance)
-      ) {
-        bestPath = feasiblePaths;
-        bestDistance = totalDistance;
-        bestPointsReached = numPointsReached;
-      }
-    }
+    const routes = predictiveSolver.createRoute(
+      convertLength(droneInfo.speed, 'kilometers', 'degrees') / 60 / 60, // drone speed in degrees per second
+      droneInfo.maxFlightDistanceDegrees,
+      depotLon,
+      depotLat,
+      predictions,
+    );
 
     return {
       futureLocations: predictions,
-      routes: bestPath,
+      routes,
     };
   }
 
