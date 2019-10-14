@@ -109,7 +109,7 @@ export class DroneRouteService {
     const routes = problem.solve(weights);
 
     return routes
-      .map(route => [route.depot, ...route.points, route.depot].map(point => [point.x, point.y]));
+      .map(route => [...route.points, route.depot].map(point => [point.x, point.y]));
   }
 
   /**

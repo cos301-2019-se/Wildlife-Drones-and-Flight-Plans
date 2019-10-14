@@ -1,4 +1,5 @@
 import getDistance from '@turf/distance';
+
 /**
  * Weights used for heuristics in the Clarke Wright algorithm
  */
@@ -54,30 +55,31 @@ class Route {
   id: number;
 
   constructor(a: Point, depot: Point) {
-    this.points = [a];
+    this.points = [depot, a];
     this.depot = depot;
     this.id = Route.id++;
   }
 
   public getStart(): Point {
-    return this.points[0];
+    return this.points[1];
   }
   public getEnd(): Point {
     return this.points[this.points.length - 1];
   }
 
   public joinRoute(route: Route) {
-    this.points.push(...route.points);
+    this.points.push(...route.points.slice(1));
   }
 
   /**
    * Cost from the depot through the points and back to the depot
    */
   public totalDistance(): number {
-    let prev = this.depot;
+    let prev = this.points[0];
     let cost = 0;
 
     this.points.forEach(point => {
+      if (point === prev) return;
       cost += prev.getDistanceTo(point);
       prev = point;
     });
@@ -91,7 +93,7 @@ class Route {
    * Total demand of all the points
    */
   public totalDemand() {
-    return this.points.reduce((sum, point) => sum + point.demand, 0);
+    return this.points.reduce((sum, point) => sum + (point === this.depot ? 0 : point.demand), 0);
   }
 
   /**
@@ -99,12 +101,14 @@ class Route {
    * Runs until no further improvements are made.
    * @param iterations The number of times to re-run
    */
-  public optimise(iterations = 10) {
-    for (let i = 0; i < iterations; i++) {
-      let bestDistance = 0;
-      while (bestDistance !== this.twoOpt()) {
-        bestDistance = this.totalDistance();
+  public optimise(maxIter = 1000) {
+    let bestDistance = 0;
+    for (let i = 0; i < maxIter; i++) {
+      const distance = this.twoOpt();
+      if (distance === bestDistance) {
+        break;
       }
+      bestDistance = distance;
     }
   }
 
@@ -113,8 +117,9 @@ class Route {
    * would be improved. Usually gets rid of most intersecting edges
    */
   private twoOpt() {
-    for (let i = 0; i < this.points.length - 1; i++) {
-      for (let j = i + 1; j < this.points.length - 1; j++) {
+    for (let i = 0; i < this.points.length - 2; i++) {
+      for (var j = i + 2; j < this.points.length - 1; j++) {
+        if (j - i === 1) continue;
         if (
           this.points[i].getDistanceTo(this.points[i + 1]) + this.points[j].getDistanceTo(this.points[j + 1])
           > this.points[i].getDistanceTo(this.points[j]) + this.points[j + 1].getDistanceTo(this.points[i + 1])
@@ -122,6 +127,15 @@ class Route {
           this.twoOptSwap(i, j);
           return this.totalDistance();
         }
+      }
+
+      // test last point back to first point
+      if (
+        this.points[i].getDistanceTo(this.points[i + 1]) + this.points[j].getDistanceTo(this.points[0])
+        > this.points[i].getDistanceTo(this.points[j]) + this.points[0].getDistanceTo(this.points[i + 1])
+      ) {
+        this.twoOptSwap(i, j);
+        return this.totalDistance();
       }
     }
     return this.totalDistance();
@@ -131,10 +145,11 @@ class Route {
    * Swap function for two-opt
    */
   private twoOptSwap(i, k) {
-    const route = this.points.slice(0, i + 1);
-    route.push(...this.points.slice(i + 1, k + 1).reverse());
-    route.push(...this.points.slice(k + 1));
-    this.points = route;
+    this.points = [
+      ...this.points.slice(0, i + 1),
+      ...this.points.slice(i + 1, k + 1).reverse(),
+      ...this.points.slice(k + 1),
+    ];
   }
 }
 
@@ -174,6 +189,8 @@ export class ClarkeWrightProblem {
     private depot: Point,
     private maxDistance: number,
   ) {
+    this.points = this.points.sort((a, b) => Math.random() - 0.5);
+
     this.maxPointDistance = -Infinity;
     for (const point of this.points) {
       for (const otherPoint of this.points) {
@@ -201,7 +218,7 @@ export class ClarkeWrightProblem {
    * demand = how much the demand matters - 0 to 2
    * @param weights
    */
-  public solve(weights: CWWeights) {
+  public solve(weights: CWWeights, optimise = true) {
     // first, create one route per point
     this.solutions = this.points.map(point => new Route(point, this.depot));
     this.findAllRouteSavingsPairs(weights); // calculate savings
@@ -224,7 +241,9 @@ export class ClarkeWrightProblem {
         }
       }
 
-      this.solutions.forEach(solution => solution.optimise());
+      if (optimise) {
+        this.solutions.forEach(solution => solution.optimise());
+      }
 
       this.joinedRoutes = {}; // clear joined routes
       this.findAllRouteSavingsPairs(weights); // recalculate savings
