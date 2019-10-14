@@ -11,6 +11,8 @@ To aid ERP rangers in anti-poaching monitoring, a system is being developed to a
 
 [Short video demo](https://youtu.be/vnIvxsNr3tk)
 
+[Shortest paths interactive demo](https://wildlife-drones-paths-demo.matthewevans.co.za/)
+
 <table>
   <tr>
     <td><img src="https://i.imgur.com/BGSGkqa.png" width="200px" /></td>
