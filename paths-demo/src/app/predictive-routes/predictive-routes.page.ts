@@ -11,6 +11,7 @@ import 'leaflet-textpath';
 import config from '../../config';
 import { PredictiveSolver } from 'src/libraries/predictive-solver';
 import { getDistance } from '../../libraries/util';
+import { scenarios } from './scenarios';
 
 @Component({
   selector: 'app-predictive-routes',
@@ -32,6 +33,18 @@ export class PredictiveRoutesPage implements OnInit {
   paths = new leaflet.FeatureGroup();
   points = new leaflet.FeatureGroup();
 
+  readonly colors = [
+    'fuchsia',
+    'red',
+    'orange',
+    'green',
+    'blue',
+    'hotpink',
+    'teal',
+  ];
+
+  scenario = scenarios['rietvlei'];
+
   constructor() {}
 
   ngOnInit() {
@@ -43,9 +56,10 @@ export class PredictiveRoutesPage implements OnInit {
     setTimeout(() => this.map.invalidateSize(), 0);
 
     // add tile layer
-    leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      opacity: 0.75,
+    leaflet.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{
+      opacity: 0.5,
+      maxZoom: 20,
+      subdomains:['mt0','mt1','mt2','mt3'],
     }).addTo(this.map);
 
     // drawn items
@@ -88,6 +102,10 @@ export class PredictiveRoutesPage implements OnInit {
 
     // show paths
     this.map.addLayer(this.paths);
+
+
+    // set the initial scenario
+    this.setScenario('rietvlei');
   }
 
   generateRoutes() {
@@ -132,25 +150,14 @@ export class PredictiveRoutesPage implements OnInit {
 
     this.paths.clearLayers();
 
-    const colors = [
-      'fuchsia',
-      'red',
-      'orange',
-      'green',
-      'blue',
-      'hotpink',
-      'teal',
-    ];
-
     routes.forEach((route, routeIndex) => {
       const path = new leaflet.Polyline(route.map(point => new leaflet.LatLng(point[1], point[0]), {}));
       path.setStyle({
-        color: colors[routeIndex % colors.length],
+        color: this.colors[routeIndex % this.colors.length],
         weight: 3,
-        opacity: 0.5,
+        opacity: 0.75,
+        dashArray: [5, 5],
       });
-
-      // const distance = getDistance(route, 'kilometers');
 
       (path as any).setText(`Foo`, {
         below: true,
@@ -161,13 +168,13 @@ export class PredictiveRoutesPage implements OnInit {
       this.animatePointAlongPath(
         path,
         convertLength(this.droneInfo.flightSpeed / 60 / 60, 'kilometers', 'degrees'),
-        'red',
+        this.scenario.vehicleIcon,
       );
     });
 
     drawnPaths.forEach((path, pathIndex) => {
       const speed = paths[pathIndex].speed;
-      this.animatePointAlongPath(path as any, speed);
+      this.animatePointAlongPath(path as any, speed, this.scenario.targetIcon);
     });
   }
 
@@ -183,7 +190,7 @@ export class PredictiveRoutesPage implements OnInit {
    * @param path Poly line
    * @param speed Speed in degrees per second
    */
-  animatePointAlongPath(path: leaflet.Polyline, speed: number, color = 'blue') {
+  animatePointAlongPath(path: leaflet.Polyline, speed: number, iconName = 'blue') {
     const SPEEDUP = 50;
     speed *= SPEEDUP;
 
@@ -195,7 +202,7 @@ export class PredictiveRoutesPage implements OnInit {
 
     const point = new leaflet.Marker([points[0][1], points[0][0]], {
       icon: new leaflet.Icon({
-        iconUrl: `/assets/marker-icon-${color}.png`,
+        iconUrl: `/assets/marker-icon-${iconName}.png`,
         shadowUrl: '/assets/marker-shadow.png',
         iconSize: [25, 41],
         iconAnchor: [12, 41],
@@ -226,6 +233,33 @@ export class PredictiveRoutesPage implements OnInit {
 
     an();
 
+  }
+
+
+  setScenario(name: string) {
+    // remove all existing layers
+    this.drawnItems.eachLayer(layer => {
+      if (layer === this.depot) return;
+      this.drawnItems.removeLayer(layer);
+    });
+
+    this.scenario = scenarios[name];
+    this.map.setView([this.scenario.center[1], this.scenario.center[0]], this.scenario.zoom);
+    this.droneInfo.flightDuration = this.scenario.flightDuration;
+    this.droneInfo.flightSpeed = this.scenario.flightSpeed;
+
+    this.depot.setLatLng([this.scenario.depot[1], this.scenario.depot[0]]);
+    this.scenario.paths.forEach((path, pathIndex) => {
+      this.drawnItems.addLayer(
+        new leaflet.Polyline(
+          path.map(p => new leaflet.LatLng(p[1], p[0]))
+        ).setStyle({
+          color: this.colors[pathIndex % this.colors.length],
+          weight: 3,
+          opacity: 0.75,
+        })
+      );
+    });
   }
 
 }

@@ -4,6 +4,15 @@
     <div class="sidebar">
       <ion-card>
         <ion-item>
+          <ion-label>Scenarios</ion-label>
+        </ion-item>
+        <ion-button (click)="setScenario('ambulances')">Medical services</ion-button>
+        <ion-button (click)="setScenario('rietvlei')">Animal tracking</ion-button>
+        <ion-button (click)="setScenario('coastGuard')">Coast guard</ion-button>
+      </ion-card>
+
+      <ion-card>
+        <ion-item>
           <ion-label>Drone information</ion-label>
         </ion-item>
         <ion-item>
