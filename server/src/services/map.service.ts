@@ -95,10 +95,20 @@ export class MapService {
       >;`);
 
     console.log('dams', dams.features.length);
-
     // //save to table
+    if(dams.features.length == 0)
+    {
+      dams.features = [{ type: 'Feature',
+      id: 'Dam/Fake',
+      properties:
+       { area: 'yes',
+         name: 'Dam Fake',
+         natural: 'water',
+         water: 'reservoir',
+         id: 'Dam/Fake' },
+      geometry: { type: 'Polygon', coordinates: [[[0,0],[0,1],[1,1],[1,0],[0,0]]] } }];
+    }
     await this.setMapData(MapFeatureType.dams, dams.features);
-
     const rivers = await this.overpass
       .query(`area["name"="${name}"]->.boundaryarea;
     (
@@ -110,7 +120,13 @@ export class MapService {
     >;`);
 
     console.log('rivers', rivers.features.length);
-
+    if(rivers.features.length == 0)
+    {
+      rivers.features = [ { type: 'Feature',
+      id: 'River/Fake',
+      properties: { name: 'River Fake', waterway: 'stream', id: 'River/Fake' },
+      geometry: { type: 'LineString', coordinates: [[0,0],[0,1],[0,2]] } }];
+    }
     await this.setMapData(MapFeatureType.rivers, rivers.features);
 
     const intermittentWater = await this.overpass
@@ -124,7 +140,13 @@ export class MapService {
       out geom;`);
 
     console.log('intermittent', intermittentWater.features.length);
-
+    if(intermittentWater.features.length == 0)
+    {
+      intermittentWater.features = [ { type: 'Feature',
+      id: 'Stream/Fake',
+      properties: { name: 'Stream Fake', waterway: 'stream', id: 'Stream/Fake' },
+      geometry: { type: 'LineString', coordinates: [[0,0],[0,1],[0,2]] } }];
+    }
     await this.setMapData(
       MapFeatureType.intermittent,
       intermittentWater.features,
@@ -139,8 +161,14 @@ export class MapService {
     out geom;`);
 
     console.log('roads', roads.features.length);
-
     //save to table
+    if(roads.features.length == 0)
+    {
+      roads.features = [ { type: 'Feature',
+      id: 'Road/Fake',
+      properties: { highway: 'residential', id: 'Road/Fake' },
+      geometry: { type: 'LineString', coordinates: [[0,0],[0,1],[0,2]] } }];
+    }
     await this.setMapData(MapFeatureType.roads, roads.features);
 
     const residential = await this.overpass
@@ -152,10 +180,22 @@ export class MapService {
       out geom;`);
 
     // save to table
+    if(residential.features.length == 0)
+    {
+      residential.features = [ { type: 'Feature',
+      id: 'Residential/Fake',
+      properties:
+       { access: 'no',
+         barrier: 'fence',
+         fixme: 'name,operator',
+         operator: 'SABS',
+         power: 'substation',
+         id: 'Residential/Fake' },
+      geometry: { type: 'Polygon', coordinates: [[[0,0],[0,1],[1,1],[1,0],[0,0]]] } }];
+    }
     await this.setMapData(MapFeatureType.residential, residential.features);
 
     console.log('residential', residential.features.length);
-
     const externalResidential = await this.overpass.query(`
         nwr[name="${name}"]->.reserve;
         area[name="${name}"]->.boundary;
@@ -175,7 +215,19 @@ export class MapService {
         (._; - .reserve;)->._;
 
         out geom;`);
-
+        if(externalResidential.features.length == 0)
+        {
+          externalResidential.features = [ { type: 'Feature',
+          id: 'ExternalResidential/Fake',
+          properties:
+           { access: 'no',
+             barrier: 'fence',
+             fixme: 'name,operator',
+             operator: 'SABS',
+             power: 'substation',
+             id: 'ExternalResidential/Fake' },
+          geometry: { type: 'Polygon', coordinates: [[[0,0],[0,1],[1,1],[1,0],[0,0]]] } }];
+        }
     await this.setMapData(
       MapFeatureType.externalResidential,
       externalResidential.features,
@@ -183,7 +235,6 @@ export class MapService {
 
     console.log('externalResidential', externalResidential.features.length);
     console.log('downloaded map data');
-
     // refresh search sets
     this.loadFeatureSearchSets();
   }
@@ -211,7 +262,6 @@ export class MapService {
       console.log('load feature search sets');
       this.loadFeatureSearchSets();
     }
-
     return await this.featureSearchSets;
   }
 
@@ -229,7 +279,15 @@ export class MapService {
           if (featureType === MapFeatureType.reserve) {
             return ob;
           }
-
+          /*{ type: 'Feature',
+          id: 'way/4234431',
+          properties:
+           { area: 'yes',
+             name: 'Rietvlei Dam',
+             natural: 'water',
+             water: 'reservoir',
+             id: 'way/4234431' },
+          geometry: { type: 'Polygon', coordinates: [Array] } }*/
           ob[featureType] = this.geoService.createFastSearchDataset(
             mapFeatures[featureType],
           );
@@ -300,7 +358,6 @@ export class MapService {
 
     // construct search datasets
     const searchDatasets = await this.getFeatureSearchSets();
-
     // update cell distances
     cells.forEach(cell => {
       const lng = cell.cellMidLongitude;

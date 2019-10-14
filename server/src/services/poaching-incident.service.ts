@@ -53,7 +53,6 @@ export class PoachingIncidentService {
         return false;
       } else {
         const date = new Date();
-
         const poachingIncident = new PoachingIncident();
         poachingIncident.timestamp = date;
         poachingIncident.longitude = lon;
