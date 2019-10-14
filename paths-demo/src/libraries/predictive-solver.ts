@@ -2,8 +2,8 @@ import getDistance from '@turf/distance';
 import lineSliceAlong from '@turf/line-slice-along';
 import getBearing from '@turf/bearing';
 import { lineString } from '@turf/helpers';
-// const Victor = require('victor');
-import * as Victor from 'victor';
+const Victor = require('victor');
+// import * as Victor from 'victor';
 
 export class PredictiveSolver {
   /**
