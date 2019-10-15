@@ -169,12 +169,13 @@ export class PredictiveRoutesPage implements OnInit {
         path,
         convertLength(this.droneInfo.flightSpeed / 60 / 60, 'kilometers', 'degrees'),
         this.scenario.vehicleIcon,
+        this.scenario.speedUp,
       );
     });
 
     drawnPaths.forEach((path, pathIndex) => {
       const speed = paths[pathIndex].speed;
-      this.animatePointAlongPath(path as any, speed, this.scenario.targetIcon);
+      this.animatePointAlongPath(path as any, speed, this.scenario.targetIcon, this.scenario.speedUp);
     });
   }
 
@@ -190,9 +191,8 @@ export class PredictiveRoutesPage implements OnInit {
    * @param path Poly line
    * @param speed Speed in degrees per second
    */
-  animatePointAlongPath(path: leaflet.Polyline, speed: number, iconName = 'blue') {
-    const SPEEDUP = 50;
-    speed *= SPEEDUP;
+  animatePointAlongPath(path: leaflet.Polyline, speed: number, iconName = 'blue', speedUp = 50) {
+    speed *= speedUp;
 
     const points = (path.getLatLngs() as leaflet.LatLng[]).map(p => [p.lng, p.lat]);
 

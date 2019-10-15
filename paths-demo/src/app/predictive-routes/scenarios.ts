@@ -1,5 +1,6 @@
 export const scenarios = {
   rietvlei: {
+    speedUp: 50,
     vehicleIcon: 'drone',
     targetIcon: 'animal',
     flightDuration: 30,
@@ -242,6 +243,7 @@ export const scenarios = {
   },
 
   ambulances: {
+    speedUp: 30,
     vehicleIcon: 'drone',
     targetIcon: 'ambulance',
     flightDuration: 10,
@@ -357,10 +359,11 @@ export const scenarios = {
   },
 
   coastGuard: {
-    vehicleIcon: 'drone',
+    speedUp: 100,
+    vehicleIcon: 'helicopter',
     targetIcon: 'pirate',
-    flightDuration: 65,
-    flightSpeed: 600,
+    flightDuration: 240,
+    flightSpeed: 200,
     center: [
       50.77880859375,
       11.77057019562524
