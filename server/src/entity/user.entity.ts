@@ -4,7 +4,7 @@ import {
   Column,
   BeforeInsert,
 } from 'typeorm';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
 @Entity()
 export class User {
