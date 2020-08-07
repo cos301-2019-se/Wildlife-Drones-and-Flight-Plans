@@ -55,7 +55,7 @@
     "big-json": "^2.0.2",
     "btoa": "^1.2.1",
     "cache-manager": "^2.10.0",
-    "class-transformer": "^0.2.3",
+    "class-transformer": "^0.3.1",
     "class-validator": "^0.9.1",
     "compression": "^1.7.4",
     "csv-parser": "^2.3.0",
